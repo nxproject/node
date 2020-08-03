@@ -1,0 +1,18 @@
+﻿{
+	"@Unique": "Y",
+	"@Requires": [
+		"processor"
+	],
+	"@SkipRecycle": "1",
+	"@Ports": [
+		"0",
+		"*"
+	],
+	"@Map": [
+		"{shared_folder}/nginx/default:/etc/nginx",
+		"{shared_folder}/nginx/default/logs:/etc/nginx/logs",
+		"{shared_folder}/nginx/default/mypages:/etc/nginx/mypages",
+		"{shared_folder}/_cert:/etc/cert"
+	],
+	"Image": "{repo_project}/nginx:{tier}"
+}

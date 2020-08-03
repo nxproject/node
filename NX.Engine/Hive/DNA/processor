@@ -1,0 +1,35 @@
+﻿{
+  "@Ports": [
+    "80"
+  ],
+  "@Map": [
+    "{shared_folder}:/etc/shared",
+    "{shared_folder}/processor:/etc/processor",
+    "{shared_folder}/bee/B{id}/etc/private",
+    "{shared_folder}/files:/etc/files",
+    "/mm/nginx/default:/etc/sdnginx",
+    "{shared_folder}/_cert:/etc/cert"
+  ],
+  "Cmd": [
+    "dotnet",
+    "NXNode.dll",
+    "--config",
+    "{config}",
+    "--id",
+    "{next_id}",
+    "--proc",
+    "{proc}"
+  ],
+  "Image": "{repo_project}/processor:{tier}",
+  "WorkingDir": "/etc/wd",
+  "XHealthcheck": {
+    "Test": [
+      "CMD",
+      "curl -f http://localhost/echo || exit 1"
+    ],
+    "Interval": 30000,
+    "Timeout": 3000,
+    "Retries": 3,
+    "StartPeriod": 10000
+  }
+}

@@ -1,0 +1,10 @@
+﻿{
+	"@Map": [
+		"{doc_folder}:/data"
+	],
+	"Image": "{repo_project}/minio:{tier}",
+	"Env": [
+		"MINIO_ACCESS_KEY={minio_access}",
+		"MINIO_SECRET_KEY={minio_secret}"
+	]
+}

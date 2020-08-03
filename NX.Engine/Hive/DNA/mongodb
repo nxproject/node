@@ -1,0 +1,17 @@
+﻿{
+	"@Unique": "*",
+	"@SkipRecycle": "1",
+	"@Ports": [
+		"27017"
+	],
+	"@Map": [
+		"{shared_folder}/databases/mongodb:/data/db",
+		"{shared_folder}/_backups:/etc/backups"
+	],
+	"Cmd": [
+		"mongod",
+		"--bind_ip",
+		"0.0.0.0"
+	],
+	"Image": "{repo_project}/mongodb:{tier}"
+}

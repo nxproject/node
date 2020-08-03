@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "NX.Server": {
+      "commandName": "Project",
+      "commandLineArgs": "--config config.json "
+    }
+  }
+}

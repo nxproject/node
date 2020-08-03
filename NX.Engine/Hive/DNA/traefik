@@ -1,0 +1,30 @@
+﻿{
+	"@Unique": "*",
+	"@SkipRecycle": "1",
+	"@Requires": [
+		"consul"
+	],
+	"@Ports": [
+		"0",
+		"80",
+		"8080",
+		"443"
+	],
+	"@Map": [
+		"{shared_folder}/_backups:/etc/backups"
+	],
+	"Cmd": [
+		"--consul",
+		"--consul.endpoint={consul}",
+		"--consul.watch=true",
+		"--traefikLog.format='json'",
+		"--accessLog.format='json'",
+		"--defaultEntryPoints=http,https",
+		"--logLevel=ERROR"
+	],
+	"Image": "{repo_project}/traefik:{tier}",
+	"Env": [
+		"NAMECHEAP_API_USER={namecheap_api_user}",
+		"NAMECHEAP_API_KEY={namecheap_api_user}"
+	]
+}

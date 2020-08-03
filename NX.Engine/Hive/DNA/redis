@@ -1,0 +1,12 @@
+﻿{
+	"@Unique": "*",
+	"@SkipRecycle": "1",
+	"@Ports": [
+		"6379"
+	],
+	"@Map": [
+		"{shared_folder}/redis:/etc/wd"
+	],
+	"Image": "{repo_project}/redis:{tier}",
+	"WorkingDir": "/etc/wd"
+}
