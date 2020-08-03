@@ -8,7 +8,7 @@ what would happen if instead I had a NodeJS plus ExpressJS in C# instead.
 
 So here we are.
 
-BTW: This README as a PDF can be found [here](README.pdf]).
+BTW: This README as a PDF can be found [here](README.pdf).
 
 ## The best way to learn
 
@@ -1247,9 +1247,7 @@ being used by Docker.  I just turn off protection for my private network.
 
 ## Author
 
-* [**Jose E. Gonzalez jr.**](mailto:jegbhe@gmail.com) - *All that you see here*
-
-If you would like to reach me, just click on my name.
+* **Jose E. Gonzalez jr.** - *All that you see here*
 
 The reason for this is that the **make_genome** command packages the config.json as
 part of the genome (image) allowing for the DNA (CreateContainer) to have a Cmd
