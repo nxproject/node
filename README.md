@@ -1255,7 +1255,7 @@ that refers to the config.json, making each created worker bee use the same sett
 
 ### A trivia question
 
-The DNS for a worker bee is **processor**.  Why?
+The DNA for a worker bee is **processor**.  Why?
 
 ## License
 
