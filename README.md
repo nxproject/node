@@ -865,7 +865,7 @@ remains at an even level.
 
 When a bee is created, it will run the function defined by the **proc** environment
 setting, which by default is empty.   When a value is passed by calling:
-````
+```
 NX.Node.exe --proc Chores
 ```
 or programmatically:
