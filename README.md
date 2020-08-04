@@ -8,8 +8,6 @@ what would happen if instead I had a NodeJS plus ExpressJS in C# instead.
 
 So here we are.
 
-BTW: This README as a PDF can be found [here](README.pdf).
-
 ## The best way to learn
 
 The best to learn what the code does is and always will be by looking at the code
@@ -18,207 +16,8 @@ code, open it with Visual Studio (use **Visual Studio Community 2019** or later,
 it's free) and get ready to view the code.  using MS Windows 10 or later, you can
 easily install [Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/).
 
-## Back to how it works
+* [The basics](README_BASICS.MD)
 
- The route is the first *NX.Node* item that you need to understand.  The following
- is a basic route definition in *NX.Node* :
-
-```javascript
-
-using System.Collections.Generic;
-
-using NX.Engine;
-using NX.Shared;
-
-namespace Route.System
-{
-    /// <summary>
-    ///
-    /// Echoes any URL values
-    ///
-    /// </summary>
-    public class Echo : RouteClass
-    {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "echo", "?opt?" };
-        public override void Call(HTTPCallClass call, StoreClass store)
-        {
-            call.RespondWithStore(store);
-        }
-    }
-}
-
-```
-
-This route definition uses two C# modules NX.Engine and NX.Shared.  Itwill not go
-into detail on what those do at this time, just keep in mind that they make this
-code much simpler.
-
-The Echo class is based in the RouteClass.  All of the built in classes are suffixed
-with the word 'Class' to  minimize conflict with other code.
-
-The class has two items that override the defaults in the RouteClass, **RouteTree**
-and **Call**:
-
-#### Call
-
-The Call code is what gets executed when the route is matched.  In this example, the
-called gets passed a StoreClass, which can be thought as a JSON Object and responds
-with the contents of the same store.  A simple echo.
-
-#### RouteTree
-
-The route tree defines the route.  The first entry is the HTTP method GET/POST/PUT/DELETE/PATCH
-or anything you like, followed by the URL to be used.  You can have four type of
-definitions:
-
-Format|Meaning
-------|-------
-text|The text entered must be seen in the URL.
-:key|The URL can have any text, but it must be non-empty.  The value entered will be passed to the route handler as a key/value pair in the store parameter.
-?key|The URL can have any text which can be empty.  Once an optional definition is seen, all following definitions must also be optional.   If a value is entered, the rules will be passed back like the :key definition.
-?key?|Same as the ?key definition, but must be the last entry in the tree.  Behaves like if multiple ?key were entered.
-
-Next I will run through some example of the above route.  Let's start with the simplest:
-```
-http://localhost/echo
-```
-This is the smallest call that will be handled by the route, as the route only requires
-the word "echo" as the first piece of the URL.  The call would produce a return of:
-```JSON
-{"opt":[]}
-```
-which tells you that opt is an optional entry but no values were defined.  This is
-similar to NodeJS but not quite the same.  Lets try a more complete example:
-```
-http://localhost/echo/john/mary/sam/peter
-```
-which produces:
-```JSON
-{"opt":["john","mary","sam","peter"]}
-```
-But we are not limited by the tree itself, we can make use of the URL parameters
-as well:
-```
-http://localhost/echo/john/paul?dept=sales&route=NY
-```
-Which return:
-```JSON
-{"dept":"sales","route":"NY","opt":["john","paul"]}
-```
-as all entries are made part of the store, only one place needs to be checked for values.
-
-Following the rule that when multiple values are seen for a given key, the passed
-values are turned into a JSON array, we get this:
-```
-http://localhost/echo/john/paul?age=34&age=47
-```
-which returns:
-```JSON
-{"age":["34","47"],"opt":["john","paul"]}
-```
-Note that the parameters are return before the route entries, so calling:
-```
-http://localhost/echo/john/paul?opt=sam&age=22&age=34&age=47
-```
-returns:
-```JSON
-{"opt":["sam","john","paul"],"age":["22","34","47"]}
-```
-Now to show the :key option, let's trun the route tree into:
-
-```JavaScript
-public override List<string> RouteTree => new List<string>() { RouteClass.GET, "echo", ":dept", "?opt?" };
-```
-
-Now let's try the first example:
-```
-http://localhost/echo
-```
-the return is now:
-```JSON
-{"code":500,"expl":"InternalServerError","error":"Internal error"}
-```
-
-This means that no route was found, as a "dept" entry is required.  Let's try a valid
-call:
-```
-http://localhost/echo/sales/john/mike/alice
-```
-which returns:
-```JSON
-{"opt":["john","mike","alice"],"dept":"sales"}
-```
-The route tree definitions, while similar to NodeJS, create a more powerful and consistent
-set of rules.
-
-### Securing routes
-
-There is a built-in route that allows one bee to call another using an HTTP POST call.
-This is a back door into the system and back doors is a trouble in the making.  This
-is the code for that call:
-```JavaScript
-
-using System.Collections.Generic;
-
-using NX.Engine;
-using NX.Shared;
-
-namespace Route.System
-{
-    /// <summary>
-    ///
-    /// A way to reach the bee in a semi-opaque way
-    ///
-    /// </summary>
-    public class FN : RouteClass
-    {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST_SECURE, "{id}", ":name"};
-        public override void Call(HTTPCallClass call, StoreClass store)
-        {
-            // Call the function and respond
-            call.RespondWithStore(call.FN(store["name"], call.BodyAsStore));
-        }
-    }
-}
-```
-Note that the method in the **RouteTree** is a modified POST that tell the system that
-this route is only available if a secure code is passed.
-
-The **_SECURE** changes the call form this:
-```
-POST  /idofbee/nameoffn
-```
-to:
-```
-POST /securecode/idofbee/nameoffn
-```
-The first is semi-secure, as the caller would have to know the id of the bee, but
-the second becomes better secured, as the caller also has to know the secure code.
-
-And the secure code can be changed on the fly:
-```
-NX.Node.exe --secure_code codeyouwant
-```
-This is the format to use when there no secure code already defined, the format is:
-```
-NX.Node.exe --secure_code oldcode=newcode
-```
-when there is a secure code already in place.
-
-The change can also be done programatically by calling:
-```JavaScript
-env["secure_code"] = newcode;
-```
-The old code is not needed as the code runs in a secure environment.
-
-And to solve the issue of forgetting to se the secure code, the secure routes are
-disabled until one is set.
-
-Note that you can change the secure code at any time without having to recycle.  It
-may take a small amount of time until all nodes switch.
-
-Note:  The secure code must not match any route entry that the system uses, as the
-behavior is not guaranteed.
 
 ### Multi-threading and handling of HTTP calls
 
@@ -410,8 +209,7 @@ SubSystem|Modules|Use
 DEX|Route.DEX, Fn.DEX|Data exchange between sites
 Dynamic|Route.Dynamic|Allows for runtime loadeing of routes and functions
 Files|Route.File|Allows for the upload, download and merging of files
-IOT|Route.IOT| Fn.IOTInterface to a Raspberry Pi based processing system
-MongoDb|Fn.MongoDx|MongoDb support
+MongoDb|Fn.MongoDb|MongoDb support
 USPS|Route.USPS Fn.USPS|USPS support
 
 Note that modules must have a two part name and the first part must be **Fn**, **Proc**
@@ -941,7 +739,7 @@ changes the call to
 GET /chores/echo/...
 ```
 You can also use the same mechanism for secured routes:
-```JavaScriot
+```JavaScript
 public override List<string> RouteTree => new List<string>() { RouteClass.POST_PROC_SECURE, "{id}", ":name"};
 ```
 which changes the call to:
@@ -1085,7 +883,47 @@ the queen will take over and reconstruct the hive.
 
 ### Minio
 
-// TBD
+Minio is the document storage system in the NXProject.  Its use is automatic when you use
+either the **Proc.File** or **Route.File** modules.  As all AWS S3-compliant system use
+a bucket structure and not a folder structure, the NX Project file manager maps a pseudo-file
+tree into buckets.  Each folder is a bucket which holds all files in the folder as well
+as pointers to sub-folders.
+
+#### Document manager
+
+You can instatiate a document manager, which is the interface to Minio by calling:
+```JavaScript
+var mgr = env.Env.Globals.Get<Proc.File.ManagerClass>();
+```
+
+#### Folders
+
+The **Proc.File.FolderClass** is the equivalent of a folder.  It requires a dcument manager,
+
+#### Documents
+
+The **Proc.File.DocumentClass** is the equivalent of a file.  It requires a dcument manager,
+
+#### At startup
+
+You can write to the folder structure while the minio bumble bee is being launched, and any
+writes will be integrated into Minio as soon as the bumble bee is available.  Reads cannot
+be queued, so they return empty strings for any file.
+
+#### making the bumble bee an external and AWS
+
+You can make the minio bumble be be external by calling:
+```
+--external minio=url
+```
+where the url is the locaton where your Minio instance is located.  If you wish to use AWS
+call:
+```
+--external minio=s3.amazonaws.com --minio_acces youraccesskey --minio_secret yoursecretkey
+```
+Note that to run the minio bumble bee locally, the access and secret keys are optional,
+except that if you destroy the environment store in the redis bumble bee, you will lose
+access to the minio bumble bee documents, so use of your own keys is strongly suggested.```
 
 ### Git
 

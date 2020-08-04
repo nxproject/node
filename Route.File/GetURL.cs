@@ -56,7 +56,7 @@ namespace Route.File
             ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();
 
             // Get the document
-            using (DocumentClass c_Reverse = new DocumentClass(c_Mgr.Storage, sRevPath))
+            using (DocumentClass c_Reverse = new DocumentClass(c_Mgr, sRevPath))
             {
                 // Get the path via metadata
                 string sPath = c_Reverse.Value;
@@ -65,7 +65,7 @@ namespace Route.File
                 if (sPath.HasValue())
                 {
                     // Get the document
-                    using (DocumentClass c_Doc = new DocumentClass(c_Mgr.Storage, sPath))
+                    using (DocumentClass c_Doc = new DocumentClass(c_Mgr, sPath))
                     {
                         // And deliver
                         call.RespondWithFile(c_Doc.Location);

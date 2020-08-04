@@ -398,7 +398,7 @@ namespace NX.Engine.Hive
             if (directory.HasValue())
             {
                 // Get all the files
-                var c_Files = Directory.GetFiles(directory.AdjustPathToOS(), "*.*", SearchOption.AllDirectories);
+                var c_Files = directory.GetTreeInPath();
 
                 // Assure
                 sOut.AssurePath();

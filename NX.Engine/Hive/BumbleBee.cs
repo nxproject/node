@@ -39,19 +39,19 @@ namespace NX.Engine
             this.Genome = genome;
 
             // Track task changes
-            this.Tracker = new Hive.TrackerClass(this.Parent.Hive, TrackerClass.TrackType.DNA, 
+            this.Tracker = new Hive.TrackerClass(this.Parent.Hive, TrackerClass.TrackType.DNA,
                 delegate (string value, List<string> url)
             {
-                // Reset
-                this.Location = null;
-                // Did we get someone to talk to?
-                if (url.Count > 0) this.Location = url[0];
+                    // Reset
+                    this.Location = null;
+                    // Did we get someone to talk to?
+                    if (url.Count > 0) this.Location = url[0];
 
-                //
-                this.Parent.LogInfo("{0} genome bumble bee is {1}available", this.Genome, this.Location.HasValue() ? "" : "not ");
+                    //
+                    this.Parent.LogInfo("{0} genome bumble bee is {1}available", this.Genome, this.Location.HasValue() ? "" : "not ");
 
-                // Tell the world
-                this.AvailabilityChanged?.Invoke(this.IsAvailable);
+                    // Tell the world
+                    this.AvailabilityChanged?.Invoke(this.IsAvailable);
 
             }, this.Genome);
 
@@ -80,8 +80,7 @@ namespace NX.Engine
         /// The URL to the task
         /// 
         /// </summary>
-        public string Location 
-        { get;  private set; }
+        public string Location { get; private set; }
 
         /// <summary>
         /// 

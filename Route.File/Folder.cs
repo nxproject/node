@@ -63,7 +63,7 @@ namespace Route.File
             ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();
 
             // And make
-            using (FolderClass c_Ref = new FolderClass(c_Mgr.Storage, sPath))
+            using (FolderClass c_Ref = new FolderClass(c_Mgr, sPath))
             {
                 // Make result
                 StoreClass c_Ans = new StoreClass();

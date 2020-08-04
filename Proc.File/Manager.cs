@@ -29,12 +29,13 @@
 
 using System;
 using System.IO;
-using System.Net;
+using System.Collections.Generic;
 
 using Minio;
 
 using NX.Engine;
 using NX.Shared;
+using iTextSharp.text.pdf;
 
 namespace Proc.File
 {
@@ -65,7 +66,7 @@ namespace Proc.File
                     // Get the settings
                     string sAccessKey = this.Parent["minio_access"];
                     // Assure
-                    if(!sAccessKey.HasValue())
+                    if (!sAccessKey.HasValue())
                     {
                         // Create
                         sAccessKey = "MINIO".GUID();
@@ -91,6 +92,23 @@ namespace Proc.File
                     {
                         // Make the client
                         this.Client = new MinioClient(sURL, sAccessKey, sSecret);
+
+                        // Get the root directory
+                        string sRoot = env.DocumentFolder;
+                        // Get all of the files
+                        List<string> c_Files = sRoot.GetTreeInPath();
+                        // Loop thru
+                        foreach (string sFile in c_Files)
+                        {
+                            // Make the document
+                            using (DocumentClass c_Doc = new DocumentClass(this, sFile.Substring(sRoot.Length)))
+                            {
+                                // Copy from local to Minio
+                                c_Doc.ValueAsBytes = sFile.ReadFileAsBytes();
+                                // Delete local copy
+                                sFile.DeleteFile();
+                            }
+                        }
                     }
                 }
                 else
@@ -112,7 +130,7 @@ namespace Proc.File
         /// The Minio client
         /// 
         /// </summary>
-        private MinioClient Client { get; set; }
+        public MinioClient Client { get; set; }
 
         /// <summary>
         /// 
@@ -120,22 +138,6 @@ namespace Proc.File
         /// 
         /// </summary>
         public override bool IsAvailable => this.Client != null;
-
-        /// <summary>
-        /// 
-        /// The folders and files
-        /// 
-        /// </summary>
-        private StorageClass IStorage { get; set; }
-        public StorageClass Storage
-        {
-            get
-            {
-                if (this.IStorage == null) this.IStorage = new StorageClass(this.Parent);
-
-                return this.IStorage;
-            }
-        }
         #endregion
 
         #region Methods
@@ -226,6 +228,15 @@ namespace Proc.File
                     }
                 }
 
+                // Do we need to move to Minio?
+                if (this.IsAvailable)
+                {
+                    // Copy from local to Minio
+                    doc.ValueAsBytes = doc.Location.ReadFileAsBytes();
+                    // Delete local copy
+                    doc.Location.DeleteFile();
+                }
+
                 call.RespondWithOK();
             }
             catch (Exception e)
@@ -238,9 +249,46 @@ namespace Proc.File
             }
         }
 
+        /// <summary>
+        /// 
+        /// Returns the file boundary string for a MIM upload
+        /// 
+        /// </summary>
+        /// <param name="ctype"></param>
+        /// <returns>The boundary</returns>
         private string GetBoundary(string ctype)
         {
             return "--" + ctype.Split(';')[1].Split('=')[1];
+        }
+
+        /// <summary>
+        /// 
+        /// Collapses a path, removing known base
+        /// 
+        /// </summary>
+        /// <param name="path">The path to collapse</param>
+        /// <returns>The collapsed path</returns>
+        public string Collapse(string path)
+        {
+            // Does it start with the base?
+            if (path.StartsWith(this.Parent.DocumentFolder))
+            {
+                path = path.Substring(this.Parent.DocumentFolder.Length);
+            }
+
+            return path;
+        }
+
+        /// <summary>
+        /// 
+        /// Expands the path, adding known baase
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public string Expand(string path)
+        {
+            return this.Parent.DocumentFolder.CombinePath(path);
         }
         #endregion
     }

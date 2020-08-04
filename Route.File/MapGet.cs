@@ -64,7 +64,7 @@ namespace Route.File
             ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();
 
             // And make
-            using (DocumentClass c_Doc = new DocumentClass(c_Mgr.Storage, sPath))
+            using (DocumentClass c_Doc = new DocumentClass(c_Mgr, sPath))
             {
                 // The map
                 using (DocumentClass c_Map = c_Doc.MergeMapDocument)

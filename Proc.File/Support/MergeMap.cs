@@ -115,7 +115,7 @@ namespace Proc.File
         /// </summary>
         public void Save()
         {
-            this.Document.Location.WriteFile(this.Values.ToString());
+            this.Document.Value = this.Values.ToString();
         }
 
         /// <summary>

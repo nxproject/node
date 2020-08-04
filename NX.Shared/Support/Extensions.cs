@@ -2905,6 +2905,14 @@ namespace NX.Shared
             return path;
         }
 
+        /// <summary>
+        /// 
+        /// Adds a new entry to the file path given
+        /// 
+        /// </summary>
+        /// <param name="path1">The filed path</param>
+        /// <param name="path2">The new entry</param>
+        /// <returns></returns>
         public static string CombinePath(this string path1, string path2)
         {
             path1 = path1.IfEmpty();
@@ -2976,6 +2984,11 @@ namespace NX.Shared
             if (c_Ans == null) c_Ans = new List<string>();
 
             return c_Ans;
+        }
+
+        public static List<string> GetTreeInPath(this string path, string patt = "*.*")
+        {
+            return new List<string>(Directory.GetFiles(path.AdjustPathToOS(), patt, SearchOption.AllDirectories));
         }
 
         public static List<string> GetFilesNamesOnlyInPath(this string path)

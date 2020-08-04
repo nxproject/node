@@ -137,6 +137,8 @@ namespace NXNode
             }
             else
             {
+               
+
                 // Only thing we are allowed inside a container
                 c_Env.Start();
             }

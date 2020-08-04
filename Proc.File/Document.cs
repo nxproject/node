@@ -43,7 +43,7 @@ namespace Proc.File
     /// A document in the document tree
     /// 
     /// </summary>
-    public class DocumentClass : ChildOfClass<StorageClass>
+    public class DocumentClass : ChildOfClass<ManagerClass>
     {
         #region Constants
         /// <summary>
@@ -57,15 +57,15 @@ namespace Proc.File
         #endregion
 
         #region Constructor
-        public DocumentClass(StorageClass stg, string path)
-            : base(stg)
+        public DocumentClass(ManagerClass mgr, string path)
+            : base(mgr)
         {
             // Save
             this.Path = this.Parent.Collapse(path);
         }
 
-        public DocumentClass(StorageClass stg, FolderClass folder, string name)
-            : this(stg, folder.Path.CombinePath(name))
+        public DocumentClass(ManagerClass mgr, FolderClass folder, string name)
+            : this(mgr, folder.Path.CombinePath(name))
         { }
         #endregion
 
@@ -152,8 +152,47 @@ namespace Proc.File
         /// </summary>
         public string Value
         {
-            get { return this.Location.ReadFile(); }
-            set { this.Location.WriteFile(value); }
+            get
+            {
+                // Assume noting
+                string sAns = null;
+
+                // Is MinIO there?
+                if (this.Parent.IsAvailable)
+                {
+                    // Via folder
+                    using (FolderClass c_Folder = this.Folder)
+                    {
+                        // Get
+                        sAns = c_Folder.GetObject(this.Name);
+                    }
+                }
+                else
+                {
+                    // Read physical
+                    sAns = this.Location.ReadFile();
+                }
+
+                return sAns;
+            }
+            set
+            {
+                // Is MinIO there?
+                if (this.Parent.IsAvailable)
+                {
+                    // Via folder
+                    using (FolderClass c_Folder = this.Folder)
+                    {
+                        // Set
+                        c_Folder.SetObject(this.Name, value);
+                    }
+                }
+                else
+                {
+                    // Write physical
+                    this.Location.WriteFile(value);
+                }
+            }
         }
 
         /// <summary>
@@ -163,8 +202,37 @@ namespace Proc.File
         /// </summary>
         public byte[] ValueAsBytes
         {
-            get { return this.Location.ReadFileAsBytes(); }
-            set { this.Location.WriteFileAsBytes(value); }
+            get
+            {
+                // Assume noting
+                byte[] abAns = null;
+
+                // Is MinIO there?
+                if (this.Parent.IsAvailable)
+                {
+                    abAns = this.Value.ToBytes();
+                }
+                else
+                {
+                    // Read physical
+                    abAns = this.Location.ReadFileAsBytes();
+                }
+
+                return abAns;
+            }
+            set
+            {
+                // Is MinIO there?
+                if (this.Parent.IsAvailable)
+                {
+                    this.Value = value.FromBytes();
+                }
+                else
+                {
+                    // Write physical
+                    this.Location.WriteFileAsBytes(value);
+                }
+            }
         }
 
         /// <summary>
@@ -180,11 +248,24 @@ namespace Proc.File
                 // Assume never
                 DateTime c_Ans = DateTime.MaxValue;
 
-                // Is it there?
-                if(this.Location.FileExists())
+                // Is MinIO there?
+                if (this.Parent.IsAvailable)
                 {
-                    // Get it
-                    c_Ans = this.Location.GetLastWriteFromPath();
+                    // Via folder
+                    using (FolderClass c_Folder = this.Folder)
+                    {
+                        // Get
+                        c_Ans = c_Folder.MinioExtra.GetLastWrittenOn(this.Name);
+                    }
+                }
+                else
+                {
+                    // Is it there?
+                    if (this.Location.FileExists())
+                    {
+                        // Get it
+                        c_Ans = this.Location.GetLastWriteFromPath();
+                    }
                 }
 
                 return c_Ans;
@@ -250,7 +331,19 @@ namespace Proc.File
         public void Delete()
         {
             // Delete the file itself
-            this.Location.DeleteFile();
+            if (this.Parent.IsAvailable)
+            {
+                // Via folder
+                using (FolderClass c_Folder = this.Folder)
+                {
+                    // Delete
+                    c_Folder.DeleteObject(this.Name);
+                }
+            }
+            else
+            {
+                this.Location.DeleteFile();
+            }
             // And any metadata
             this.MetadataFolder.Delete();
         }
@@ -378,7 +471,7 @@ namespace Proc.File
         /// <param name="source">The source document</param>
         /// <param name="data">The merge data</param>
         /// <returns></returns>
-        private static byte[] MiniMerge(StorageClass stg, DocumentClass source, StoreClass data)
+        private static byte[] MiniMerge(ManagerClass mgr, DocumentClass source, StoreClass data)
         {
             byte[] abAns = source.ValueAsBytes; ;
 
@@ -394,12 +487,12 @@ namespace Proc.File
                             string sMDoc = c_Docs.Get(iDoc);
                             if (sMDoc.HasValue())
                             {
-                                DocumentClass c_Wkg = new DocumentClass(stg, sMDoc);
-                                byte[] abExtra = DocumentClass.MiniMerge(stg, c_Wkg, data);
+                                DocumentClass c_Wkg = new DocumentClass(mgr, sMDoc);
+                                byte[] abExtra = DocumentClass.MiniMerge(mgr, c_Wkg, data);
 
                                 using (Vendors.DocXClass c_Filler = new Vendors.DocXClass())
                                 {
-                                    abExtra = c_Filler.Merge(abExtra, c_Wkg.MergeMap.Eval(data, stg.Parent));
+                                    abExtra = c_Filler.Merge(abExtra, c_Wkg.MergeMap.Eval(data, mgr.Parent));
                                 }
 
                                 abAns = c_Merge.Append(abAns, abExtra, false);
@@ -418,12 +511,12 @@ namespace Proc.File
                             string sMDoc = c_Docs.Get(iDoc);
                             if (sMDoc.HasValue())
                             {
-                                DocumentClass c_Wkg = new DocumentClass(stg, sMDoc);
-                                byte[] abExtra = DocumentClass.MiniMerge(stg, c_Wkg, data);
+                                DocumentClass c_Wkg = new DocumentClass(mgr, sMDoc);
+                                byte[] abExtra = DocumentClass.MiniMerge(mgr, c_Wkg, data);
 
                                 using (Vendors.DocXClass c_Filler = new Vendors.DocXClass())
                                 {
-                                    abExtra = c_Filler.Merge(abExtra, c_Wkg.MergeMap.Eval(data, stg.Parent)); ;
+                                    abExtra = c_Filler.Merge(abExtra, c_Wkg.MergeMap.Eval(data, mgr.Parent)); ;
                                 }
 
                                 abAns = c_Merge.Append(abAns, abExtra, true);
