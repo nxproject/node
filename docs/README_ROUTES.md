@@ -1,7 +1,7 @@
-# NX.Node - The basics
+# NX.Node - Routes
 
- The route is the first *NX.Node* item that you need to understand.  The following
- is a basic route definition in *NX.Node* :
+The route is the first *NX.Node* item that you need to understand.  The following
+is a basic route definition in *NX.Node* :
 
 ```javascript
 
@@ -199,3 +199,5 @@ may take a small amount of time until all nodes switch.
 
 Note:  The secure code must not match any route entry that the system uses, as the
 behavior is not guaranteed.
+
+[Back to top](../README.md)
