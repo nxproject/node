@@ -24,9 +24,9 @@ easily install [Docker Desktop on Windows](https://docs.docker.com/docker-for-wi
 
 ## Containers are bees
 
-As the **NX.Node** is designed to run as a Docker container, a set of classes are
+As **NX.Node** is designed to run as a Docker container, a set of classes are
 part of the **NX.Engine** to supports containers.  In the NX universe, a container
-is called a **bee**, which live ina **hive** and can transverse many **fields**.
+is called a **bee**, which live in a **hive** and can transverse many **fields**.
 Let's dive into how they relate.
 
 Term|Meaning

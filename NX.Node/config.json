@@ -7,14 +7,27 @@
   "root_folder": "/etc/wd", // Where bee's data is kept
   "doc_folder": "@/etc/docs", // Where shared documents are kept
 
+  // Default values, just to demo
+
   "http_port": "80", // The port where the HTTP server listens
   "http_threads": "4", // Number of HTTP process threads to run
 
+  // Profile
+
+  "uses": [ "Proc.File", "Route.File" ], // To give the system some flavor
+
+  // Queens duties
+
   "qd_bumble": [ "redis" ],
-  "qd_worker": [ "3", "Chores:2" ],
+  "qd_worker": [ "2", "Chores:1" ],
 
   "secure_code": "wqfmtohhofyzzrojnhvy", // The security code
   // From https://www.random.org/strings/?num=1&len=20&loweralpha=on&unique=on&format=html&rnd=new
+
+  // Minio
+
+  "minio_access": "myaccesskey",
+  "minio_secret": "mysecretkey",
 
   // These are for development
 
@@ -22,4 +35,5 @@
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
   "genome_source": [] // Folders where extra code is located
+
 }

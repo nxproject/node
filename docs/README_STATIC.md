@@ -45,9 +45,22 @@ elsewhere, it will match whatever the requestor entered.
 If what was entered does not exist as a file, **index.html** is appended.
 
 The root path is **ui_folder** and the file must be in that folder or a child folder.
-If the file is not found a 4004 Not found error is returned.
+If the file is not found a 404 Not found error is returned.
 
 And I say maybe a static web system, as I can see where with a bit of code, you can
 make this route into a processor and modify the files as they are being returned.
+
+The config for this application looks like:
+```JSON
+{
+    "uses": [ "Route.UI" ],
+    "ui_folder": "@/etc/ui",
+
+    // How many bees we want to have
+
+    "qd_worker": [ "4" ],
+    "qd_bumble": [ "traefik" ]
+}
+```
 
 [Back to top](../README.md)

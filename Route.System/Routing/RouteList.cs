@@ -31,33 +31,16 @@ namespace Route.System
 {
     /// <summary>
     /// 
-    /// Return the routing key for a call.  Presence of the routing key,
-    /// which typically is the first item in the URL, indicates that the
-    /// sub-system has been loaded.
-    /// 
-    /// Passed in store:
-    /// 
-    /// name            - The route
-    /// 
-    /// Returns:
-    /// 
-    /// OK              - "1" if it exists, "0" otherwise
+    /// Lists all the route in the system
     /// 
     /// </summary>
-    public class RouteGetKey : RouteClass
+    public class RouteList : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, "isavailable" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET_SECURE, Support.Route, "list" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
-            // Does it exist?
-            if (call.Env.Router.IsDefined(store["name"]))
-            {
-                call.RespondWithOK();
-            }
-            else
-            {
-                call.RespondWithFail();
-            }
+            // Dump
+            call.RespondWithJSON(call.Env.Router.AsJObject());
         }
     }
 }

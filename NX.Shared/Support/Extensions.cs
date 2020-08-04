@@ -3066,6 +3066,25 @@ namespace NX.Shared
             return System.IO.Path.GetDirectoryName(path);
         }
 
+        public static string GetParentDirectoryFromPath(this string path)
+        {
+            string sPath = path.IfEmpty();
+            // Look for last piece
+            int iPos = sPath.LastIndexOf("/");
+            //  Any?
+            if (iPos != -1)
+            {
+                // Remove
+                sPath = sPath.Substring(0, iPos);
+            }
+            else
+            {
+                sPath = "";
+            }
+
+            return sPath;
+        }
+
         public static string SetExtensionFromPath(this string path, string ext)
         {
             path = path.IfEmpty();

@@ -22,42 +22,25 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-
 using NX.Engine;
 using NX.Shared;
 
-namespace Route.System
+namespace Proc.File
 {
     /// <summary>
     /// 
-    /// Return the routing key for a call.  Presence of the routing key,
-    /// which typically is the first item in the URL, indicates that the
-    /// sub-system has been loaded.
-    /// 
-    /// Passed in store:
-    /// 
-    /// name            - The route
-    /// 
-    /// Returns:
-    /// 
-    /// OK              - "1" if it exists, "0" otherwise
+    /// Initializes the minio bumble bee
     /// 
     /// </summary>
-    public class RouteGetKey : RouteClass
+    public class Init : FNClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, "isavailable" };
-        public override void Call(HTTPCallClass call, StoreClass store)
+        public override void Initialize(EnvironmentClass env)
         {
-            // Does it exist?
-            if (call.Env.Router.IsDefined(store["name"]))
-            {
-                call.RespondWithOK();
-            }
-            else
-            {
-                call.RespondWithFail();
-            }
+            // Make the bumble bee
+            ManagerClass c_Mgr = env.Globals.Get<ManagerClass>();
+
+            base.Initialize(env);
         }
+
     }
 }

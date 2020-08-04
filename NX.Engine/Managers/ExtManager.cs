@@ -195,10 +195,19 @@ namespace NX.Engine
                                     //
                                     try
                                     {
-                                        // And finally initialize
-                                        c_Plug.Initialize(this.Parent);
+                                        if (sName.StartsWith("File."))
+                                        {
+                                            var a = 1;
+                                        }
+                                            // And finally initialize
+                                            c_Plug.Initialize(this.Parent);
                                     }
                                     catch { }
+
+                                    
+
+                                    //
+                                    this.Parent.LogVerbose("Loaded {0}", sName);
                                 }
                             }
                         }

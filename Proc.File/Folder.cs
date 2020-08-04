@@ -56,20 +56,6 @@ namespace Proc.File
         }
         #endregion
 
-        #region IDisposable
-        public override void Dispose()
-        {
-            //
-            if (this.IMinioExtra != null)
-            {
-                this.IMinioExtra.Dispose();
-                this.IMinioExtra = null;
-            }
-
-            base.Dispose();
-        }
-        #endregion
-
         #region Properties
         /// <summary>
         /// 
@@ -102,7 +88,14 @@ namespace Proc.File
                 // Is MinIO there?
                 if (this.Parent.IsAvailable)
                 {
-                    // TBD
+                    // Get list of children
+                    List<string> c_Files = this.Parent.ListObjectvalues(this.Parent.MakeAttributeName(ManagerClass.Types.Child, this.Path));
+                    // Loop thru
+                    foreach(string sEntry in c_Files)
+                    {
+                        // Add
+                        c_Ans.Add(new DocumentClass(this.Parent, sEntry));
+                    }
                 }
                 else
                 {
@@ -131,7 +124,14 @@ namespace Proc.File
                 // Using MinIO?
                 if (this.Parent.IsAvailable)
                 {
-                    // TBD
+                    // Get list of children
+                    List<string> c_Dirs = this.Parent.ListObjectvalues(this.Parent.MakeAttributeName(ManagerClass.Types.ChildFolder, this.Path));
+                    // Loop thru
+                    foreach (string sEntry in c_Dirs)
+                    {
+                        // Add
+                        c_Ans.Add(new FolderClass(this.Parent, sEntry));
+                    }
                 }
                 else
                 {
@@ -143,35 +143,6 @@ namespace Proc.File
                 }
 
                 return c_Ans;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// The folder name in Minio
-        /// 
-        /// </summary>
-        private string MinioName
-        {
-            get { return this.Path.ToLower().MD5HashString(); }
-        }
-
-        /// <summary>
-        /// 
-        /// The Minio extra information for this folder
-        /// 
-        /// </summary>
-        private MinioExtraInfo IMinioExtra { get; set; }
-        public MinioExtraInfo MinioExtra
-        {
-            get
-            {
-                if (this.IMinioExtra == null)
-                {
-                    this.IMinioExtra = new MinioExtraInfo(this);
-                }
-
-                return this.IMinioExtra;
             }
         }
         #endregion
@@ -187,7 +158,8 @@ namespace Proc.File
             // Is MinIO there?
             if (this.Parent.IsAvailable)
             {
-                // TBD
+                // Delete
+                this.Parent.DeleteObject(this.Path, true);
             }
             else
             {
@@ -206,7 +178,7 @@ namespace Proc.File
             if (this.Parent.IsAvailable)
             {
                 //
-                this.AssureBucket(false);
+                this.AssureFolder();
             }
             else
             {
@@ -217,309 +189,43 @@ namespace Proc.File
         #endregion
 
         #region MinIO
-        /// <summary>
-        /// 
-        /// Gets an object from Minio
-        /// 
-        /// </summary>
-        /// <param name="name">The name of the object</param>
-        /// <returns>The object value</returns>
-        public string GetObject(string name, bool isprivate = false)
-        {
-            // Assume none
-            string sAns = null;
-
-            // Do we have Minio
-            if (this.Parent.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket(isprivate);
-
-                // Read
-                this.Parent.Client.GetObjectAsync(this.MinioName, name, delegate (Stream stream)
-                {
-                    // Make a buffer
-                    byte[] abBuffer = new byte[32 * 1024];
-
-                    // Read a chunk
-                    int iSize = stream.Read(abBuffer, 0, abBuffer.Length);
-                    // Until no more
-                    while (iSize > 0)
-                    {
-                        // Append
-                        sAns += abBuffer.SubArray(0, iSize).FromBytes();
-                        // Read again
-                        iSize = stream.Read(abBuffer, 0, abBuffer.Length);
-                    }
-
-                }).Wait();
-            }
-
-            return sAns;
-        }
 
         /// <summary>
         /// 
-        /// Writes an object to Minio
+        /// Make sure that the folder entry
         /// 
         /// </summary>
-        /// <param name="name">The name of the object</param>
-        /// <param name="value">The object value</param>
-        /// <param name="isprivate">Trues is what is being written is part of the info block</param>
-        public void SetObject(string name, string value, bool isprivate = false)
+        private void AssureFolder()
         {
             // Do we have Minio
             if (this.Parent.IsAvailable)
             {
-                // Make sure bucket exixts
-                this.AssureBucket(isprivate);
-
-                // Make into stream
-                using (MemoryStream c_Stream = new MemoryStream(value.ToBytes()))
-                {
-                    // Write
-                    this.Parent.Client.PutObjectAsync(this.MinioName, name, c_Stream, (long)value.Length).Wait();
-                    // Private?
-                    if (!isprivate)
-                    {
-                        //
-                        this.MinioExtra.SetLastWrittenOn(name, DateTime.Now);
-                    }
-                }
-            }
-        }
-
-        public void DeleteObject(string name, bool isprivate = false)
-        {
-            // Do we have Minio
-            if (this.Parent.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket(isprivate);
-
-                // Do
-                this.Parent.Client.RemoveObjectAsync(this.MinioName, name).Wait();
-
-                // Remove all keys
-                this.MinioExtra.Delete(MinioExtraInfo.Types.File, this.MinioName, name);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// Make sure that the Minio bucket exists
-        /// 
-        /// </summary>
-        private void AssureBucket(bool isprivate)
-        {
-            // Do we have Minio
-            if (this.Parent.IsAvailable)
-            {
+                // Asssure
                 // Does it exist?
-                if (!this.Parent.Client.BucketExistsAsync(this.MinioName).Result)
+                if (!this.Parent.GetAttribute(ManagerClass.Types.Path, this.Path).HasValue())
                 {
                     // Create
-                    this.Parent.Client.MakeBucketAsync(this.MinioName).Wait();
+                    this.Parent.SetAttribute(ManagerClass.Types.Path, this.Path, this.Path);
+                    // And set the creation time
+                    this.Parent.SetAttribute(ManagerClass.Types.LastWrite, this.Path, DateTime.Now.ToUniversalTime().ToDBDate());
 
-                    // Get the timestamp
-                    DateTime c_Now = DateTime.Now;
-
-                    // Set the base info
-                    this.MinioExtra.Name = this.Path.GetDirectoryNameFromPath();
-                    this.MinioExtra.Path = this.Path;
-                    this.MinioExtra.CreatedOn = c_Now;
-                    this.MinioExtra.LastAccessOn = c_Now;
-
-                    // Get the path
-                    string sPath = this.Path;
-                    // Look for last piece
-                    int iPos = this.Path.LastIndexOf("/");
-                    //  Any?
-                    if (iPos != -1)
+                    // Get the  parent path
+                    string sPath = this.Path.GetParentDirectoryFromPath();
+                    // Anything left?
+                    if (sPath.HasValue())
                     {
-                        // Remove
-                        sPath = sPath.Substring(0, iPos);
-                        // ANything left?
-                        if (sPath.HasValue())
+                        // Assure
+                        using (FolderClass c_Parent = new FolderClass(this.Parent, sPath))
                         {
-                            // Assure
-                            using (FolderClass c_Parent = new FolderClass(this.Parent, sPath))
-                            {
-                                // Set us as a child folder
-                                this.MinioExtra.SetFolder(this.MinioName, "", this.Path);
-                            }
+                            // make if needed
+                            c_Parent.AssureFolder();
+
+                            // Set us as a child folder
+                            this.Parent.SetAttribute(ManagerClass.Types.ChildFolder, c_Parent.Path, this.Path);
                         }
                     }
                 }
-                else
-                {
-                    // Unless a private call
-                    if (!isprivate)
-                    {
-                        // Set
-                        this.MinioExtra.LastAccessOn = DateTime.Now;
-                    }
-                }
             }
-        }
-        #endregion
-    }
-
-    /// <summary>
-    /// 
-    /// Keeps all of the extra info to make the S3 bucket system
-    /// look and behave like folders
-    /// 
-    /// </summary>
-    public class MinioExtraInfo : ChildOfClass<FolderClass>
-    {
-        #region Constructor
-        internal MinioExtraInfo(FolderClass folder)
-        : base(folder)
-        { }
-        #endregion
-
-        #region Enums
-        public enum Types
-        {
-            Setting,
-            Folder,
-            File
-        }
-        #endregion
-
-        #region Properties
-        /// <summary>
-        /// 
-        /// The folder name
-        /// 
-        /// </summary>
-        public string Name
-        {
-            get { return this.Get(Types.Setting, "name", null); }
-            set { this.Set(Types.Setting, "name", null, value); }
-        }
-
-        /// <summary>
-        /// 
-        /// The path
-        /// 
-        /// </summary>
-        public string Path
-        {
-            get { return this.Get(Types.Setting, "path", null); }
-            set { this.Set(Types.Setting, "path", null, value); }
-        }
-
-        /// <summary>
-        /// 
-        /// Date folder was created
-        /// 
-        /// </summary>
-        public DateTime CreatedOn
-        {
-            get { return this.Get(Types.Setting, "created", null).FromDBDate(); }
-            set { this.Set(Types.Setting, "created", null, value.ToUniversalTime().ToDBDate()); }
-        }
-
-
-        /// <summary>
-        /// 
-        /// Date folder was last accessed
-        /// 
-        /// </summary>
-        public DateTime LastAccessOn
-        {
-            get { return this.Get(Types.Setting, "last", null).FromDBDate(); }
-            set { this.Set(Types.Setting, "last", null, value.ToUniversalTime().ToDBDate()); }
-        }
-        #endregion
-
-        #region File
-        /// <summary>
-        /// 
-        /// Get the time that the file was last written
-        /// 
-        /// </summary>
-        /// <param name="file">The file name</param>
-        /// <returns>Date and time last written</returns>
-        public DateTime GetLastWrittenOn(string file)
-        {
-            return this.Get(Types.File, file, "lw").FromDBDate();
-        }
-
-        /// <summary>
-        /// 
-        /// Set the last time the file was written
-        /// 
-        /// </summary>
-        /// <param name="file">The file name</param>
-        /// <param name="value">Date and time of last write</param>
-        public void SetLastWrittenOn(string file, DateTime value)
-        {
-            this.Set(Types.File, file, "lw", value.ToUniversalTime().ToDBDate());
-        }
-        #endregion
-
-        #region Methods
-        /// <summary>
-        /// 
-        /// Creates the name for the private
-        /// 
-        /// </summary>
-        /// <param name="type">The type</param>
-        /// <param name="name">The name</param>
-        /// <returns>The FQ value</returns>
-        private string MakeName(Types type, string name, string op)
-        {
-            return ("__" + type + "_" + name + "_" + op.IfEmpty()).ToLower();
-        }
-
-        /// <summary>
-        /// 
-        /// Gets a private from the folder
-        /// 
-        /// </summary>
-        /// <param name="type">The type</param>
-        /// <param name="name">The name</param>
-        /// <returns>The value</returns>
-        public string Get(Types type, string name, string op)
-        {
-            // Get
-            return this.Parent.GetObject(this.MakeName(type, name, op), true);
-        }
-
-        /// <summary>
-        /// 
-        /// Sets a private from the folder
-        /// 
-        /// </summary>
-        /// <param name="type">The type</param>
-        /// <param name="name">The name</param>
-        /// <param name="value">The value to store</param>
-        public void Set(Types type, string name, string op, string value)
-        {
-            // Set
-            this.Parent.SetObject(this.MakeName(type, name, op), value, true);
-        }
-
-        /// <summary>
-        /// 
-        /// Gets a private from the folder
-        /// 
-        /// </summary>
-        /// <param name="type">The type</param>
-        /// <param name="name">The name</param>
-        /// <returns>The value</returns>
-        public string Delete(Types type, string name, string op = null)
-        {
-            // Get
-            return this.Parent.GetObject(this.MakeName(type, name, op), true);
-        }
-
-        public void SetFolder(string folder, string op, string value)
-        {
-            // TBD
         }
         #endregion
     }

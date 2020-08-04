@@ -181,6 +181,13 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// Has the hive setup?
+        /// 
+        /// </summary>
+        public bool HasSetup { get; set; }
+
+        /// <summary>
+        /// 
         /// The number of bees in the hive
         /// 
         /// </summary>
@@ -458,7 +465,7 @@ namespace NX.Engine.Hive
             this.Parent.LogInfo("Hive auto refresh has started");
 
             // The sleep cycle
-            TimeSpan c_Wait = 10.SecondsAsTimeSpan();
+            TimeSpan c_Wait = 5.SecondsAsTimeSpan();
 
             // Forever
             while (c_Status.IsActive)
@@ -471,6 +478,25 @@ namespace NX.Engine.Hive
 
                 // Now go to slow mode
                 c_Wait = 5.MinutesAsTimeSpan();
+
+                // If first time, do the setup
+                if(!this.HasSetup)
+                {
+                    // Only once
+                    this.HasSetup = true;
+
+                    // Get the uses list
+                    ItemsClass c_Uses = new ItemsClass(this.Parent.GetAsJArray("uses"));
+                    // Loop thru
+                    foreach(ItemClass c_Item in c_Uses)
+                    {
+                        // Load
+                        this.Parent.Use(c_Item.Priority);
+                    }
+
+                    // And handle process option
+                    this.Parent.Use("Proc." + this.Parent.Process.IfEmpty("Default"));
+                }
             }
 
             //

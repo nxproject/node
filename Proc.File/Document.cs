@@ -77,7 +77,7 @@ namespace Proc.File
         /// </summary>
         public override void Dispose()
         {
-            if(this.IMergeMap != null)
+            if (this.IMergeMap != null)
             {
                 this.IMergeMap.Dispose();
                 this.IMergeMap = null;
@@ -160,12 +160,8 @@ namespace Proc.File
                 // Is MinIO there?
                 if (this.Parent.IsAvailable)
                 {
-                    // Via folder
-                    using (FolderClass c_Folder = this.Folder)
-                    {
-                        // Get
-                        sAns = c_Folder.GetObject(this.Name);
-                    }
+                    // Get
+                    sAns = this.Parent.GetObject(this.Path);
                 }
                 else
                 {
@@ -180,12 +176,8 @@ namespace Proc.File
                 // Is MinIO there?
                 if (this.Parent.IsAvailable)
                 {
-                    // Via folder
-                    using (FolderClass c_Folder = this.Folder)
-                    {
-                        // Set
-                        c_Folder.SetObject(this.Name, value);
-                    }
+                    // Set
+                    this.Parent.SetObject(this.Path, value);
                 }
                 else
                 {
@@ -255,7 +247,7 @@ namespace Proc.File
                     using (FolderClass c_Folder = this.Folder)
                     {
                         // Get
-                        c_Ans = c_Folder.MinioExtra.GetLastWrittenOn(this.Name);
+                        c_Ans = this.Parent.GetAttribute(ManagerClass.Types.LastWrite, this.Path).FromDBDate();
                     }
                 }
                 else
@@ -287,7 +279,7 @@ namespace Proc.File
                 string sAns = this.Path.SHA1HashString();
 
                 // Save a pointer back to itself
-                using(DocumentClass c_Doc = new DocumentClass(this.Parent, this.MetadataFolder, ReversePointerFile))
+                using (DocumentClass c_Doc = new DocumentClass(this.Parent, this.MetadataFolder, ReversePointerFile))
                 {
                     // Write
                     c_Doc.Value = this.Path;
@@ -309,7 +301,7 @@ namespace Proc.File
         {
             get
             {
-                if(this.IMetadataFolder == null)
+                if (this.IMetadataFolder == null)
                 {
                     // Make the path
                     string sPath = DocumentClass.MetadataFolderRoot(this.Parent.Parent).CombinePath(this.Path.SHA1HashString());
@@ -333,12 +325,8 @@ namespace Proc.File
             // Delete the file itself
             if (this.Parent.IsAvailable)
             {
-                // Via folder
-                using (FolderClass c_Folder = this.Folder)
-                {
-                    // Delete
-                    c_Folder.DeleteObject(this.Name);
-                }
+                // Delete
+                this.Parent.DeleteObject(this.Path);
             }
             else
             {
@@ -394,7 +382,7 @@ namespace Proc.File
                     {
                         // New?
                         bool bNew = c_Map.WrittenOn < this.WrittenOn;
-                        
+
                         // Load
                         this.IMergeMap = new MergeMapClass(c_Map);
 

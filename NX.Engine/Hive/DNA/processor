@@ -22,5 +22,4 @@
   ],
   "Image": "{repo_project}/processor:{tier}",
   "WorkingDir": "/etc/wd"
-  }
 }

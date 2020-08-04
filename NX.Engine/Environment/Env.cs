@@ -35,6 +35,7 @@ using Octokit;
 
 using NX.Engine.Hive;
 using NX.Shared;
+using System.Reactive.Disposables;
 
 namespace NX.Engine
 {
@@ -779,6 +780,9 @@ namespace NX.Engine
         /// <param name="module">The module name</param>
         public void Use(string module, Profiles profile = Profiles.Fns | Profiles.Procs | Profiles.Routes)
         {
+            //
+            this.LogVerbose("Using {0}", module);
+
             // Remove the .dll if any
             if (module.EndsWith(".dll")) module = module.Substring(0, module.Length - 1);
 
@@ -799,12 +803,50 @@ namespace NX.Engine
             {
                 // Set the path
                 string sPath = "".WorkingDirectory().CombinePath("modules");
+                // Are we running outside?
+                if(!"".InContainer())
+                {
+                    // Does the path exist?
+                    if(!sPath.DirectoryExists())
+                    {
+                        // Flag as not found
+                        bool bFound = false;
+
+                        // Get list of sources
+                        List<string> c_Sources = this.GetAsJArray("genome_sources").ToList();
+                        // Loop thru
+                        foreach(string sDir in c_Sources)
+                        {
+                            // Found?
+                            if(sDir.CombinePath(module).AdjustPathToOS().FileExists())
+                            {
+                                // Save
+                                sPath = sDir;
+                                // And flag
+                                bFound = true;
+                                //Only one
+                                break;
+                            }
+                        }
+
+                        // Did we find it?
+                        if (!bFound)
+                        {
+                            // Possibly in Visual Studio Debug
+
+                            // Get working directory
+                            string sWD = "".WorkingDirectory();
+                            // Replace NX.Node with the module
+                            sPath = sWD.Replace("NX.Node", module);
+                        }
+                    }
+                }
 
                 // Add the file name itself
                 sPath = sPath.CombinePath(module + ".dll");
 
                 // Is it a real file?
-                if (sPath.FileExists())
+                if (sPath.AdjustPathToOS().FileExists())
                 {
                     // Add to system
                     this.LoadDynamic(sPath, profile);
@@ -1045,9 +1087,6 @@ namespace NX.Engine
                 var a = this.FNS;
                 var b = this.Router;
                 var c = this.Procs;
-
-                // And handle process
-                this.Use("Proc." + this.Process.IfEmpty("Default"));
             }
         }
 

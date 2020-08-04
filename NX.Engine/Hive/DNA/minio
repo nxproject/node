@@ -2,6 +2,10 @@
 	"@Map": [
 		"{doc_folder}:/data"
 	],
+	"Cmd": [
+		"server",
+		"/data"
+	],
 	"Image": "{repo_project}/minio:{tier}",
 	"Env": [
 		"MINIO_ACCESS_KEY={minio_access}",

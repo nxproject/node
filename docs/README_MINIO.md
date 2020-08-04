@@ -40,6 +40,16 @@ call:
 ```
 Note that to run the minio bumble bee locally, the access and secret keys are optional,
 except that if you destroy the environment store in the redis bumble bee, you will lose
-access to the minio bumble bee documents, so use of your own keys is strongly suggested.```
+access to the minio bumble bee documents, so use of your own keys is strongly suggested.
 
+## Bucket usage
+
+The minio bumble bee uses one bucket, which can be ste by using:
+```
+--minio_bucket thebuckettobeused
+```
+The default name is **nxproject**.
+
+Note that the object names used in the bucket are encoded to support the naming conventions
+used in a disk based directory structure.
 [Back to top](../README.md)
