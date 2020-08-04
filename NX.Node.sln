@@ -63,8 +63,32 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		LICENSE = LICENSE
 		README.md = README.md
+		docs\README_B_BEE.md = docs\README_B_BEE.md
+		docs\README_B_BUMBLE.md = docs\README_B_BUMBLE.md
+		docs\README_B_DNA.md = docs\README_B_DNA.md
+		docs\README_B_FIELD.md = docs\README_B_FIELD.md
+		docs\README_B_GENOME.md = docs\README_B_GENOME.md
+		docs\README_B_HIVE.md = docs\README_B_HIVE.md
+		docs\README_B_MASON.md = docs\README_B_MASON.md
+		docs\README_B_QUEEN.md = docs\README_B_QUEEN.md
+		docs\README_B_ROSTER.md = docs\README_B_ROSTER.md
+		docs\README_ENV.md = docs\README_ENV.md
 		docs\README_FNS.md = docs\README_FNS.md
+		docs\README_FOLDERS.md = docs\README_FOLDERS.md
+		docs\README_GIT.md.txt = docs\README_GIT.md.txt
+		docs\README_HTTP.md = docs\README_HTTP.md
+		docs\README_KUBE.md = docs\README_KUBE.md
+		docs\README_MINIO.md = docs\README_MINIO.md
+		docs\README_NGINX.md = docs\README_NGINX.md
+		docs\README_NOSQL.md = docs\README_NOSQL.md
+		docs\README_PROCS.md = docs\README_PROCS.md
+		docs\README_REDIS.md = docs\README_REDIS.md
 		docs\README_ROUTES.md = docs\README_ROUTES.md
+		docs\README_STATIC.md = docs\README_STATIC.md
+		docs\README_TIER.md = docs\README_TIER.md
+		docs\README_TRAEFIK.md = docs\README_TRAEFIK.md
+		docs\README_USE.md = docs\README_USE.md
+		docs\README_XML.md = docs\README_XML.md
 	EndProjectSection
 EndProject
 Global
