@@ -16,7 +16,7 @@ code, open it with Visual Studio (use **Visual Studio Community 2019** or later,
 it's free) and get ready to view the code.  using MS Windows 10 or later, you can
 easily install [Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/).
 
-* [The basics](README_BASICS.MD)
+* [The basics](./README_BASICS.MD)
 
 
 ### Multi-threading and handling of HTTP calls
