@@ -57,7 +57,7 @@ There are two basic rules you need to follow to include your own code:
 
 Once those are done, execute the following in the command line:
 ```
-NXNode.exe --make_genome y --genome_source foldername --field name=iptodocker
+NXNode.exe --make_genome y --code_folder foldername --field name=iptodocker
 ```
 The **gnome_source** is optional but the folder should contain all of our DLL's
 to be included in the genome.  It may me used multiple times to include multiple sources.

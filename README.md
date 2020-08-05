@@ -19,7 +19,7 @@ easily install [Docker Desktop on Windows](https://docs.docker.com/docker-for-wi
 * [Routes](docs/README_ROUTES.md)
 * [Functions](docs/README_FNS.md)
 * [Processes](docs/README_PROCS.md)
-* [Loading routes and functions](docs/README_USE.md)
+* [Loading processes, routes and functions](docs/README_USE.md)
 * [Environment](docs/EADME.ENV.md)
 
 ## Containers are bees

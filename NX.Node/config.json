@@ -14,12 +14,12 @@
 
   // Profile
 
-  "uses": [ "Proc.File", "Route.File" ], // To give the system some flavor
+  "uses": [ "Route.UI" ], // To give the system some flavor
 
   // Queens duties
 
   "qd_bumble": [ "redis" ],
-  "qd_worker": [ "2", "Chores:1" ],
+  //"qd_worker": [ "2", "Chores:1" ],
 
   "secure_code": "wqfmtohhofyzzrojnhvy", // The security code
   // From https://www.random.org/strings/?num=1&len=20&loweralpha=on&unique=on&format=html&rnd=new
@@ -28,12 +28,13 @@
 
   "minio_access": "myaccesskey",
   "minio_secret": "mysecretkey",
+  "minio_disk": "y", // Testing
 
   // These are for development
 
   "verbose": "n", // Tell me what is going on
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
-  "genome_source": [] // Folders where extra code is located
+  "code_folder": [ ] // Folders where extra code is located
 
 }

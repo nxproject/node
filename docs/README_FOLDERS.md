@@ -44,9 +44,9 @@ The bees themselves all live in Linux, and you must think in Linux.  Folder path
 are in the format of **/folder/subfolder1/subfoldeer2...**.  It applies to the following:
 
 * config
-* genome_source
+* code_folder
 * xxx_folder
 
-The config and genome_source are not stored in the shared environment settings.
+The config and code_folder are not stored in the shared environment settings.
 
 [Back to top](../README.md)

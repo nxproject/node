@@ -35,7 +35,6 @@ using Octokit;
 
 using NX.Engine.Hive;
 using NX.Shared;
-using System.Reactive.Disposables;
 
 namespace NX.Engine
 {
@@ -80,7 +79,7 @@ namespace NX.Engine
         // Local use only
         private const string KeyProcess = "proc";
         private const string KeyMakeGenome = "make_genome";
-        private const string KeyGenomeSource = "genome_source";
+        public const string KeyCodeFolder = "code_folder";
         private const string KeyMakeBee = "make_bee";
         private const string KeyLoopbackURL = "loopback";
         #endregion
@@ -199,7 +198,7 @@ namespace NX.Engine
                     case KeyID:
                     case KeyProcess:
                     case KeyMakeGenome:
-                    case KeyGenomeSource:
+                    case KeyCodeFolder:
                     case KeyMakeBee:
                     case KeyLoopbackURL:
                     case KeyConfig:
@@ -692,16 +691,6 @@ namespace NX.Engine
 
         /// <summary>
         /// 
-        /// Genome code source
-        /// 
-        /// </summary>
-        public string GenomeSourceFolder
-        {
-            get { return this[EnvironmentClass.KeyGenomeSource]; }
-        }
-
-        /// <summary>
-        /// 
         /// Are we making a bee?
         /// 
         /// </summary>
@@ -735,7 +724,7 @@ namespace NX.Engine
                 // Remove the locals
                 c_Ans.Remove(KeyProcess);
                 c_Ans.Remove(KeyMakeGenome);
-                c_Ans.Remove(KeyGenomeSource);
+                c_Ans.Remove(KeyCodeFolder);
                 c_Ans.Remove(KeyMakeBee);
 
                 return c_Ans;
@@ -813,20 +802,30 @@ namespace NX.Engine
                         bool bFound = false;
 
                         // Get list of sources
-                        List<string> c_Sources = this.GetAsJArray("genome_sources").ToList();
+                        ItemsClass c_Sources = new ItemsClass( this.GetAsJArray("code_folder"));
                         // Loop thru
-                        foreach(string sDir in c_Sources)
+                        foreach (ItemClass c_Item in c_Sources)
                         {
-                            // Found?
-                            if(sDir.CombinePath(module).AdjustPathToOS().FileExists())
+                            // Get the type
+                            string sType = c_Item.Value.IfEmpty("code");
+
+                            // And according to type
+                            switch (sType.ToLower())
                             {
-                                // Save
-                                sPath = sDir;
-                                // And flag
-                                bFound = true;
-                                //Only one
-                                break;
+                                case "code":
+                                    // Found?
+                                    if (c_Item.Key.CombinePath(module).AdjustPathToOS().FileExists())
+                                    {
+                                        // Save
+                                        sPath = c_Item.Key;
+                                        // And flag
+                                        bFound = true;
+                                    }
+                                    break;
                             }
+
+                            // Found?
+                            if (bFound) break;
                         }
 
                         // Did we find it?

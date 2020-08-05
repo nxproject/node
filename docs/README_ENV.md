@@ -45,7 +45,5 @@ Setting|Meaning
 -------|-------
 http_threads|The number of HTTP worker threads to run (Default: 4)
 http_port|The port that the server will listen for HTTP requests (Default: 80)
-proc|The Fn to run at startup.  This value is not saved in the settings folder  and
-must be set via command line or environment setting.
 
 [Back to top](../README.md)

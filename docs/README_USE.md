@@ -1,4 +1,4 @@
-# NX.Node - Loading routes and functions
+# NX.Node - Loading processes, routes and functions
 
 While the base system has a limited number of routes and functions, *NX.Node* itself
 has a few extra modules that can be made available by calling:

@@ -68,33 +68,37 @@ namespace Proc.File
                 // Accordingly
                 if (isavailable)
                 {
-                    // Get the settings
-                    string sAccessKey = this.Parent["minio_access"].IfEmpty(this.Parent.Hive.Name.MD5HashString());
-                    string sSecret = this.Parent["minio_secret"].IfEmpty(this.Parent.Hive.Name.MD5HashString());
-
-                    // Get the url
-                    string sURL = this.Location;
-
-                    // Must have all three
-                    if (sURL.HasValue() && sAccessKey.HasValue() && sSecret.HasValue())
+                    // O ly if non-disk
+                    if (!this.Parent["minio_disk"].ToBoolean())
                     {
-                        // Make the client
-                        this.Client = new MinioClient(sURL, sAccessKey, sSecret);
+                        // Get the settings
+                        string sAccessKey = this.Parent["minio_access"].IfEmpty(this.Parent.Hive.Name.MD5HashString());
+                        string sSecret = this.Parent["minio_secret"].IfEmpty(this.Parent.Hive.Name.MD5HashString());
 
-                        // Get the root directory
-                        string sRoot = env.DocumentFolder;
-                        // Get all of the files
-                        List<string> c_Files = sRoot.GetTreeInPath();
-                        // Loop thru
-                        foreach (string sFile in c_Files)
+                        // Get the url
+                        string sURL = this.Location;
+
+                        // Must have all three
+                        if (sURL.HasValue() && sAccessKey.HasValue() && sSecret.HasValue())
                         {
-                            // Make the document
-                            using (DocumentClass c_Doc = new DocumentClass(this, sFile.Substring(sRoot.Length)))
+                            // Make the client
+                            this.Client = new MinioClient(sURL, sAccessKey, sSecret);
+
+                            // Get the root directory
+                            string sRoot = env.DocumentFolder;
+                            // Get all of the files
+                            List<string> c_Files = sRoot.GetTreeInPath();
+                            // Loop thru
+                            foreach (string sFile in c_Files)
                             {
-                                // Copy from local to Minio
-                                c_Doc.ValueAsBytes = sFile.ReadFileAsBytes();
-                                // Delete local copy
-                                sFile.DeleteFile();
+                                // Make the document
+                                using (DocumentClass c_Doc = new DocumentClass(this, sFile.Substring(sRoot.Length)))
+                                {
+                                    // Copy from local to Minio
+                                    c_Doc.ValueAsBytes = sFile.ReadFileAsBytes();
+                                    // Delete local copy
+                                    sFile.DeleteFile();
+                                }
                             }
                         }
                     }

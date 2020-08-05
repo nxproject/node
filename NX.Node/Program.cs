@@ -28,6 +28,7 @@ using Newtonsoft.Json.Linq;
 
 using NX.Engine;
 using NX.Shared;
+using Octokit;
 
 namespace NXNode
 {
@@ -73,9 +74,13 @@ namespace NXNode
                     CopyFolder(c_Env, sWD, sOut);
 
                     // The modules folder
-                    string sMod = sOut + @"\modules";
+                    string sMod = sOut.CombinePath("modules");
                     // Assure
                     sMod.AssurePath();
+                    // And the UI folder
+                    string sUI = sOut.CombinePath("shared").CombinePath("ui");
+                    // Assure
+                    sUI.AssurePath();
 
                     // Get the root
                     string sRoot = sDir.Substring(0, sDir.IndexOf("{0}"));
@@ -101,13 +106,27 @@ namespace NXNode
                         }
                     }
 
-                    // Get the extra folder
-                    string sExtras = c_Env.GenomeSourceFolder;
-                    // Do we have one?
-                    if (sExtras.HasValue())
+                    // Get the extra folders
+                    ItemsClass c_Folders = new ItemsClass(c_Env.GetAsJArray(EnvironmentClass.KeyCodeFolder));
+                    // Loop thru
+                    foreach(ItemClass c_Folder in c_Folders)
                     {
-                        // Copy folder
-                        CopyFolder(c_Env, sExtras, sMod);
+                        // Get type
+                        switch(c_Folder.Value.IfEmpty())
+                        {
+                            case "ui":
+                                // Adjust if needed
+                                string sFolder = c_Folder.Key.Replace(@"..\", sRoot);
+                                // Copy folder
+                                CopyFolder(c_Env, sFolder, sUI);
+                                break;
+
+                            default:
+                                // Copy folder
+                                CopyFolder(c_Env, c_Folder.Key, sMod);
+                                break;
+                        }
+                        
                     }
 
                     // Make into image
@@ -137,7 +156,7 @@ namespace NXNode
             }
             else
             {
-               
+
 
                 // Only thing we are allowed inside a container
                 c_Env.Start();
@@ -154,8 +173,10 @@ namespace NXNode
                 // Make path
                 target.AssurePath();
 
+                // The list
+                List<string> c_Files = source.GetFilesInPath();
                 // Do each file
-                foreach (string sFile in source.GetFilesInPath())
+                foreach (string sFile in c_Files)
                 {
                     // Get the actual file name
                     string sName = sFile.GetFileNameFromPath();

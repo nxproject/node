@@ -63,4 +63,30 @@ The config for this application looks like:
 }
 ```
 
+If you include your web site pages in the Visual Studio solution you can set the config
+as follows:
+```JSON
+{
+    "make_bee": "y",
+    "uses": [ "Route.UI" ],
+    "code_folder": "folderwithwebsite=ui"
+}
+```
+The **ui** option at the end of the **code_folder** tells the system that the folder
+contains the website UI.  This code will not be then used for the call of:
+```JavaScript
+env.Use("xxx.xx");
+```
+ad the proper **ui_folder** value will be created.
+
+## Sample sites
+
+There are two sample sites included:
+
+Package|Enviroment setting
+-------|------------------
+[Bootstrap](https://getbootstrap.com)|--code_folder "..\UI.Bootstrap=ui" 
+[Feact](https://github.com/facebook/react)|--code_folder "..\UI.React=ui" 
+[Vue](https://vuejs.org)|--code_folder "..\UI.Vue=ui"
+
 [Back to top](../README.md)

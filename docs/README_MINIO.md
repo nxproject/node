@@ -44,7 +44,7 @@ access to the minio bumble bee documents, so use of your own keys is strongly su
 
 ## Bucket usage
 
-The minio bumble bee uses one bucket, which can be ste by using:
+The minio bumble bee uses one bucket, which can be set by using:
 ```
 --minio_bucket thebuckettobeused
 ```
@@ -52,4 +52,14 @@ The default name is **nxproject**.
 
 Note that the object names used in the bucket are encoded to support the naming conventions
 used in a disk based directory structure.
+
+## Making the system disk based
+
+By calling:
+```
+--minio_disk y
+```
+you disable minio but allow the file and folders operation to continue using the **doc_folder**
+as the root folder.
+
 [Back to top](../README.md)

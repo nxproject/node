@@ -61,6 +61,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NXNode", "NX.Node\NXNode.cs
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EB5DB50B-09BA-4FDA-BFDB-42FA8DFE0C27}"
 	ProjectSection(SolutionItems) = preProject
+		UI.Bootstrap\index.html = UI.Bootstrap\index.html
 		LICENSE = LICENSE
 		README.md = README.md
 		docs\README_B_BEE.md = docs\README_B_BEE.md
@@ -89,6 +90,33 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docs\README_TRAEFIK.md = docs\README_TRAEFIK.md
 		docs\README_USE.md = docs\README_USE.md
 		docs\README_XML.md = docs\README_XML.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI", "UI", "{1ED3F8B1-1354-4DC8-B86D-C27E4431625B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI.Bootstrap", "UI.Bootstrap", "{99D54BC9-6119-4CE8-AE6D-CA0D779F0C34}"
+	ProjectSection(SolutionItems) = preProject
+		UI.Bootstrap\index.html = UI.Bootstrap\index.html
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI.React", "UI.React", "{DF6E15BC-DC47-4620-9633-39269DD64861}"
+	ProjectSection(SolutionItems) = preProject
+		UI.React\index.html = UI.React\index.html
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "js", "js", "{71028B6C-DD8E-43C2-8E25-40133EB42F97}"
+	ProjectSection(SolutionItems) = preProject
+		UI.React\js\scripts.js = UI.React\js\scripts.js
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UI.Vue", "UI.Vue", "{1A8E331D-DC7C-4B42-8AF2-F37F6765A04A}"
+	ProjectSection(SolutionItems) = preProject
+		UI.Vue\index.html = UI.Vue\index.html
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "js", "js", "{DA9D78DA-C538-4212-A141-D60D387E0576}"
+	ProjectSection(SolutionItems) = preProject
+		UI.Vue\js\app.js = UI.Vue\js\app.js
 	EndProjectSection
 EndProject
 Global
@@ -197,6 +225,11 @@ Global
 		{53CFE5CB-F41A-4D77-9BF6-40E89239A4BF} = {CFC91268-BAB1-4D58-BA9E-E39BFA1DA073}
 		{5B50F2DF-2A46-4308-92A1-D3427ECD2922} = {D5BDA4A8-8206-4F9B-A01F-6D4E04D91BBF}
 		{650E99E8-ACAB-4CF0-9EE4-5E36C9AA663E} = {4B7724AD-9C22-4D09-850D-46237B9F8702}
+		{99D54BC9-6119-4CE8-AE6D-CA0D779F0C34} = {1ED3F8B1-1354-4DC8-B86D-C27E4431625B}
+		{DF6E15BC-DC47-4620-9633-39269DD64861} = {1ED3F8B1-1354-4DC8-B86D-C27E4431625B}
+		{71028B6C-DD8E-43C2-8E25-40133EB42F97} = {DF6E15BC-DC47-4620-9633-39269DD64861}
+		{1A8E331D-DC7C-4B42-8AF2-F37F6765A04A} = {1ED3F8B1-1354-4DC8-B86D-C27E4431625B}
+		{DA9D78DA-C538-4212-A141-D60D387E0576} = {1A8E331D-DC7C-4B42-8AF2-F37F6765A04A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC856DE7-32A6-44B5-8E43-30FBEC634219}
