@@ -126,6 +126,12 @@ for language, operating system and  whatever else you care about.  I am glad tha
 you care about it, but I do not care to get into any arguments.  Like a colleague
 once said **Let this be a learning moment for you, not a teaching moment for me**.
 
+Do bear with me, this is my first open source project, based on years of work 
+in many languages. I know that my conversion work is not done, until then you will 
+see a version number of less than 1.0. And like any programmer, the code will
+change to adapt to new things.
+
+
 ## Acknowledgments
 
 * To all of those that came before me
