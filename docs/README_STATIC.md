@@ -56,8 +56,6 @@ The config for this application looks like:
     "uses": [ "Route.UI" ],
     "ui_folder": "@/etc/ui",
 
-    // How many bees we want to have
-
     "qd_worker": [ "4" ],
     "qd_bumble": [ "traefik" ]
 }
@@ -86,7 +84,7 @@ There are two sample sites included:
 Package|Enviroment setting
 -------|------------------
 [Bootstrap](https://getbootstrap.com)|--code_folder "..\UI.Bootstrap=ui" 
-[Feact](https://github.com/facebook/react)|--code_folder "..\UI.React=ui" 
+[React](https://github.com/facebook/react)|--code_folder "..\UI.React=ui" 
 [Vue](https://vuejs.org)|--code_folder "..\UI.Vue=ui"
 
 [Back to top](../README.md)
