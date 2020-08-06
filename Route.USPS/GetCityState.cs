@@ -50,7 +50,7 @@ namespace Route.USPS
     /// </summary>
     public class GetCityState : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, "citystate" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET_ROUTED, "citystate" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Do

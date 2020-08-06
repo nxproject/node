@@ -22,10 +22,24 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-namespace Route.MongoDb
+using NX.Engine;
+using NX.Shared;
+
+namespace Fn.USPS
 {
-    public static class Support
+    /// <summary>
+    /// 
+    /// Initializes the usps bumble bee
+    /// 
+    /// </summary>
+    public class Init : FNClass
     {
-        public const string Route = "nosql";
+        public override void Initialize(EnvironmentClass env)
+        {
+            // Make the bumble bee
+            ManagerClass c_Mgr = env.Globals.Get<ManagerClass>();
+
+            base.Initialize(env);
+        }
     }
 }

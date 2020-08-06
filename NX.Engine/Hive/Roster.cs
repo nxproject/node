@@ -120,6 +120,7 @@ namespace NX.Engine.Hive
 
             return c_Ans;
         }
+
         /// <summary>
         /// 
         /// Gets a bee from it's ID
@@ -193,6 +194,30 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// Returns a list of DNAs
+        /// 
+        /// </summary>
+        /// <returns>The list of all DNAs</returns>
+        public List<string> GetDNAs()
+        {
+            // Assume none
+            List<string> c_Ans = new List<string>();
+
+            // Loop thru
+            foreach (FieldClass c_Field in this.Parent.Fields.Values)
+            {
+                // Get the URLs
+                c_Ans.AddRange(c_Field.GetDNAs());
+            }
+
+            // Unique
+            c_Ans = c_Ans.Unique();
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
         /// Returns the bees for a given DNA
         /// 
         /// </summary>
@@ -250,6 +275,30 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// Returns a list of ports
+        /// 
+        /// </summary>
+        /// <returns>The list of all ports</returns>
+        public List<string> GetPorts()
+        {
+            // Assume none
+            List<string> c_Ans = new List<string>();
+
+            // Loop thru
+            foreach (FieldClass c_Field in this.Parent.Fields.Values)
+            {
+                // Get the URLs
+                c_Ans.AddRange(c_Field.GetPorts());
+            }
+
+            // Unique
+            c_Ans = c_Ans.Unique();
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
         /// Returns the URLs for a given port
         /// 
         /// </summary>
@@ -291,16 +340,16 @@ namespace NX.Engine.Hive
             if (!"".InContainer())
             {
                 // Do we have a me?
-                if (this.Parent.Me == null)
+                if (this.Parent.Roster.MeBee == null)
                 {
                     // 
                     this.Parent.Parent.LogInfo("Creating a ghost bee as {0}", this.Parent.Parent.ID);
                     // Make me
-                    this.Parent.Me = new BeeClass(this.Parent.Fields.Values.First(), 
+                    this.Parent.Roster.MeBee = new BeeClass(this.Parent.Fields.Values.First(), 
                                                     this.Parent.Parent.ID, 
                                                     BeeClass.Types.Ghost);
                     // Add to roster
-                    this.Add(this.Parent.Me);
+                    this.Add(this.Parent.Roster.MeBee);
                 }
             }
 
@@ -375,6 +424,31 @@ namespace NX.Engine.Hive
                 }
             }
         }
+
+        /// <summary>
+        /// 
+        /// The delegate for the QueenChanged event
+        /// 
+        /// </summary>
+        /// <param name="isavailable">Is the bee available</param>
+        public delegate void OnCQhangedHandler();
+
+        /// <summary>
+        /// 
+        /// Defines the event to be raised when the queen changes
+        /// 
+        /// </summary>
+        public event OnCQhangedHandler QueenChanged;
+        #endregion
+
+        #region Me
+        /// <summary>
+        /// 
+        /// Returns the running instance as a bee
+        /// 
+        /// </summary>
+        public BeeClass MeBee { get; internal set; }
+
         #endregion
 
         #region Chain of Command
@@ -402,6 +476,9 @@ namespace NX.Engine.Hive
                         if (c_Ans == null || c_FieldLeader.Id.CompareTo(c_Ans.Id) > 0) c_Ans = c_FieldLeader;
                     }
                 }
+
+                // Assume it is me
+                if (c_Ans == null && !"".InContainer()) c_Ans = this.MeBee;
 
                 return c_Ans;
             }
@@ -517,16 +594,16 @@ namespace NX.Engine.Hive
             BeeClass c_Queen = this.QueenBee;
 
             // Am I it?
-            if (this.Parent.Me != null)
+            if (this.Parent.Roster.MeBee != null)
             {
                 // Am I the queen?
-                if (c_Queen == null || c_Queen.Id.IsSameValue(this.Parent.Me.CV.NXID))
+                if (c_Queen == null || c_Queen.Id.IsSameValue(this.Parent.Roster.MeBee.CV.NXID))
                 {
                     // Already ascended?
                     if (SafeThreadManagerClass.Get(this.Parent.LabelQueen) == null)
                     {
                         // YES! Off with their heads
-                        this.Parent.Parent.LogInfo("Bee {0} is becoming queen soon!", this.Parent.Me.Id);
+                        this.Parent.Parent.LogInfo("Bee {0} is becoming queen soon!", this.Parent.Roster.MeBee.Id);
 
                         // Try to run the task but delay
                         this.QueenTaskID = 20.SecondsAsTimeSpan().WaitThenCall(delegate ()
@@ -535,7 +612,7 @@ namespace NX.Engine.Hive
                                new System.Threading.ParameterizedThreadStart(QueenToDo)).HasValue())
                            {
                                // Just ascended!
-                               this.Parent.Parent.LogInfo("Bee {0} is now queen", this.Parent.Me.Id);
+                               this.Parent.Parent.LogInfo("Bee {0} is now queen", this.Parent.Roster.MeBee.Id);
                            }
                        });
                     }
@@ -565,18 +642,24 @@ namespace NX.Engine.Hive
             //
             this.Parent.Parent.LogInfo("Started on queen's duties");
 
+            // Tell the world that the queen changed
+            this.QueenChanged?.Invoke();
+
             // Forever
             while (c_Status.IsActive)
             {
                 // Refresh
                 this.Refresh();
 
-                //// Are we connected?
-                //if (!this.Parent.Parent.Redis.IsAvailable)
-                //{
-                //    // Refresh
-                //    this.Refresh();
-                //}
+                // Get the list of required items
+                ItemsClass c_Uses = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_uses"));
+                // Loop thru
+                foreach (ItemClass c_Item in c_Uses)
+                {
+                    // Use
+                    this.Parent.Parent.Use(c_Item.Priority);
+                }
+
 
                 // Get the list of required bumble bees
                 ItemsClass c_Requests = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_bumble"));
@@ -684,6 +767,9 @@ namespace NX.Engine.Hive
                 c_Status.WaitFor(this.Parent.Parent["qd_every"].ToInteger(1).MinutesAsTimeSpan());
             }
 
+            // Tell the world
+            this.QueenChanged?.Invoke();
+
             //
             this.Parent.Parent.LogInfo("Queen's duties have ended");
         }
@@ -706,7 +792,7 @@ namespace NX.Engine.Hive
                 c_Status.WaitFor(5.MinutesAsTimeSpan());
 
                 // Do I know myself?
-                BeeClass c_Me = this.Parent.Me;
+                BeeClass c_Me = this.Parent.Roster.MeBee;
                 if (c_Me != null)
                 {
                     // Get the follower

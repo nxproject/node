@@ -276,6 +276,12 @@ namespace NX.Engine.Hive
         #endregion
     }
 
+    /// <summary>
+    /// 
+    /// A cross-reference of bees by DNA/Port for 
+    /// ticke areas
+    /// 
+    /// </summary>
     public class TickleAreaMapClass : ChildOfClass<FieldClass>
     {
         #region Constructor
@@ -341,7 +347,8 @@ namespace NX.Engine.Hive
         public void Add(BeeClass bee)
         {
             // Must have real a bee
-            if (bee != null && !bee.IsGhost)
+            // TBD
+            if (bee != null) //  && !bee.IsGhost)
             {
                 // Already there?
                 if (!this.Bees.ContainsKey(bee.Id))
@@ -360,7 +367,7 @@ namespace NX.Engine.Hive
                     if (bee.CV.NXID.IsSameValue(this.Parent.Parent.Parent.ID))
                     {
                         // Save
-                        this.Parent.Parent.Me = bee;
+                        this.Parent.Parent.Roster.MeBee = bee;
                         //
                         this.Parent.Parent.Parent.LogInfo("I am bee {0}", bee.Id);
 
@@ -633,6 +640,17 @@ namespace NX.Engine.Hive
         #region Map
         /// <summary>
         /// 
+        /// Returns a list of DNAs
+        /// 
+        /// </summary>
+        /// <returns>The list of DNAs</returns>
+        public List<string>GetDNAs()
+        {
+            return new List<string>(this.DNAs.Keys);
+        }
+
+        /// <summary>
+        /// 
         /// Returns the URLs for a given DNA
         /// 
         /// </summary>
@@ -677,6 +695,17 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// Returns a list of ports
+        /// 
+        /// </summary>
+        /// <returns>The list of ports</returns>
+        public List<string> GetPorts()
+        {
+            return new List<string>(this.Ports.Keys);
+        }
+        
+        /// <summary>
+        /// 
         /// Returns the URLs for a given port
         /// 
         /// </summary>
@@ -697,7 +726,6 @@ namespace NX.Engine.Hive
             return c_Ans;
         }
 
-
         /// <summary>
         /// 
         /// Returns the bee for a given port
@@ -715,6 +743,34 @@ namespace NX.Engine.Hive
             {
                 // Get the URLs
                 c_Ans.AddRange(this.DNAs[port].GetBees());
+            }
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Returns a bee using a given location
+        /// 
+        /// </summary>
+        /// <param name="location">The location (url)</param>
+        /// <returns>The bee</returns>
+        public BeeClass GetBeeFromLocation(string location)
+        {
+            // Assume none
+            BeeClass c_Ans = null;
+
+            // Loop thru
+            foreach(BeeClass c_Bee in this.Bees.Values)
+            {
+                // Does the location match?
+                if(location.IsSameValue(c_Bee.URL))
+                {
+                    // Yes
+                    c_Ans = c_Bee;
+                    // Only one
+                    break;
+                }
             }
 
             return c_Ans;
@@ -770,7 +826,7 @@ namespace NX.Engine.Hive
                 // Get the bee
                 BeeClass c_Zombie = this.GetBee(sZombie);
                 // Any?
-                if (c_Zombie != null)
+                if (c_Zombie != null && !c_Zombie.IsGhost)
                 {
                     // Kill
                     c_Zombie.Kill(BeeClass.KillReason.Zombie);

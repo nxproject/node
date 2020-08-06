@@ -22,45 +22,24 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-/// Packet Manager Requirements
-/// 
-/// Install-Package ServiceStack.Redis -Version 5.9.0
-/// Install-Package MongoDb.Driver -Version 2.10.4
-/// 
-
-using System.Collections.Generic;
-
-using MongoDB.Driver;
-
 using NX.Engine;
 using NX.Shared;
 
-namespace Fn.MongoDb
+namespace Proc.NginX
 {
     /// <summary>
     /// 
-    /// MongoDb interface
-    /// 
-    /// Defined settings
-    /// 
-    /// The following settings are used:
-    /// 
-    /// mongo_host          -  The host url
+    /// Initializes the nginx bumble bee
     /// 
     /// </summary>
-    public class ManagerClass : BumbleBeeClass    
+    public class Init : FNClass
     {
-        #region Constructor
-        public ManagerClass(EnvironmentClass env)
-            : base(env, "percona")
+        public override void Initialize(EnvironmentClass env)
         {
-            //// Do we have a running task?
-            //if (this.Parent.Hive.Roster.GetLocationsForDNA(ManagerClass.TaskName).Count == 0)
-            //{
-            //    // Launch via the queen
-            //    env.Hive.Roster.FN(env.Hive.Roster.QueenBee, "Sytem.Assure", "dna".AsJObject(ManagerClass.TaskName));
-            //}
+            // Make the bumble bee
+            ManagerClass c_Mgr = env.Globals.Get<ManagerClass>();
+
+            base.Initialize(env);
         }
-        #endregion
     }
 }

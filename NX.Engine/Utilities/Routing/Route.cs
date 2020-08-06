@@ -23,7 +23,7 @@
 ///--------------------------------------------------------------------------------
 
 using System.Collections.Generic;
-
+using Microsoft.CodeAnalysis.VisualBasic;
 using NX.Shared;
 
 namespace NX.Engine
@@ -52,6 +52,18 @@ namespace NX.Engine
         public const string PUT_SECURE = RouterClass.SecureRoutePrefix + "PUT";
         public const string DELETE_SECURE = RouterClass.SecureRoutePrefix + "DELETE";
         public const string PATCH_SECURE = RouterClass.SecureRoutePrefix + "PATCH";
+
+        public const string GET_ROUTED = RouterClass.RoutedRoutePrefix + "GET";
+        public const string POST_ROUTED = RouterClass.RoutedRoutePrefix + "POST";
+        public const string PUT_ROUTED = RouterClass.RoutedRoutePrefix + "PUT";
+        public const string DELETE_ROUTED = RouterClass.RoutedRoutePrefix + "DELETE";
+        public const string PATCH_ROUTED = RouterClass.RoutedRoutePrefix + "PATCH";
+
+        public const string GET_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "GET";
+        public const string POST_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "POST";
+        public const string PUT_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "PUT";
+        public const string DELETE_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "DELETE";
+        public const string PATCH_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "PATCH";
 
         public const string ANY = "*";
         #endregion
@@ -106,48 +118,7 @@ namespace NX.Engine
         /// 
         /// The entries in the URL that determine if the route
         /// is called.  The first entry is the HTTP method (GET/POST),
-        /// followed by the URL entries.  There are four options for
-        /// each entry:
-        /// 
-        /// text - The text will be matched
-        /// :field - The text will be stored in the store for the call
-        /// ?field - Optional entry.  If text is provided, it will be treated like :field
-        /// ?field? - Multiple optional entries.  All of the entries will be stored as a JSON array
-        /// 
-        /// Examples:
-        /// 
-        /// "GET", "echo" 
-        /// Triggered when /echo is called via a GET
-        /// 
-        /// "POST", "info", "sample"
-        /// Triggered when /info/sample is called via a POST
-        /// 
-        /// "GET", "user", ":name"
-        /// Triggered when /user/mike is called via a GET.  {"name: "mike"} is made part of the store
-        /// 
-        /// "GET", "site", "?siteid"
-        /// Triggered when /site/alpha is called via a GET. {"siteid": "alpha"} is made part of the store
-        /// Triggered when /site is called via a GET. {"siteid": ""} is made part of the store
-        /// 
-        /// "GET", "file", "?path?"
-        /// Triggered when /file/folder1/folder2/sample.txt is called via a GET {"path": ["folder1", "folder2", "sample.txt"]} is made part of the store
-        ///
-        /// Note that any parameter passed in the URL is also passed in the store, for example:
-        /// 
-        /// /echo?name=john
-        /// {"name": "john"} is passed in the store
-        /// 
-        /// /echo?name=john&size=medium
-        /// "name": "john", "size": "medium"} are passed in the store
-        /// 
-        /// /site/alpha?name=john
-        /// {"siteid": "alpha", "name": "john"} are passed in the store
-        /// 
-        /// /echo?name=john&size=medium&name=mike&size=large
-        /// "name": ["john", mike"], "size": ["medium", "large"]} are passed in the store
-        /// 
-        /// /file/sample.txt?path=folder1&path=folder2
-        /// {path: ["folder1", "folder2", "sample.txt"]} is passed in the store
+        /// followed by the URL entries.
         /// 
         /// </summary>
         public virtual List<string> RouteTree { get { return new List<string>() { this.Name }; } }

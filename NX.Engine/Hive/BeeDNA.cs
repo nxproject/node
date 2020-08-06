@@ -681,7 +681,7 @@ namespace NX.Engine.Hive
             if (this.Map.HasValue())
             {
                 // Make holding areas
-                JArray c_Binds = c_Ans.AssureJArray("Binds");
+                JArray c_Binds = c_HostConfig.AssureJArray("Binds");
                 JObject c_Volumes = c_Ans.AssureJObject("Volumes");
 
                 // Process it

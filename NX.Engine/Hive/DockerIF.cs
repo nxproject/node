@@ -578,6 +578,54 @@ namespace NX.Engine.Hive
         /// 
         /// </summary>
         /// <param name="id">The container id</param>
+        public void StopContainer(string id)
+        {
+            // Protect
+            try
+            {
+                // Stop it
+                this.Client.Containers.StopContainerAsync(id,
+                    new ContainerStopParameters()
+                    {
+                    }).Wait();
+            }
+            catch (Exception e)
+            {
+                this.HandleException("StopContainerAsync", e);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Restarts a container
+        /// 
+        /// </summary>
+        /// <param name="id">The container id</param>
+        public void RestartContainer(string id)
+        {
+            // Protect
+            try
+            {
+                // Stop it
+                this.Client.Containers.RestartContainerAsync(id,
+                    new ContainerRestartParameters()
+                    { 
+                    }).Wait();
+            }
+            catch (Exception e)
+            {
+                this.HandleException("RestartContainerAsync", e);
+            }
+        }
+
+        /// <summary>
+
+        /// <summary>
+        /// 
+        /// Removes a container
+        /// 
+        /// </summary>
+        /// <param name="id">The container id</param>
         public void RemoveContainer(string id)
         {
             // Protect
@@ -595,6 +643,13 @@ namespace NX.Engine.Hive
                 this.HandleException("RemoveContainerAsync", e);
             }
         }
+
+        /// <summary>
+        /// 
+        /// Gets the Stdout and StdErr logs
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
 
         public void GetLogs(string id)
         {
@@ -686,7 +741,7 @@ namespace NX.Engine.Hive
         private void DumpStream(Stream stream, string header = null, string footer = null)
         {
             //
-            if (header.HasValue()) this.Parent.Parent.Parent.LogInfo(header);
+            if (header.HasValue()) this.Parent.Parent.Parent.LogVerbose(header);
 
             //
             string sLine = "";
@@ -707,7 +762,7 @@ namespace NX.Engine.Hive
                 while (iEOL != -1)
                 {
                     // Log
-                    this.Parent.Parent.Parent.LogInfo(sLine.Substring(0, iEOL).ASCIIOnly());
+                    this.Parent.Parent.Parent.LogVerbose(sLine.Substring(0, iEOL).ASCIIOnly());
                     // Remove
                     sLine = sLine.Substring(iEOL + 1);
                     // And  repeat
@@ -724,10 +779,10 @@ namespace NX.Engine.Hive
             if (sLine.HasValue())
             {
                 // Log
-                this.Parent.Parent.Parent.LogInfo(sLine);
+                this.Parent.Parent.Parent.LogVerbose(sLine);
             }
             //
-            if (footer.HasValue()) this.Parent.Parent.Parent.LogInfo(footer);
+            if (footer.HasValue()) this.Parent.Parent.Parent.LogVerbose(footer);
         }
         #endregion
     }

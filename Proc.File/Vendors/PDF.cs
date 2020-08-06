@@ -1218,7 +1218,7 @@ namespace Proc.File.Vendors
                     c_Document.Open();
                     PdfContentByte cb1 = c_Writer.DirectContent;
 
-                    // amke teh transforms
+                    // amke the transforms
                     AffineTransform[] c_Trans = new AffineTransform[4];
 
                     AffineTransform c_Transform = new AffineTransform();

@@ -78,10 +78,12 @@ namespace NX.Engine
         /// </summary>
         public AuthenticationSchemes Scheme { get; private set; } = AuthenticationSchemes.Anonymous;
 
-        private string PrivateName
-        {
-            get { return this.Parent.ApplySystemPrefix("http"); }
-        }
+        /// <summary>
+        /// 
+        /// The master thread 
+        /// 
+        /// </summary>
+        private string ThreadID { get; set; }
         #endregion
 
         #region Methods
@@ -108,7 +110,7 @@ namespace NX.Engine
                     // Start
                     this.Listener.Start();
                     // And create thread
-                    PrivateName.StartThread(new ParameterizedThreadStart(AddRequest));
+                    this.ThreadID = "".StartThread(new ParameterizedThreadStart(AddRequest));
                     //
                     // Create worker threads  
                     //
@@ -135,7 +137,7 @@ namespace NX.Engine
             if (this.Listener != null)
             {
                 // Stop the threads
-                SafeThreadManagerClass.StopThreadsMatching(PrivateName + ".*");
+                SafeThreadManagerClass.StopThreadsMatching(this.ThreadID + "*");
 
                 // Stop listening
                 try
@@ -302,13 +304,13 @@ namespace NX.Engine
             if (count < 1) count = 1;
 
             // Get the threads
-            List<string> c_Threads = SafeThreadManagerClass.GetMatching(PrivateName + "_.+");
+            List<string> c_Threads = SafeThreadManagerClass.GetMatching(this.ThreadID + "_.+");
 
             // Add threads
             while (c_Threads.Count < count)
             {
                 // Make a name
-                string sName = PrivateName + "_".GUID();
+                string sName = this.ThreadID + "_".GUID();
                 // And start
                 if (sName.StartThread(new ParameterizedThreadStart(ProcessRequest)).HasValue())
                 {

@@ -45,6 +45,7 @@ namespace NX.Engine
     {
         #region Constants
         public const string SecureRoutePrefix = "@";
+        public const string RoutedRoutePrefix = "^";
         public const string UnsecureCode = "unsecured";
         #endregion
 
@@ -107,29 +108,49 @@ namespace NX.Engine
             // Must have a tree
             if (nodes != null && nodes.Count > 0)
             {
+                // Get the first entry
+                string sAt = nodes[0];
+
                 // Is this a secured route?
-                switch(nodes[0])
+                if (sAt.StartsWith(RouterClass.SecureRoutePrefix))
                 {
-                    case RouteClass.GET_SECURE:
-                    case RouteClass.POST_SECURE:
-                    case RouteClass.PUT_SECURE:
-                    case RouteClass.DELETE_SECURE:
-                    case RouteClass.PATCH_SECURE:
-                        // Change it to normal
-                        nodes[0] = nodes[0].Substring(1);
-                        // And add secure to the route
-                        if(nodes.Count == 1)
-                        {
-                            // Add
-                            nodes.Add(RouterClass.SecureRoutePrefix);
-                        }
-                        else
-                        {
-                            // Insert
-                            nodes.Insert(1, RouterClass.SecureRoutePrefix);
-                        }
-                        break;
+                    // Change it to normal
+                    sAt = sAt.Substring(1);
+                    // And add secure to the route
+                    if (nodes.Count == 1)
+                    {
+                        // Add
+                        nodes.Add(RouterClass.SecureRoutePrefix);
+                    }
+                    else
+                    {
+                        // Insert
+                        nodes.Insert(1, RouterClass.SecureRoutePrefix);
+                    }
                 }
+
+                // Routed?
+                if(sAt.StartsWith(RouterClass.RoutedRoutePrefix))
+                {
+                    // Get the module name
+                    string sModule = route.ModuleName().ToLower();
+                    // Change it to normal
+                    sAt = sAt.Substring(1);
+                    // And add secure to the route
+                    if (nodes.Count == 1)
+                    {
+                        // Add
+                        nodes.Add(sModule);
+                    }
+                    else
+                    {
+                        // Insert
+                        nodes.Insert(1, sModule);
+                    }
+                }
+
+                // Put back resolved
+                nodes[0] = sAt;
 
                 // Make the substitution store
                 using (StoreClass c_Fmt = new StoreClass(this.Parent.AsParameters))

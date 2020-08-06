@@ -1,14 +1,12 @@
 ﻿{
   "@Ports": [
-    "80"
+    "8086"
   ],
   "@Map": [
     "{shared_folder}:/etc/shared",
-    "{shared_folder}/processor:/etc/processor",
     "{shared_folder}/bee/B{id}/etc/private",
     "{shared_folder}/files:/etc/files",
-    "/mm/nginx/default:/etc/sdnginx",
-    "{shared_folder}/_cert:/etc/cert"
+    "{shared_folder}/nginx/default:/etc/nginx"
   ],
   "Cmd": [
     "dotnet",

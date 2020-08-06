@@ -28,6 +28,26 @@ call:
 ```JavaScript
 env.Use("Proc.Default");
 
+## Naming Processes, functions and routes for procs
+
+You need to name the projects that hold processes, functions and route in the format of:
+```
+XX.proc
+```
+for example, The route for the Chores proc routes is called **Route.Chores**.  This
+is because the proc used is **chores**.
+
+Note that capitalization is ignored.
+
+Also route trees should be defined as:
+```JavaScript
+public override List<string> RouteTree => new List<string>() { RouteClass.GET_ROUTED, "get", ":id" };
+```
+Note the use of **RouteClass.GET_ROUTED** instead of **RouteClass.GET**.  You can use 
+**RouteClass.GET_ROUTED _SECURE** to also secure the route.
+
+See [NginX](README_NGINX.md), section **Procs** to understand why this is required.
+
 ## Process routes
 
 While you will later learn how to use **NginX** or **Traefik** to route  HTTP calls to

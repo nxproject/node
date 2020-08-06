@@ -30,7 +30,7 @@
 /// 
 
 using System;
-
+using System.IO;
 using Newtonsoft.Json.Linq;
 
 using NX.Engine;
@@ -350,6 +350,72 @@ namespace Proc.File
 
             // And return the file
             return new DocumentClass(this.Parent, sPath);
+        }
+        #endregion
+
+        #region Streams
+        /// <summary>
+        /// 
+        /// Reads from file as a stream
+        /// 
+        /// </summary>
+        /// <param name="cb">The callback using a stream</param>
+        public void AsReadStream(Action<Stream> cb)
+        {
+            // Is MinIO there?
+            if (this.Parent.IsAvailable)
+            {
+                // Get
+                this.Parent.GetStream(this.Path, cb);
+            }
+            else
+            {
+                // Open
+                using (FileStream c_Stream = new FileStream(this.Path, FileMode.Open, FileAccess.Read))
+                {
+                    // Call
+                    cb(c_Stream);
+
+                    // Close
+                    try
+                    {
+                        c_Stream.Close();
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Writes to the file as a stream
+        /// 
+        /// </summary>
+        /// <param name="stream">The stream</param>
+        public void AsWriteStream(Stream stream)
+        {
+            // Is MinIO there?
+            if (this.Parent.IsAvailable)
+            {
+                // Get
+                this.Parent.SetStream(this.Path, stream);
+            }
+            else
+            {
+                // Open
+                using (FileStream c_Stream = new FileStream(this.Path, FileMode.Create, FileAccess.Write))
+                {
+                    //
+                    stream.CopyTo(c_Stream);
+
+                    // Close
+                    try
+                    {
+                        c_Stream.Close();
+                    }
+                    catch { }
+                }
+            }
         }
         #endregion
 

@@ -1,5 +1,11 @@
 # NX.Node - HTTP
 
+The settings used by HTTO are:
+
+Setting|Meaning|Default
+http_port|The port to listen to|8086
+http_threads|Worker threads|4
+
 ## Multi-threading and handling of HTTP calls
 
 While NodeJS is a single threaded process, *NX.Node*  is built with the ability to

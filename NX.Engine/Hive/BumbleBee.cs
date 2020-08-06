@@ -35,17 +35,41 @@ namespace NX.Engine
         public BumbleBeeClass(EnvironmentClass env, string genome)
             : base(env)
         {
+            // Tell world
+            this.Parent.LogVerbose("{0} bumble bee created", genome);
             // Save
             this.Genome = genome;
+
+            // Track queen changes
+            this.Parent.Hive.Roster.QueenChanged += delegate ()
+            {
+                // Signal
+                this.SignalQueenChange();
+            };
 
             // Track task changes
             this.Tracker = new Hive.TrackerClass(this.Parent.Hive, TrackerClass.TrackType.DNA,
                 delegate (string value, List<string> url)
-            {
+                {
                     // Reset
                     this.Location = null;
+                    this.Field = null;
+                    this.Bee = null;
+
                     // Did we get someone to talk to?
-                    if (url.Count > 0) this.Location = url[0];
+                    if (url.Count > 0)
+                    {
+                        // Set the location
+                        this.Location = url[0];
+                        // And now the field from the location
+                        this.Field = this.Parent.Hive.FieldFromLocation(this.Location);
+                        // Do we have one?
+                        if (this.Field != null)
+                        {
+                            // And the bee
+                            this.Bee = this.Field.BeeFromLocation(this.Location);
+                        }
+                    }
 
                     //
                     this.Parent.LogInfo("{0} genome bumble bee is {1}available", this.Genome, this.Location.HasValue() ? "" : "not ");
@@ -55,11 +79,8 @@ namespace NX.Engine
 
             }, this.Genome);
 
-            // Check current
-            this.Tracker.Trigger(this.Genome, this.Parent.Hive.Roster.GetLocationsForDNA(this.Genome));
-
             // And once we are running
-            if (this.Parent.Hive.BeeCount > 0)
+            if (this.Parent.Hive.HasSetup)
             {
                 // And assure at least one
                 this.Parent.Hive.AssureDNACount(this.Genome, 1);
@@ -84,10 +105,45 @@ namespace NX.Engine
 
         /// <summary>
         /// 
+        /// The bee itself
+        /// 
+        /// </summary>
+        public BeeClass Bee { get; private set; }
+
+        /// <summary>
+        /// 
+        /// The field the bee is at
+        /// 
+        /// </summary>
+        public FieldClass Field { get; private set; }
+
+        /// <summary>
+        /// 
         /// Returns true manager is available
         /// 
         /// </summary>
         public virtual bool IsAvailable { get { return this.Location.HasValue(); } }
+
+        /// <summary>
+        /// 
+        /// Are we the queen?
+        /// 
+        /// </summary>
+        public bool IsQueen
+        {
+            get
+            {
+                bool bIsQueen = false;
+                // Do we have both a me and queen bees?
+                if (this.Parent.Hive.Roster.MeBee != null && this.Parent.Hive.Roster.QueenBee != null)
+                {
+                    // One and the same?
+                    bIsQueen = this.Parent.Hive.Roster.MeBee.Id.IsSameValue(this.Parent.Hive.Roster.QueenBee.Id);
+                }
+
+                return bIsQueen;
+            }
+        }
 
         /// <summary>
         /// 
@@ -97,10 +153,50 @@ namespace NX.Engine
         private Hive.TrackerClass Tracker { get; set; }
         #endregion
 
+        #region Methods
+        /// <summary>
+        /// 
+        /// Waits for the bumble bee to become available
+        /// 
+        /// </summary>
+        public void Wait()
+        { 
+            // Is it available?
+            while(!this.IsAvailable)
+            {
+                // Sleep
+                5.SecondsAsTimeSpan().Sleep();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Bootstrap check
+        /// 
+        /// </summary>
+        public void CheckForAvailability()
+        {
+            // Check current
+            this.Tracker.Trigger(this.Genome, this.Parent.Hive.Roster.GetLocationsForDNA(this.Genome));
+
+        }
+
+        /// <summary>
+        /// 
+        /// Invokes the QueenChanged event
+        /// 
+        /// </summary>
+        public void SignalQueenChange()
+        {
+            // Call
+            this.QueenChanged?.Invoke(this.IsQueen);
+        }
+        #endregion
+
         #region Events
         /// <summary>
         /// 
-        /// The delegate for all of the events
+        /// The delegate for the AvailabilityChanged event
         /// 
         /// </summary>
         /// <param name="isavailable">Is the bee available</param>
@@ -112,6 +208,21 @@ namespace NX.Engine
         /// 
         /// </summary>
         public event OnChangedHandler AvailabilityChanged;
+
+        /// <summary>
+        /// 
+        /// The delegate for the QueenChanged event
+        /// 
+        /// </summary>
+        /// <param name="isavailable">Is the bee available</param>
+        public delegate void OnCQhangedHandler(bool isqueen);
+
+        /// <summary>
+        /// 
+        /// Defines the event to be raised when the queen changes
+        /// 
+        /// </summary>
+        public event OnCQhangedHandler QueenChanged;
         #endregion
     }
 }

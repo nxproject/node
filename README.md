@@ -140,3 +140,4 @@ change to adapt to new things.
 * To the people at **Microsoft** for creating the often painful, but overall useful Visual Studio .NET, which has been my home since it was first released, and the creation of .NET to which I was introduced early in 2001 and have been toiling at ever since.
 * To **Herre Kuijpers** for his [a Tiny Parser Generator v1.2](https://www.codeproject.com/Articles/28294/a-Tiny-Parser-Generator-v1-2) which has been hacked to death in so many incarnations.  It is the only non-package in the system.
 * To the people at **Atom** https://atom.io/ which created the nifty editor, the results of which you just read
+* To [Gary Larson](https://www.thefarside.com/2020/08/05/2), always kept me smiling

@@ -345,13 +345,6 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
-        /// Returns the running instance as a bee
-        /// 
-        /// </summary>
-        public BeeClass Me { get; internal set; }
-
-        /// <summary>
-        /// 
         /// The field where I am in
         /// 
         /// </summary>
@@ -363,10 +356,10 @@ namespace NX.Engine.Hive
                 FieldClass c_Ans = null;
 
                 // Are we in a bee?
-                if (this.Me != null)
+                if (this.Roster.MeBee != null)
                 {
                     // Get the field from it
-                    c_Ans = Me.Field;
+                    c_Ans = this.Roster.MeBee.Field;
                 }
                 else
                 {
@@ -446,6 +439,37 @@ namespace NX.Engine.Hive
             }
 
             return sAns;
+        }
+
+        /// <summary>
+        /// 
+        /// Returns the field where a bee is located
+        /// 
+        /// </summary>
+        /// <param name="location">The location (url)</param>
+        /// <returns>The field</returns>
+        public FieldClass FieldFromLocation(string location)
+        {
+            // Assume none
+            FieldClass c_Ans = null;
+
+            // Get the IP
+            string sLoc = location.RemoveProtocol().RemovePort();
+
+            // Loop thru
+            foreach(FieldClass c_Field in this.Fields.Values)
+            {
+                // IP match?
+                if(sLoc.IsSameValue(c_Field.URL.RemoveProtocol().RemovePort()))
+                {
+                    // Fund it
+                    c_Ans = c_Field;
+                    // Only one
+                    break;
+                }
+            }
+
+            return c_Ans;
         }
         #endregion
 

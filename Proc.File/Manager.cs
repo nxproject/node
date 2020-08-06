@@ -103,16 +103,10 @@ namespace Proc.File
                         }
                     }
                 }
-                else
-                {
-                    // Do we have a client?
-                    if (this.Client != null)
-                    {
-                        // Bye
-                        this.Client = null;
-                    }
-                }
             };
+
+            // Bootstap
+            this.CheckForAvailability();
         }
         #endregion
 
@@ -419,10 +413,46 @@ namespace Proc.File
                         iSize = stream.Read(abBuffer, 0, abBuffer.Length);
                     }
 
+                    // Close
+                    stream.Close();
+                    if (c_Local != null) c_Local.Close();
+
                 }).Wait();
             }
 
             return sAns;
+        }
+
+        /// <summary>
+        /// 
+        /// Reads an object via a stream
+        /// 
+        /// </summary>
+        /// <param name="name">The name of the object</param>
+        /// <param name="cb">The callback</param>
+        public void GetStream(string name, Action<Stream> cb)
+        {
+            // Do we have Minio
+            if (this.IsAvailable)
+            {
+                // Make sure bucket exixts
+                this.AssureBucket();
+
+                // Read
+                this.Client.GetObjectAsync(this.MinioBucket, this.MakeObjectName(name), delegate (Stream stream)
+                {
+                    // Do the callback
+                    if (cb != null) cb(stream);
+
+                    // Close
+                    try
+                    {
+                        stream.Close();
+                    }
+                    catch { }
+
+                }).Wait();
+            }
         }
 
         /// <summary>
@@ -474,6 +504,36 @@ namespace Proc.File
                     c_Stream.Flush();
                     c_Stream.Close();
                 }
+
+                // Private?
+                if (!name.StartsWith(MinioPrefix))
+                {
+                    // Now is the time that we wrote
+                    this.SetAttribute(Types.LastWrite, name, DateTime.Now.ToDBDate());
+
+                    // And make child
+                    this.SetAttribute(Types.Child, name.GetDirectoryFromPath(), name);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Writes an object via a stream
+        /// 
+        /// </summary>
+        /// <param name="name">The name of the object</param>
+        /// <param name="stream">The stream</param>
+        public void SetStream(string name, Stream stream)
+        {
+            // Do we have Minio
+            if (this.IsAvailable)
+            {
+                // Make sure bucket exixts
+                this.AssureBucket();
+
+                // Write
+                this.Client.PutObjectAsync(this.MinioBucket, this.MakeObjectName(name), stream, stream.Length).Wait();
 
                 // Private?
                 if (!name.StartsWith(MinioPrefix))

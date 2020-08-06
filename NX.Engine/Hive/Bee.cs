@@ -102,6 +102,12 @@ namespace NX.Engine.Hive
             {
                 // If ghost, phony the URL
                 this.IURL = "localhost:{0}".FormatString(this.Parent.Parent.Parent.HTTPPort).URLMake();
+
+                // Make the TickleArea
+                TickleAreaClass c_EP = new TickleAreaClass(this, this.Parent.Parent.Parent.HTTPPort.ToString(),
+                                                                    this.Parent.Parent.Parent.HTTPPort.ToString());
+                // Add
+                this.TickleAreas.Add(c_EP);
             }
             else if (this.IsVirtual)
             {

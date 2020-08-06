@@ -302,6 +302,17 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// Returns a list of DNAs
+        /// 
+        /// </summary>
+        /// <returns>The list of DNAs</returns>
+        public List<string> GetDNAs()
+        {
+            return this.Bees.GetDNAs();
+        }
+
+        /// <summary>
+        /// 
         /// Returns the URLs for a given DNA
         /// 
         /// </summary>
@@ -326,6 +337,17 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// Returns a list of ports
+        /// 
+        /// </summary>
+        /// <returns>The list of ports</returns>
+        public List<string> GetPorts()
+        {
+            return this.Bees.GetPorts();
+        }
+
+        /// <summary>
+        /// 
         /// Returns the URLs for a given port
         /// 
         /// </summary>
@@ -346,6 +368,18 @@ namespace NX.Engine.Hive
         public List<BeeClass> GetBeesForPort(string port)
         {
             return this.Bees.GetBeesForPort(port);
+        }
+
+        /// <summary>
+        /// 
+        /// Returns a bee using a given location
+        /// 
+        /// </summary>
+        /// <param name="location">The location (url)</param>
+        /// <returns>The bee</returns>
+        public BeeClass BeeFromLocation(string location)
+        {
+            return this.Bees.GetBeeFromLocation(location);
         }
         #endregion
 

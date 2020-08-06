@@ -279,9 +279,10 @@ namespace NX.Shared
             return Regex.Match(value, patt).Success;
         }
 
-        public static string ASCIIOnly(this string value)
+        public static string ASCIIOnly(this string value, bool allowcrlf = false)
         {
-            return Regex.Replace(value, @"[^\x20-\x7f]", "");
+            string sPatt = allowcrlf ? @"[^\x0D\x0A\x20-\x7f]" : @"[^\x20-\x7f]";
+            return Regex.Replace(value, sPatt, "");
         }
 
         public static string ASCIIOnly(this string value, string allowed)
@@ -1335,6 +1336,33 @@ namespace NX.Shared
             int iPos = value.IfEmpty().IndexOf("://");
             // Any?
             if (iPos != -1) value = value.Substring(iPos + 3);
+
+            return value;
+        }
+
+        public static string RemovePort(this string value)
+        {
+            // Find the port
+            int iPos = value.IfEmpty().LastIndexOf(":");
+            // Any?
+            if (iPos != -1) value = value.Substring(0, iPos);
+
+            return value;
+        }
+
+        public static string GetPort(this string value)
+        {
+            // Find the port
+            int iPos = value.IfEmpty().LastIndexOf(":");
+            // Any?
+            if (iPos != -1)
+            {
+                value = value.Substring(iPos + 1);
+            }
+            else
+            {
+                value = "";
+            }
 
             return value;
         }
@@ -2625,15 +2653,19 @@ namespace NX.Shared
 
         public static string ObjectFullName(this object value)
         {
+            return value.ModuleName() + "." + value.ObjectName();
+        }
+
+        public static string ModuleName(this object value)
+        {
             // Get theh assembly name
             Assembly c_Assm = value.GetType().Assembly;
             // Retrieve the module name
             string sModule = null;
             Match c_Match = Regex.Match(c_Assm.FullName, @"[^\x2E]+\x2E(?<name>[^,]+)\x2C");
             if (c_Match.Success) sModule = c_Match.Groups["name"].Value;
-            sModule = sModule.IfEmpty("Other") + ".";
 
-            return sModule + value.ObjectName();
+            return sModule.IfEmpty("Other");
         }
         #endregion
 
@@ -2986,7 +3018,7 @@ namespace NX.Shared
             return c_Ans;
         }
 
-        public static List<string> GetTreeInPath(this string path, string patt = "*.*")
+        public static List<string> GetTreeInPath(this string path, string patt = "*")
         {
             return new List<string>(Directory.GetFiles(path.AdjustPathToOS(), patt, SearchOption.AllDirectories));
         }
@@ -3280,11 +3312,6 @@ namespace NX.Shared
                 // Copy
                 iAns += sDirectory.CopyDirectoryTree(target.CombinePath(sDirName));
             }
-
-            //if(!string.IsNullOrEmpty( donefile))
-            //{
-            //    target.CombinePath(donefile).WriteFile("1");
-            //}
 
             return iAns;
         }
@@ -4255,6 +4282,11 @@ namespace NX.Shared
             if (values != null && values.Count > 0) sAns = values[0];
 
             return sAns;
+        }
+
+        public static List<string> Unique(this List<string> values)
+        {
+            return new List<string>(values.Distinct<string>());
         }
         #endregion
 

@@ -41,6 +41,5 @@ namespace Proc.File
 
             base.Initialize(env);
         }
-
     }
 }

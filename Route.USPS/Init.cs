@@ -35,7 +35,7 @@ namespace Route.USPS
     /// </summary>
     public class Init : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET_ROUTED };
         public override void Initialize(EnvironmentClass env)
         {
             base.Initialize(env);

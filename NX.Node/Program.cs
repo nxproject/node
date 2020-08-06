@@ -125,8 +125,7 @@ namespace NXNode
                                 // Copy folder
                                 CopyFolder(c_Env, c_Folder.Key, sMod);
                                 break;
-                        }
-                        
+                        }                        
                     }
 
                     // Make into image
@@ -168,7 +167,7 @@ namespace NXNode
             if (!source.Contains(";"))
             {
                 // Tell user
-                env.LogInfo(source + " => " + target);
+                env.LogVerbose(source + " => " + target);
 
                 // Make path
                 target.AssurePath();

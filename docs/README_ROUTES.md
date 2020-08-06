@@ -26,14 +26,13 @@ namespace Route.System
         }
     }
 }
-
 ```
 
 This route definition uses two C# modules NX.Engine and NX.Shared.  Itwill not go
 into detail on what those do at this time, just keep in mind that they make this
 code much simpler.
 
-The Echo class is based in the RouteClass.  All of the built in classes are suffixed
+The Echo class is based in the RouteClass.  All of the built-in classes are suffixed
 with the word 'Class' to  minimize conflict with other code.
 
 The class has two items that override the defaults in the RouteClass, **RouteTree**
@@ -191,7 +190,7 @@ env["secure_code"] = newcode;
 ```
 The old code is not needed as the code runs in a secure environment.
 
-And to solve the issue of forgetting to se the secure code, the secure routes are
+And to solve the issue of forgetting to set the secure code, the secure routes are
 disabled until one is set.
 
 Note that you can change the secure code at any time without having to recycle.  It

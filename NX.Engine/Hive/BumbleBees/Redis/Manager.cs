@@ -63,6 +63,9 @@ namespace NX.Engine.BumbleBees.Redis
                     this.DB = this.Client.GetDatabase();
                 }
             };
+
+            // Bootstap
+            this.CheckForAvailability();
         }
         #endregion
 
@@ -81,6 +84,5 @@ namespace NX.Engine.BumbleBees.Redis
         /// </summary>
         public IDatabase DB { get; private set; }
         #endregion
-
     }
 }

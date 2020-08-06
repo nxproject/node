@@ -59,5 +59,19 @@ Note that the Queen's duties do not start for two minutes after her ascension.
 This is to handle moments where
 a number of bees have come into play and things are getting sorted out.
 
+## qd_uses vs. qd_bumble
+
+Let's look at these tqo entries:
+```
+--qd_bumble mongodb
+```
+and
+```
+--qd_uses Proc.MongoDb
+```
+
+Both end up creating a genome (container) of a MongoDb server, but while the
+**qd_bumble** just creates the genome, **qd_uses** loads the MongoDb client,
+thus making the genome usable.
 
 [Back to top](../README.md)

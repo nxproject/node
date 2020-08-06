@@ -165,9 +165,10 @@ namespace NX.Engine
             this[KeyHive] = this[KeyHive].IfEmpty("default");
             this[KeyTier] = this[KeyTier].IfEmpty("latest");
             this[KeyRepoProject] = this[KeyRepoProject].IfEmpty("nxproject");
-            this[KeyRootFolder] = this[KeyRootFolder].IfEmpty("/etc/wd");
-            this[KeyDynamicFolder] = this.GetFolderPath(this.RootFolder, KeyDynamicFolder, "dyn");
-            this[KeySharedFolder] = this.GetFolderPath(this.RootFolder, KeySharedFolder, "shared");
+
+            this[KeyRootFolder] = this[KeyRootFolder].IfEmpty("".WorkingDirectory());
+            this[KeySharedFolder] = this[KeySharedFolder].IfEmpty("/etc/shared");
+            this[KeyDynamicFolder] = this.GetFolderPath(this.SharedFolder, KeyDynamicFolder, "dyn");
             this[KeyDocumentFolder] = this.GetFolderPath(this.SharedFolder, KeyDocumentFolder, "files");
             this[KeyUIFolder] = this.GetFolderPath(this.SharedFolder, KeyUIFolder, "ui");
 
@@ -545,12 +546,12 @@ namespace NX.Engine
         /// <summary>
         /// 
         /// Port to listen on
-        /// Default: 80
+        /// Default: 8086
         /// 
         /// </summary>
         public int HTTPPort
         {
-            get { return this[KeyPort].ToInteger(80); }
+            get { return this[KeyPort].ToInteger(8086); }
         }
 
         /// <summary>
@@ -849,6 +850,10 @@ namespace NX.Engine
                 {
                     // Add to system
                     this.LoadDynamic(sPath, profile);
+                }
+                else
+                {
+                    this.LogVerbose("Path {0} not found", sPath);
                 }
             }
             else if (sGPath.HasValue())

@@ -97,8 +97,10 @@ namespace NX.Engine
                     // Nope, make one
                     c_Ans = (T)Activator.CreateInstance(typeof(T), this.Parent);                    
                 }
-                catch 
+                catch (Exception e)
                 {
+                    //
+                    this.Parent.LogException("Creating {0}".FormatString(typeof(T).FullName), e);
                     c_Ans = default(T);
                 }
             }

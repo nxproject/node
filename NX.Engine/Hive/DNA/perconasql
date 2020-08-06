@@ -1,0 +1,15 @@
+﻿{
+	"@Unique": "*",
+	"@SkipRecycle": "1",
+	"@Ports": [
+		"3306",
+		"33060"
+	],
+	"@Map": [
+		"{shared_folder}/databases/mysql:/var/lib/mysql"
+	],
+	"Image": "{repo_project}/perconasql:{tier}",
+	"Env": [
+		"MYSQL_ROOT_PASSWORD={mysql_password}"
+	]
+}

@@ -9,7 +9,7 @@
 
   // Default values, just to demo
 
-  "http_port": "80", // The port where the HTTP server listens
+  "http_port": "8086", // The port where the HTTP server listens
   "http_threads": "4", // Number of HTTP process threads to run
 
   // Profile
@@ -18,8 +18,9 @@
 
   // Queens duties
 
+  "qd_uses": [ "Proc.NginX" ],
   "qd_bumble": [ "redis" ],
-  //"qd_worker": [ "2", "Chores:1" ],
+  "qd_worker": [ "2", "Chores:1" ],
 
   "secure_code": "wqfmtohhofyzzrojnhvy", // The security code
   // From https://www.random.org/strings/?num=1&len=20&loweralpha=on&unique=on&format=html&rnd=new
@@ -32,9 +33,12 @@
 
   // These are for development
 
-  "verbose": "n", // Tell me what is going on
+  "nginx_bumble": [ "redis" ], // Allow access to Redis
+  "nginx_proc": [ "Chores" ], // Map Chores procs
+
+  "verbose": "y", // Tell me what is going on
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
-  "code_folder": [ ] // Folders where extra code is located
+  "code_folder": [] // Folders where extra code is located
 
 }

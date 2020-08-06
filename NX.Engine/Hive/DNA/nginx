@@ -1,18 +1,14 @@
 ﻿{
 	"@Unique": "Y",
-	"@Requires": [
-		"processor"
-	],
 	"@SkipRecycle": "1",
 	"@Ports": [
 		"0",
-		"*"
+		"80"
 	],
 	"@Map": [
-		"{shared_folder}/nginx/default:/etc/nginx",
-		"{shared_folder}/nginx/default/logs:/etc/nginx/logs",
-		"{shared_folder}/nginx/default/mypages:/etc/nginx/mypages",
-		"{shared_folder}/_cert:/etc/cert"
+		"{shared_folder}/nginx/logs:/etc/nginx/logs",
+		"{shared_folder}/nginx/default:/etc/nginx"
 	],
-	"Image": "{repo_project}/nginx:{tier}"
+	"Image": "{repo_project}/nginx:{tier}",
+	"WorkingDir": "/etc/wd"
 }

@@ -5,9 +5,30 @@ bumble brees included in the system:
 
 * [Redis](README_REDIS.md)
 * [Minio](README_MINIO.md)
+* [SQL](README_SQL.md)
 * [NoSQL](README_NOSQL.md)
 * [NginX](README_NGINX.md)
 * [Traefik](README_TRAEFIK.md)
+
+## Naming Processes, functions and routes for bumble bees
+
+You need to name the projects that hold processes, functions and route in the format of:
+```
+XX.genome
+```
+for example, The route for the MongoDb Bumble Bee is called **Route.MongoDB**.  This
+is because the genome used is **mongodb**.
+
+Note that capitalization is ignored.
+
+Also route trees should be defined as:
+```JavaScript
+public override List<string> RouteTree => new List<string>() { RouteClass.GET_ROUTED, "get", ":id" };
+```
+Note the use of **RouteClass.GET_ROUTED** instead of **RouteClass.GET**.  You can use 
+**RouteClass.GET_ROUTED _SECURE** to also secure the route.
+
+See [NginX](README_NGINX.md), section **Bumble bee access** to understand why this is required.
 
 ##  Sharing bumble bees
 
@@ -43,5 +64,24 @@ You setup these bees using the following:
 ```
 which tells the system that the DNA is **mongodb**, and it can be reached at the IP
 given.  Like many other calls, you can define multiple external resources.
+
+## Delay in creation
+
+As the bumble bee's underlying DNA (container) may take some time to be created and started,
+calls to the bumble bee's code may not produce the intended result if called too soon
+after the bumble bee' creation.
+
+To solve this issue, you can call:
+```JavaScript
+bumblebee.Wait();
+```
+to ensure availability.
+
+External bumble bees are considered available at all times.
+
+## Samples of bumble bees
+
+* [Redis](README_BB_REDIS.md)
+* [NginX](README_BB_NGINX.md)
 
 [Back to top](../README.md)
