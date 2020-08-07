@@ -109,6 +109,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 * MongoDB.Driver 2.10.4
 * Newtonsoft.Json 12.0.3
 * Octokit 0.48.0
+* SocketIOClient 2.0.2.3
 * StackExchange.Redis 2.1.58
 * TimeZoneConverter 3.2.0
 
