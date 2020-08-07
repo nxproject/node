@@ -2,8 +2,7 @@
 	"@Unique": "Y",
 	"@SkipRecycle": "1",
 	"@Ports": [
-		"0",
-		"80"
+		"{nginx_port}"
 	],
 	"@Map": [
 		"{shared_folder}/nginx/logs:/etc/nginx/logs",

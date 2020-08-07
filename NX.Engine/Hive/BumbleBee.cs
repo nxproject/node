@@ -191,6 +191,19 @@ namespace NX.Engine
             // Call
             this.QueenChanged?.Invoke(this.IsQueen);
         }
+
+        /// <summary>
+        /// 
+        /// Sets the location and rewite parameters
+        /// 
+        /// </summary>
+        /// <param name="location">The location, overrides genome</param>
+        /// <param name="rewrite">If true, the location will be removed from the URL</param>
+        public void SetNginxInformation(string location, bool rewrite)
+        {
+            // Set
+            this.Parent.NginXInfo[this.Genome, NginX.ServicesClass.Types.BumbleBee] = new NginX.InformationClass(this.Parent.NginXInfo, location, rewrite);
+        }
         #endregion
 
         #region Events

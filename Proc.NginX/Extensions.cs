@@ -22,15 +22,9 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-/// Packet Manager Requirements
-/// 
-/// Install-Package Newtonsoft.Json -Version 12.0.3
-/// 
-
 using System.Collections.Generic;
 
-using Newtonsoft.Json.Linq;
-
+using NX.Engine.NginX;
 using NX.Shared;
 
 namespace Proc.NginX
@@ -180,9 +174,9 @@ namespace Proc.NginX
         /// <param name="site">The site definition</param>
         /// <param name="urls">The URLs that can be used</param>
         /// <returns>The snippet</returns>
-        public static string NginxUpstream(this ItemClass site, List<string> urls)
+        public static string NginxUpstream(this InformationClass site, List<string> urls)
         {
-            return site.Key.NginxUpstream(urls);
+            return site.Name.NginxUpstream(urls);
         }
 
         /// <summary>
@@ -225,15 +219,16 @@ namespace Proc.NginX
 
         /// <summary>
         /// 
-        /// Creates a location block for a site definition
+        /// Creates a location block
         /// 
         /// </summary>
-        /// <param name="site">The site definition</param>
+        /// <param name="site">Information for site</param>
+        /// <param name="alias">The route to use, if empty the site name will be used</param>
         /// <param name="body">Nginx statements to include</param>
-        /// <returns></returns>
-        public static string NginxLocation(this ItemClass site, params string[] body)
+        /// <returns>The snippet</returns>
+        public static string NginxLocation(this InformationClass site, params string[] body)
         {
-            return "".NginxLocation(site.Value.IfEmpty(site.Key), body);
+            return site.Location.NginxLocation(body);
         }
 
         /// <summary>
@@ -245,14 +240,14 @@ namespace Proc.NginX
         /// <param name="alias">The route to use, if empty the site name will be used</param>
         /// <param name="body">Nginx statements to include</param>
         /// <returns>The snippet</returns>
-        public static string NginxLocation(this string site, string alias, params string[] body)
+        public static string NginxLocation(this string site, params string[] body)
         {
             string sAns = "";
 
             // The header
-            sAns += "Location for {0}".FormatString(alias.IfEmpty(site).IfEmpty("entry point")).NginxComment(2, false);
+            sAns += "Location for {0}".FormatString(site.IfEmpty(site).IfEmpty("entry point")).NginxComment(2, false);
 
-            sAns += ("location /" + alias.IfEmpty(site).ToLower() + " {").NginxLine(2);
+            sAns += ("location /" + site.IfEmpty(site).ToLower() + " {").NginxLine(2);
 
             sAns += "Headers".NginxComment(3);
             sAns += "proxy_set_header Host $host;".NginxLine(3);
@@ -275,7 +270,7 @@ namespace Proc.NginX
             sAns += "Routing".NginxComment(3);
             foreach (string sLine in body)
             {
-                sAns += sLine;
+                sAns += sLine.IfEmpty();
             }
             sAns += "}".NginxLine(2);
 
@@ -298,6 +293,15 @@ namespace Proc.NginX
             return sAns;
         }
 
+        /// <summary>
+        /// 
+        /// Fowards a call
+        /// 
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="usessl"></param>
+        /// <param name="level"></param>
+        /// <returns></returns>
         public static string NginxProxyForwarded(this string x, bool usessl, int level)
         {
             string sAns = "";
@@ -344,11 +348,23 @@ namespace Proc.NginX
         /// Removes a location name from the URL
         /// 
         /// </summary>
+        /// <param name="loc">The information</param>
+        /// <returns>The snippet</returns>
+        public static string NginxRemove(this InformationClass loc)
+        {
+            return loc.Location.NginxRemove();
+        }
+
+        /// <summary>
+        /// 
+        /// Removes a location name from the URL
+        /// 
+        /// </summary>
         /// <param name="loc">The location name</param>
         /// <returns>The snippet</returns>
         public static string NginxRemove(this string loc)
         {
-            return @"rewrite ^/{0}/(.*) /$1 break;".FormatString(loc.ToLower()).NginxLine(3);
+            return loc.HasValue() ?  @"rewrite ^/{0}/(.*) /$1 break;".FormatString(loc.ToLower()).NginxLine(3) : "";
         }
 
         /// <summary>
@@ -414,7 +430,7 @@ namespace Proc.NginX
 
             foreach (string sLine in body)
             {
-                sAns += sLine;
+                sAns += sLine.IfEmpty();
             }
 
             return sAns;
@@ -451,12 +467,19 @@ namespace Proc.NginX
 
             foreach (string sLine in body)
             {
-                sAns += sLine;
+                sAns += sLine.IfEmpty();
             };
 
             return sAns;
         }
 
+        /// <summary>
+        /// 
+        /// Ends the server block
+        /// 
+        /// </summary>
+        /// <param name="value">Unused</param>
+        /// <returns>The snippet</returns>
         public static string NginxServerEnd(this string value)
         {
             return "}".NginxLine(1);

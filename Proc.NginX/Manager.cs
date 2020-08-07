@@ -28,11 +28,10 @@
 /// 
 
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis.CSharp;
-using Newtonsoft.Json.Linq;
 
 using NX.Engine;
 using NX.Engine.Hive;
+using NX.Engine.NginX;
 using NX.Shared;
 
 namespace Proc.NginX
@@ -170,7 +169,7 @@ namespace Proc.NginX
                 if (!sConf.IsExactSameValue(sFile.ReadFile()))
                 {
                     // Copy from sources
-                    this.Parent.LogInfo("{0} files copied {1} => {2}", sSource.CopyDirectoryTree(sPath), 
+                    this.Parent.LogVerbose("{0} files copied {1} => {2}", sSource.CopyDirectoryTree(sPath), 
                                             sSource, 
                                             sPath);
 
@@ -272,8 +271,13 @@ namespace Proc.NginX
             // Loop thru
             foreach(ItemClass c_Bee in c_Bees)
             {
+                // Get the information
+                InformationClass c_Info = this.Parent.NginXInfo[c_Bee.Key, ServicesClass.Types.BumbleBee];
+                // Apply the entry
+                c_Info.Apply(c_Bee);
+
                 // Add the DNA
-                sBody += c_Bee.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(c_Bee.Key));
+                sBody += c_Info.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(c_Bee.Key));
             }
 
             // 
@@ -284,8 +288,13 @@ namespace Proc.NginX
             // Loop thru
             foreach (ItemClass c_Proc in c_Procs)
             {
+                // Get the information
+                InformationClass c_Info = this.Parent.NginXInfo[c_Proc.Key, ServicesClass.Types.Proc];
+                // Apply the entry
+                c_Info.Apply(c_Proc);
+
                 // Add the DNA
-                sBody += c_Proc.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(HiveClass.ProcessorDNAName + "." +  c_Proc.Key));
+                sBody += c_Info.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(HiveClass.ProcessorDNAName + "." +  c_Proc.Key));
             }
 
             // Make the worker bees 
@@ -298,7 +307,7 @@ namespace Proc.NginX
             // Defualt to the me field
             FieldClass c_Field = this.Parent.Hive.MeField;
             // Get the field to use
-            string sField = this.Parent["nginx_field"];
+            string sField = this.Parent["field_nginx"];
             // Any?
             if(sField.HasValue())
             {
@@ -314,15 +323,20 @@ namespace Proc.NginX
             // Open the server
             sBody += c_Field.URL.RemoveProtocol().RemovePort().NginxServerStart();
             // Set the port
-            sBody += "80".NginxListen();
+            sBody += this.Parent["nginx_port"].NginxListen();
 
             // Do the bees
             // Loop thru
             foreach (ItemClass c_Bee in c_Bees)
             {
+                // Get the information
+                InformationClass c_Info = this.Parent.NginXInfo[c_Bee.Key, ServicesClass.Types.BumbleBee];
+                // Apply the entry
+                c_Info.Apply(c_Bee);
+                
                 // Add the DNA
-                sBody += c_Bee.NginxLocation("",
-                    c_Bee.Value.IfEmpty(c_Bee.Key).NginxRemove(),
+                sBody += c_Info.NginxLocation("",
+                    c_Info.NginxRemove(),
                     c_Bee.Key.NginxProxyPass());
             }
 
@@ -330,8 +344,13 @@ namespace Proc.NginX
             // Loop thru
             foreach (ItemClass c_Proc in c_Procs)
             {
+                // Get the information
+                InformationClass c_Info = this.Parent.NginXInfo[c_Proc.Key, ServicesClass.Types.Proc];
+                // Apply the entry
+                c_Info.Apply(c_Proc);
+
                 // Add the DNA
-                sBody += c_Proc.NginxLocation("",
+                sBody += c_Info.NginxLocation("",
                     c_Proc.Key.NginxProxyPass());
             }
 

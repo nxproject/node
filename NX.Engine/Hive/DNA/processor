@@ -1,6 +1,6 @@
 ﻿{
   "@Ports": [
-    "8086"
+    "{http_port}"
   ],
   "@Map": [
     "{shared_folder}:/etc/shared",

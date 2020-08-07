@@ -2,8 +2,7 @@
 	"@Unique": "*",
 	"@SkipRecycle": "1",
 	"_Ports": [
-		"0",
-		"8500"
+		"$8500"
 	],
 	"@Map": [
 		"{shared_folder}/_consul:/consul/data"

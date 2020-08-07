@@ -746,9 +746,6 @@ namespace NX.Engine.Hive
                 JObject c_Exposed = c_Ans.AssureJObject("ExposedPorts");
                 bool bExposeAll = false;
 
-                // Begin with dynamic ports
-                bool bDyn = true;
-
                 // Loop
                 for (int iLoop = 0; iLoop < this.Ports.Count; iLoop++)
                 {
@@ -756,13 +753,13 @@ namespace NX.Engine.Hive
                     string sPort = values.Format(this.Ports.Get(iLoop)).Trim();
                     if (sPort.HasValue())
                     {
+                        // Dynamic?
+                        bool bStatic = sPort.StartsWith("$");
+                        // If so clear flag
+                        if (bStatic) sPort = sPort.Substring(1);
+
                         // Flag?
-                        if (sPort.IsSameValue("0"))
-                        {
-                            // Flip
-                            bDyn = !bDyn;
-                        }
-                        else if (sPort.IsSameValue("$"))
+                        if (sPort.IsSameValue("*"))
                         {
                             //
                             bExposeAll = true;
@@ -786,7 +783,7 @@ namespace NX.Engine.Hive
                             }
 
                             // Static?
-                            if (!bDyn)
+                            if (bStatic)
                             {
                                 // Make definition
                                 JObject c_Internal = new JObject();

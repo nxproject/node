@@ -161,7 +161,11 @@ namespace NX.Engine
                 }
             }
 
-            // Assure 
+            // -------------------------------------------------------------
+            //
+            // In this section we setup the defaults
+            //
+
             this[KeyHive] = this[KeyHive].IfEmpty("default");
             this[KeyTier] = this[KeyTier].IfEmpty("latest");
             this[KeyRepoProject] = this[KeyRepoProject].IfEmpty("nxproject");
@@ -173,12 +177,15 @@ namespace NX.Engine
             this[KeyUIFolder] = this.GetFolderPath(this.SharedFolder, KeyUIFolder, "ui");
 
             this["wd"] = this["wd"].IfEmpty("".InContainer() ? "/etc/wd" : "".WorkingDirectory());
+            this["nginx_port"] = this["nginx_port"].IfEmpty("80");
 
             if (this.Process.IsSameValue("{proc}") || !this.Process.HasValue()) this.Process = "";
             this.Verbose = !!this.Verbose;
 
             // Set my own ID
             if (!this.ID.HasValue()) this.ID = "".GUID();
+
+            // -------------------------------------------------------------
 
             this.LogVerbose("Params: {0}", this.SynchObject.ToSimpleString());
 
@@ -484,6 +491,22 @@ namespace NX.Engine
                 }
 
                 return this.IHive;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// NginX Information
+        /// 
+        /// </summary>
+        private NginX.ServicesClass INginXInfo { get; set; }
+        public NginX.ServicesClass NginXInfo
+        {
+            get
+            {
+                if(this.INginXInfo == null) this.INginXInfo = new NginX.ServicesClass(this);
+
+                return this.INginXInfo;
             }
         }
         #endregion

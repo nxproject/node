@@ -36,7 +36,7 @@
   "nginx_bumble": [ "redis" ], // Allow access to Redis
   "nginx_proc": [ "Chores" ], // Map Chores procs
 
-  "verbose": "y", // Tell me what is going on
+  "verbose": "n", // Tell me what is going on
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
   "code_folder": [] // Folders where extra code is located

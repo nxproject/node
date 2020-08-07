@@ -283,7 +283,7 @@ namespace NX.Engine.Hive
                         foreach (TickleAreaClass c_TA in this.TickleAreas)
                         {
                             // Is this the one?
-                            if (c_TA.PrivatePort.IsSameValue("80"))
+                            if (c_TA.PrivatePort.IsSameValue(this.Parent.Parent.Parent.HTTPPort.ToString()))
                             {
                                 // Yes, get the field
                                 sAns = this.Field.DockerIF.URL;
@@ -422,10 +422,10 @@ namespace NX.Engine.Hive
             States eAns = States.Dead;
 
             // Get my URL
-            string sURL = this.URL;
+            string sURL = this.URL.IfEmpty().Trim();
 
             //
-            this.Parent.Parent.Parent.LogInfo("Checking bee {0} at {1}", this.Id, this.URL);
+            this.Parent.Parent.Parent.LogInfo("Checking bee {0} at {1}", this.Id, sURL);
 
             // Any?
             if (sURL.HasValue())

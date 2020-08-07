@@ -35,7 +35,7 @@ This is the DNA for the processor **genome**:
 ```JSON
 {
   "@Ports": [
-    "80"
+    "{http_port}"
   ],
   "@Map": [
     "{shared_folder}:/etc/shared",
@@ -94,6 +94,24 @@ it would be:
 which would create Redis in field **jack**.
 
 If no environment setting is defined, the system will use the first field.
+
+## @Ports
+
+The @Port entry is which ports are to be exposed.  If the entry starts with a $, the 
+port will be exposed with an external port of the same value, otherwise a dynamic port
+will be assigned.
+
+If an * entry is seen, all ports opened by the genome will be exposed.
+
+## @Map
+
+The @Map entry defines volume mapping.  Each entry defines a source:target pair and
+it is used to generate Volums and Bindings.
+
+##@SkipRecycle
+
+The @SkipRecycle flag will be used in the future to detemine if a genome is to be
+recycled when the site changes.  If set to "1", the genome will not be recycled.
 
 ## Adding your own DNA
 
