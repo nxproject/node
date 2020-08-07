@@ -22,11 +22,6 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-/// Packet Manager Requirements
-/// 
-/// Install-Package Newtonsoft.Json -Version 12.0.3
-/// 
-
 using System.Collections.Generic;
 
 using NX.Engine;

@@ -1,0 +1,12 @@
+{
+	"@Unique": "*",
+	"@SkipRecycle": "1",
+	"@Ports": [
+		"80"
+	],
+	"@Map": [
+		"{shared_folder}/socketio:/etc/wd"
+	],
+	"Image": "{repo_project}/socketio:{tier}",
+	"WorkingDir": "/etc/wd"
+}

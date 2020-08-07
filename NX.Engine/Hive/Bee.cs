@@ -425,7 +425,7 @@ namespace NX.Engine.Hive
             string sURL = this.URL.IfEmpty().Trim();
 
             //
-            this.Parent.Parent.Parent.LogInfo("Checking bee {0} at {1}", this.Id, sURL);
+            this.Parent.Parent.Parent.LogVerbose("Checking bee {0} at {1}", this.Id, sURL);
 
             // Any?
             if (sURL.HasValue())
@@ -434,10 +434,10 @@ namespace NX.Engine.Hive
                 string sID = sURL.URLNX("id").NXReturnValue();
 
                 //
-                this.Parent.Parent.Parent.LogInfo("Return was {0}", sID);
+                this.Parent.Parent.Parent.LogVerbose("Return was {0}", sID);
 
                 //// ID's must match
-                //eAns = sID.IsSameValue(this.Id) ? States.Alive : States.Dead;
+                eAns = sID.IsSameValue(this.Id) ? States.Alive : States.Dead;
 
                 // --------------------------------------------------
                 // 
@@ -452,17 +452,17 @@ namespace NX.Engine.Hive
                 // --------------------------------------------------
 
                 // ID's must match
-                eAns = sID.IsSameValue(this.Id) ? States.Alive : States.Hiccup;
+                //eAns = sID.IsSameValue(this.Id) ? States.Alive : States.Hiccup;
 
-                // If not
-                if (eAns != States.Alive)
-                {
-                    // Refresh
-                    this.CV.Refresh();
+                //// If not
+                //if (eAns != States.Alive)
+                //{
+                //    // Refresh
+                //    this.CV.Refresh();
 
-                    // And get from CV
-                    eAns = this.CV.IsInTrouble ? States.Dead : eAns;
-                }
+                //    // And get from CV
+                //    eAns = this.CV.IsInTrouble ? States.Dead : eAns;
+                //}
             }
 
             return eAns;

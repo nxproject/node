@@ -7,6 +7,7 @@ bumble brees included in the system:
 * [Minio](README_MINIO.md)
 * [SQL](README_SQL.md)
 * [NoSQL](README_NOSQL.md)
+* [SocketIO](README_SOCKETIO.md)
 * [NginX](README_NGINX.md)
 * [Traefik](README_TRAEFIK.md)
 

@@ -29,7 +29,7 @@ You also want to use the NuGet Manager to get:
 
 ## The manager
 
-The Proc.MongoDb.ManageClass is the interface to the mongodb bumble bee.
+The Proc.MongoDb.ManagerClass is the interface to the mongodb bumble bee.
 It is reached by calling:
 ```JavaScript
 var mgr = env.Globals.Get<Proc.MongoDb.ManagerClass>();
