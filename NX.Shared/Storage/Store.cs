@@ -676,7 +676,7 @@ namespace NX.Shared
                             }
                         }
 
-                        if (c_Extras.ContainsKey(sKey))
+                        if (c_Extras.Contains(sKey))
                         {
                             // Get it
                             sValue = c_Extras.Get(sKey);

@@ -72,7 +72,7 @@ namespace NX.Engine
         /// A dictionary of any sub-layers that can be called
         /// 
         /// </summary>
-        public Dictionary<string, RouteLayerClass> Routes { get; set; } = new Dictionary<string, RouteLayerClass>();
+        public NamedListClass<RouteLayerClass> Routes { get; set; } = new NamedListClass<RouteLayerClass>();
         #endregion
 
         #region Methods
@@ -96,10 +96,10 @@ namespace NX.Engine
                     string sEntry = nodes[at];
 
                     // New?
-                    if (!this.Routes.ContainsKey(sEntry))
+                    if (!this.Routes.Contains(sEntry))
                     {
                         // Add a layer
-                        this.Routes.Add(sEntry, new RouteLayerClass(this.Parent));
+                        this.Routes[sEntry] = new RouteLayerClass(this.Parent);
                     }
 
                     // Call sub-layer to keep processing
@@ -132,7 +132,7 @@ namespace NX.Engine
                     string sEntry = nodes[at];
 
                     // New?
-                    if (this.Routes.ContainsKey(sEntry))
+                    if (this.Routes.Contains(sEntry))
                     {
                         // Move down the tree
                         at++;
@@ -185,7 +185,7 @@ namespace NX.Engine
                     }
 
                     // Sub-layer exists?
-                    if (this.Routes.ContainsKey(sEntry))
+                    if (this.Routes.Contains(sEntry))
                     {
                         // Process
                         sAns = this.Routes[sEntry].Get(values, nodes, at + 1);
@@ -231,7 +231,7 @@ namespace NX.Engine
         /// <returns>True if it is defined</returns>
         public bool Contains(string route)
         {
-            return this.Routes.ContainsKey(route);
+            return this.Routes.Contains(route);
         }
 
         /// <summary>

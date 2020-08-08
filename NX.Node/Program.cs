@@ -109,10 +109,10 @@ namespace NXNode
                     // Get the extra folders
                     ItemsClass c_Folders = new ItemsClass(c_Env.GetAsJArray(EnvironmentClass.KeyCodeFolder));
                     // Loop thru
-                    foreach(ItemClass c_Folder in c_Folders)
+                    foreach (ItemClass c_Folder in c_Folders)
                     {
                         // Get type
-                        switch(c_Folder.Value.IfEmpty())
+                        switch (c_Folder.Value.IfEmpty())
                         {
                             case "ui":
                                 // Adjust if needed
@@ -125,13 +125,16 @@ namespace NXNode
                                 // Copy folder
                                 CopyFolder(c_Env, c_Folder.Key, sMod);
                                 break;
-                        }                        
+                        }
                     }
 
                     // Make into image
                     c_Env.Hive.MakeSelfIntoGenome(sOut);
                     // Delete
                     sOut.DeletePath();
+
+                    // Kill all
+                    c_Env.Hive.KillProcessorBees();
 
                     //
                     c_Env.LogInfo("Container has been created");
@@ -146,7 +149,7 @@ namespace NXNode
                     c_Env.LogInfo(@"Bee of proc=""{0}"" has {1} been created".FormatString(c_Env.Process, c_Bee == null ? "not " : ""));
                 }
 
-                // Otherwise start
+                // Normal mode?
                 if (!c_Env.InMakeMode)
                 {
                     // And recycle
@@ -155,8 +158,6 @@ namespace NXNode
             }
             else
             {
-
-
                 // Only thing we are allowed inside a container
                 c_Env.Start();
             }

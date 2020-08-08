@@ -54,7 +54,7 @@ namespace NX.Engine
         /// The objects found
         /// 
         /// </summary>
-        private Dictionary<string, Type> Cache { get; set; } = new Dictionary<string, Type>();
+        private NamedListClass<Type> Cache { get; set; } = new NamedListClass<Type>();
 
         /// <summary>
         ///  The list of names
@@ -180,17 +180,10 @@ namespace NX.Engine
                                     string sName = c_Plug.ObjectFullName();
 
                                     // Make room
-                                    if (this.Cache == null) this.Cache = new Dictionary<string, Type>();
+                                    if (this.Cache == null) this.Cache = new NamedListClass<Type>();
 
-                                    // Add (or replace)
-                                    if (!this.Cache.ContainsKey(sName))
-                                    {
-                                        this.Cache.Add(sName, c_Type);
-                                    }
-                                    else
-                                    {
-                                        this.Cache[sName] = c_Type;
-                                    }
+                                    // Add
+                                    this.Cache[sName] = c_Type;
 
                                     //
                                     try
@@ -261,7 +254,7 @@ namespace NX.Engine
         /// <returns>Trues if it is a name we know</returns>
         public bool Exists(string name)
         {
-            return this.Cache.ContainsKey(name);
+            return this.Cache.Contains(name);
         }
         #endregion
     }

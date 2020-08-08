@@ -270,7 +270,7 @@ namespace NX.Engine
         /// The list of tasks to do
         /// 
         /// </summary>
-        private static Dictionary<string, Tuple<DateTime, Action>> DelayedActions { get; set; } = new Dictionary<string, Tuple<DateTime, Action>>();
+        private static NamedListClass<Tuple<DateTime, Action>> DelayedActions { get; set; } = new NamedListClass<Tuple<DateTime, Action>>();
 
         /// <summary>
         /// 
@@ -320,15 +320,8 @@ namespace NX.Engine
             // Must have  ID
             if (id.HasValue())
             {
-                // Multi threaded
-                lock (DelayedActions)
-                {
-                    // Exists?
-                    if (DelayedActions.ContainsKey(id))
-                    {
-                        DelayedActions.Remove(id);
-                    }
-                }
+                // Remove
+                DelayedActions.Remove(id);
             }
         }
 

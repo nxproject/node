@@ -611,7 +611,7 @@ namespace NX.Engine.Hive
         /// <param name="env">The current environment</param>
         /// <param name="values">The substitution values</param>
         /// <returns>The ready to use JObject</returns>
-        public JObject AsParameters(HiveClass hive, FieldClass field, string task, JObject xvalues, StoreClass values = null)
+        public JObject AsParameters(HiveClass hive, FieldClass field, string task, string nextid, JObject xvalues, StoreClass values = null)
         {
             // Make a copy
             JObject c_Ans = this.SynchObject.Clone();
@@ -624,8 +624,8 @@ namespace NX.Engine.Hive
             if (values != null) c_Params.Merge(values.SynchObject);
             // And make a new store
             values = new StoreClass(c_Params);
-            // Assure a next id
-            values["next_id"] = "".GUID();
+            //
+            values["next_id"] = nextid;
 
             // Format the image
             c_Ans.Set("Image", values.Format(this.Image));
@@ -669,7 +669,7 @@ namespace NX.Engine.Hive
             c_Labels.Set(hive.LabelDNA,  task.IfEmpty(HiveClass.ProcessorDNAName +".").Replace(".", "_"));
 
             // And to relate it to the instance
-            c_Labels.Set(hive.LabelID, values["next_id"]);
+            c_Labels.Set(hive.LabelID, nextid);
 
             // And the field
             c_Labels.Set(hive.LabelField, field.Name);

@@ -24,59 +24,37 @@
 
 /// Packet Manager Requirements
 /// 
-/// Install-Package SocketIOClient -Version 2.0.2.3
+/// Install-Package MySql.Data -Version 8.0.21
 /// 
 
 using System.Collections.Generic;
 
-using SocketIOClient;
+using MySql.Data.MySqlClient;
 
 using NX.Engine;
-using NX.Engine.Hive;
-using NX.Engine.NginX;
 using NX.Shared;
-using iTextSharp.text.factories;
 
-namespace Proc.SocketIO
+namespace Proc.MySQL
 {
     /// <summary>
     /// 
-    /// Socket.IO interface
+    /// MySql interface
     /// 
     /// </summary>
     public class ManagerClass : BumbleBeeClass
     {
         #region Constructor
         public ManagerClass(EnvironmentClass env)
-            : base(env, "socketio")
+            : base(env, env["nosql"].IfEmpty("perconanosql"))
         {
-            // Handle NginX
-            this.SetNginxInformation("socket.io", false);
-
-            // Handle the events
+            // Handle the event
             this.AvailabilityChanged += delegate (bool isavailable)
             {
-                // Clear
-                if (this.Client != null)
+                // Reset all databases
+                foreach(DatabaseClass c_DB in this.Cache.Values)
                 {
-                    this.Client = null;
-                }
-
-                // Is Socket.IO available
-                if (this.IsAvailable)
-                {
-                    // Create
-                    this.Client = new SocketIOClient.SocketIO(this.Location.URLMake());
-
-                    // Handle disconnection
-                    this.Client.OnDisconnected += delegate (object sender, string e)
-                    {
-                        // Redo
-                        this.Client.ConnectAsync();
-                    };
-
-                    // Connect
-                    this.Client.ConnectAsync();
+                    // Reset
+                    c_DB.Reset();
                 }
             };
 
@@ -86,18 +64,18 @@ namespace Proc.SocketIO
         #endregion
 
         #region Indexer
-        public EventClass this[string name]
+        public DatabaseClass this[string db]
         {
             get
             {
-                // Do we already know it?
-                if(!this.Map.Contains(name))
+                // Do we know of it?
+                if(!this.Cache.Contains(db))
                 {
-                    // Create
-                    this.Map[name] = new EventClass(this, name);
+                    // Make
+                    this.Cache[db] = new DatabaseClass(this, db);
                 }
 
-                return this.Map[name];
+                return this.Cache[db];
             }
         }
         #endregion
@@ -105,20 +83,10 @@ namespace Proc.SocketIO
         #region Properties
         /// <summary>
         /// 
-        /// The Socket.IO client
+        /// Cache of databases
         /// 
         /// </summary>
-        internal SocketIOClient.SocketIO Client { get; set; }
-        
-        /// <summary>
-        /// 
-        /// A map of rooms
-        /// 
-        /// </summary>
-        private NamedListClass<EventClass> Map { get; set; } = new NamedListClass<EventClass>();
-        #endregion
-
-        #region Methods
+        private NamedListClass<DatabaseClass> Cache { get; set; } = new NamedListClass<DatabaseClass>();
         #endregion
     }
 }

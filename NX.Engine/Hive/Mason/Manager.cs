@@ -90,7 +90,7 @@ namespace NX.Engine.Hive.Mason
         /// <summary>
         /// 
         /// </summary>
-        private Dictionary<string, QueueClass> WorkQueues { get; set; } = new Dictionary<string, QueueClass>();
+        private NamedListClass<QueueClass> WorkQueues { get; set; } = new NamedListClass<QueueClass>();
 
         /// <summary>
         /// 
@@ -114,7 +114,7 @@ namespace NX.Engine.Hive.Mason
             lock (this)
             {
                 // Do we know it already?
-                if (this.WorkQueues.ContainsKey(queue))
+                if (this.WorkQueues.Contains(queue))
                 {
                     // Map
                     QueueClass c_WQ = this.WorkQueues[queue];

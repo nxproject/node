@@ -33,6 +33,7 @@ using MongoDB.Driver;
 
 using NX.Engine;
 using NX.Shared;
+using RestSharp.Extensions;
 
 namespace Proc.MongoDb
 {
@@ -82,10 +83,10 @@ namespace Proc.MongoDb
             get
             {
                 // Do we know of it?
-                if(!this.Cache.ContainsKey(db))
+                if(!this.Cache.Contains(db))
                 {
                     // Make
-                    this.Cache.Add(db, new DatabaseClass(this, db));
+                    this.Cache[db] = new DatabaseClass(this, db);
                 }
 
                 return this.Cache[db];
@@ -113,7 +114,7 @@ namespace Proc.MongoDb
         /// Cache of databases
         /// 
         /// </summary>
-        private Dictionary<string, DatabaseClass> Cache { get; set; } = new Dictionary<string, DatabaseClass>();
+        private NamedListClass<DatabaseClass> Cache { get; set; } = new NamedListClass<DatabaseClass>();
 
         /// <summary>
         /// 

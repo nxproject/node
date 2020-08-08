@@ -153,7 +153,7 @@ namespace NX.Engine
                     // Already have?  
                     // This allow for the user to override the config
                     // file in the command line
-                    if (!this.SynchObject.ContainsKey(sKey))
+                    if (!this.SynchObject.Contains(sKey))
                     {
                         // Move in
                         this.SynchObject.Set(sKey, c_Config.GetObject(sKey));

@@ -24,18 +24,16 @@
 
 /// Packet Manager Requirements
 /// 
-/// Install-Package MongoDb.Driver -Version 2.10.4
-/// Install-Package MongoDb.Bson -Version 2.10.4
+/// Install-Package MySql.Data -Version 8.0.21
 /// 
 
 using System.Collections.Generic;
-
-using MongoDB.Driver;
-using MongoDB.Bson;
+using System.Data;
+using MySql.Data.MySqlClient;
 
 using NX.Shared;
 
-namespace Proc.MongoDb
+namespace Proc.MySQL
 {
     public class DatabaseClass : ChildOfClass<ManagerClass>
     {
@@ -68,46 +66,30 @@ namespace Proc.MongoDb
         /// The databse interface
         /// 
         /// </summary>
-        private IMongoDatabase IInterface { get; set; }
-        public IMongoDatabase Interface
+        private MySqlConnection IInterface { get; set; }
+        public MySqlConnection Interface
         {
             get
             {
                 // Already setup?
                 if (this.IInterface == null && this.Parent.IsAvailable)
                 {
-                    // Make
-                    this.IInterface = this.Parent.Client.GetDatabase(this.Name);
+                    // Setup the connection string
+                    string sConn = "server=" + this.Parent.Location.RemoveProtocol();
+                    if (this.Parent.Parent["mysql_user"].HasValue()) sConn += ";userid=" + this.Parent["mysql_user"];
+                    if (this.Parent.Parent["mysql_pwd"].HasValue()) sConn += ";password=" + this.Parent["mysql_pwd"];
+                    sConn += ";database=" + this.Name;
+
+                    // Make the client
+                    this.IInterface = new MySqlConnection(sConn);
                 }
 
                 return this.IInterface;
             }
         }
-
-        /// <summary>
-        /// 
-        /// Cache of collections
-        /// 
-        /// </summary>
-        private NamedListClass<CollectionClass> Cache { get; set; } = new NamedListClass<CollectionClass>();
         #endregion
 
         #region Methods
-        /// <summary>
-        /// 
-        /// Drops a database
-        /// 
-        /// </summary>
-        public void Drop()
-        {
-            // Can we do it?
-            if (this.Parent.IsAvailable)
-            {
-                // Do
-                this.Parent.Client.DropDatabase(this.Name);
-            }
-        }
-
         /// <summary>
         /// 
         /// Resets a database
@@ -117,13 +99,18 @@ namespace Proc.MongoDb
         {
             // Clear
             this.IInterface = null;
+        }
 
-            // Do cache
-            foreach(CollectionClass c_Coll in this.Cache.Values)
-            {
-                // Reset
-                c_Coll.Reset();
-            }
+        /// <summary>
+        /// 
+        /// Creates a statement
+        /// 
+        /// </summary>
+        /// <param name="statement">The statement</param>
+        /// <returns></returns>
+        public StatementClass New(string statement)
+        {
+            return new StatementClass(this, statement);
         }
         #endregion
     }

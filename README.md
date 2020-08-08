@@ -84,10 +84,6 @@ being used by Docker.  I just turn off protection for my private network.
 
 * **Jose E. Gonzalez jr.** - *All that you see here*
 
-The reason for this is that the **make_genome** command packages the config.json as
-part of the genome (image) allowing for the DNA (CreateContainer) to have a Cmd
-that refers to the config.json, making each created worker bee use the same settings.
-
 ### A trivia question
 
 The DNA for a worker bee is **processor**.  Why?

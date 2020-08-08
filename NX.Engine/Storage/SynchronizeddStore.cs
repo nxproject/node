@@ -361,7 +361,7 @@ namespace NX.Engine
         private void Assure(string key)
         {
             // Do we have it?
-            if (!this.SynchObject.ContainsKey(key) && this.Synch != null && this.Synch.IsAvailable)
+            if (!this.SynchObject.Contains(key) && this.Synch != null && this.Synch.IsAvailable)
             {
                 // Fetch
                 string sSer = this.RedisGet(key);

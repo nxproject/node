@@ -74,7 +74,7 @@ namespace Proc.NginX
         /// A map of processors vs. URL list
         /// 
         /// </summary>
-        private Dictionary<string, List<string>> Map { get; set; } = new Dictionary<string, List<string>>();
+        private NamedListClass<List<string>> Map { get; set; } = new NamedListClass<List<string>>();
         #endregion
 
         #region Methods
@@ -89,7 +89,7 @@ The  property:
 
 We start out by not having  client at all, as there is no client for NginX. We do have:
 ```JavaScript
-private Dictionary<string, List<string>> Map { get; set; } = new Dictionary<string, List<string>>();
+private NamedListClass<List<string>> Map { get; set; } = new NamedListClass<List<string>>();
 ```
 which is used by the code.
 

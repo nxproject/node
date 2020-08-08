@@ -135,10 +135,10 @@ namespace NX.Engine
             {
                 bool bIsQueen = false;
                 // Do we have both a me and queen bees?
-                if (this.Parent.Hive.Roster.MeBee != null && this.Parent.Hive.Roster.QueenBee != null)
+                if (this.Parent.Hive.Roster.MeBee != null)
                 {
                     // One and the same?
-                    bIsQueen = this.Parent.Hive.Roster.MeBee.Id.IsSameValue(this.Parent.Hive.Roster.QueenBee.Id);
+                    bIsQueen = this.Parent.Hive.Roster.MeBee.IsSameAs(this.Parent.Hive.Roster.QueenBee);
                 }
 
                 return bIsQueen;

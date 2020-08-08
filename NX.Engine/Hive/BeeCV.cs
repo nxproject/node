@@ -68,7 +68,7 @@ namespace NX.Engine.Hive
             if (this.IsGhost || this.IsVirtual)
             {
                 // make phony labels
-                this.Labels = new Dictionary<string, string>();
+                this.Labels = new NamedListClass<string>();
                 // Fill
                 this.Labels.Add(this.TheHive.LabelID, id);
                 this.Labels.Add(this.TheHive.LabelUUID, "".GUID());
@@ -183,9 +183,9 @@ namespace NX.Engine.Hive
             get { return new List<Port>(this.Values.Ports); }
         }
 
-        public Dictionary<string, string> Labels
+        public IDictionary<string, string> Labels
         {
-            get { return this.Values.Labels as Dictionary<string, string>; }
+            get { return this.Values.Labels; }
             private set { this.Values.Labels = value; }
         }
 
@@ -324,14 +324,10 @@ namespace NX.Engine.Hive
             string sAns = "";
 
             // Do we have labels?
-            if (this.Labels != null)
+            if (this.Labels != null && this.Labels.ContainsKey(label))
             {
-                // Does the labels have what we are looking for?
-                if (this.Labels.ContainsKey(label))
-                {
-                    // Get
-                    sAns = this.Labels[label];
-                }
+                // Get
+                sAns = this.Labels[label];
             }
 
             return sAns;
@@ -350,20 +346,11 @@ namespace NX.Engine.Hive
             if (this.Labels == null)
             {
                 // Make them
-                this.Labels = new Dictionary<string, string>();
+                this.Labels = new NamedListClass<string>();
             }
 
-            // Does the labels have what we are looking for?
-            if (this.Labels.ContainsKey(label))
-            {
-                // Set
-                this.Labels[label] = value;
-            }
-            else
-            {
-                // Add
-                this.Labels.Add(label, value);
-            }
+            //
+            this.Labels[label] = value;
         }
 
         /// <summary>
@@ -429,10 +416,7 @@ namespace NX.Engine.Hive
                             this.Values = c_CVs.First();
                         }
                     }
-                    catch
-                    {
-
-                    }
+                    catch { }
                 }
             }
         }

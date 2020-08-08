@@ -42,7 +42,7 @@ using NX.Shared;
 
 namespace NX.Engine
 {
-    public class FunctionsDefinitions : Dictionary<string, Function>
+    public class FunctionsDefinitions : NamedListClass<Function>
     {
         #region Constructor
         public FunctionsDefinitions()

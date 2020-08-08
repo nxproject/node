@@ -37,6 +37,7 @@ using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using Newtonsoft.Json.Linq;
 
 using NX.Shared;
+using Org.BouncyCastle.Ocsp;
 
 namespace NX.Engine.Hive
 {
@@ -159,7 +160,8 @@ namespace NX.Engine.Hive
 
             TooMany,
 
-            ViaRoute
+            ViaRoute,
+            NoLogs
         }
         #endregion
 
@@ -353,11 +355,15 @@ namespace NX.Engine.Hive
             // Get location
             DockerIFClass c_Client = this.Parent.DockerIF;
             // Available?
-            if (c_Client != null)
+            if (c_Client != null && reason != KillReason.Zombie)
             {
                 // Dump the logs
                 this.Parent.Parent.Parent.LogInfo("Dump for bee {0}, reason: {1}", this.Id.IfEmpty(this.CV.Id), reason);
-                c_Client.GetLogs(this.CV.Id);
+                // Oly if wanted
+                if (reason != KillReason.NoLogs)
+                {
+                    c_Client.GetLogs(this.CV.Id);
+                }
 
                 //
                 c_Client.RemoveContainer(this.CV.Id);
@@ -412,6 +418,42 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// Does the handshake with another bee
+        /// 
+        /// </summary>
+        /// <returns>True if bee responded properly</returns>
+        public bool Handshake(string request, bool defaultvalue = false)
+        {
+            // Assume no return
+            bool bAns = false; 
+
+            // Get my URL
+            string sURL = this.URL.IfEmpty().Trim();
+
+            // Any?
+            if (sURL.HasValue())
+            {
+                // Call
+                bAns = sURL.URLNX("handshake", request.IfEmpty("none")).NXReturnOK(defaultvalue);
+            }
+
+            return bAns;
+        }
+
+        /// <summary>
+        /// 
+        /// Does the handshake with another bee
+        /// 
+        /// </summary>
+        /// <returns>True if bee responded properly</returns>
+        public bool Handshake(HiveClass.States state, bool defaultvalue = false)
+        {
+            //
+            return this.Handshake(state.ToString(), defaultvalue);
+        }
+
+        /// <summary>
+        /// 
         /// Pings a bee to check for liveliness
         /// 
         /// </summary>
@@ -436,7 +478,7 @@ namespace NX.Engine.Hive
                 //
                 this.Parent.Parent.Parent.LogVerbose("Return was {0}", sID);
 
-                //// ID's must match
+                // ID's must match
                 eAns = sID.IsSameValue(this.Id) ? States.Alive : States.Dead;
 
                 // --------------------------------------------------
@@ -466,6 +508,18 @@ namespace NX.Engine.Hive
             }
 
             return eAns;
+        }
+
+        /// <summary>
+        /// 
+        /// Compares two bees
+        /// 
+        /// </summary>
+        /// <param name="bee">The bee to comapre it to</param>
+        /// <returns>True if they are the same bee</returns>
+        public bool IsSameAs(BeeClass bee)
+        {
+            return this != null && bee != null && this.Id.IsSameValue(bee.Id);
         }
         #endregion
     }

@@ -43,7 +43,7 @@ namespace NX.Shared
         /// A table of all the threads created by the manager
         /// 
         /// </summary>
-        internal static Dictionary<string, SafeThreadClass> ThreadMap { get; set; } = new Dictionary<string, SafeThreadClass>();
+        internal static NamedListClass<SafeThreadClass> ThreadMap { get; set; } = new NamedListClass<SafeThreadClass>();
 
         ///// <summary>
         ///// 
@@ -69,20 +69,7 @@ namespace NX.Shared
         /// <returns>The thread if any</returns>
         public static SafeThreadClass Get(string name)
         {
-            //
-            SafeThreadClass c_Ans = null;
-
-            // To handle multi threaded calls
-            lock (SafeThreadManagerClass.ThreadMap)
-            {
-                // Get it
-                if (SafeThreadManagerClass.ThreadMap.ContainsKey(name))
-                {
-                    c_Ans = SafeThreadManagerClass.ThreadMap[name];
-                }
-            }
-
-            return c_Ans;
+            return SafeThreadManagerClass.ThreadMap[name];
         }
 
         /// <summary>
@@ -112,7 +99,7 @@ namespace NX.Shared
             string sAns = null;
 
             // Name cannot be used
-            if (!SafeThreadManagerClass.ThreadMap.ContainsKey(name))
+            if (!SafeThreadManagerClass.ThreadMap.Contains(name))
             {
                 // See if it launches
                 try
@@ -124,6 +111,9 @@ namespace NX.Shared
 
                     // Get the ID
                     sAns = c_Thread.ID;
+
+                    // Add
+                    SafeThreadManagerClass.ThreadMap[name] = c_Thread;
                 }
                 catch { }
             }
@@ -154,7 +144,7 @@ namespace NX.Shared
         public static void StopThread(string name)
         {
             // Do we have it?
-            if(SafeThreadManagerClass.ThreadMap.ContainsKey(name))
+            if(SafeThreadManagerClass.ThreadMap.Contains(name))
             {
                 // Kill it
                 SafeThreadManagerClass.ThreadMap[name].Stop();
@@ -323,16 +313,7 @@ namespace NX.Shared
                 sAns = this.SynchObject.GetHashCode().ToString();
 
                 // And create ourselves
-                if(!SafeThreadManagerClass.ThreadMap.ContainsKey("$"))
-                {
-                    // New
-                    SafeThreadManagerClass.ThreadMap.Add(this.ThreadName, this);
-                }
-                else
-                {
-                    // Save
-                    SafeThreadManagerClass.ThreadMap[this.ThreadName] = this;
-                }
+                SafeThreadManagerClass.ThreadMap[this.ThreadName] = this;
             }
 
             // Return the ID

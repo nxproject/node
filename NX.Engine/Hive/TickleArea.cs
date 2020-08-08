@@ -208,7 +208,7 @@ namespace NX.Engine.Hive
     /// A table of TickleAreas grouped by a subject
     /// 
     /// </summary>
-    public class TickleAreaTableClass : Dictionary<string, TickleAreaListClass>
+    public class TickleAreaTableClass : NamedListClass<TickleAreaListClass>
     {
         #region Constructor
         public TickleAreaTableClass()
@@ -227,7 +227,7 @@ namespace NX.Engine.Hive
         public bool AddTickleArea(string key, TickleAreaClass ep)
         {
             // Make room
-            if (!this.ContainsKey(key)) this.Add(key, new TickleAreaListClass());
+            if (!this.Contains(key)) this[key] = new TickleAreaListClass();
 
             // Add
             return this[key].AddTickleArea(ep);
@@ -247,7 +247,7 @@ namespace NX.Engine.Hive
             bool bAns = false;
 
             // A known subject
-            if (this.ContainsKey(key))
+            if (this.Contains(key))
             {
                 // Remove
                 bAns = this[key].RemoveTickleArea(ep);
@@ -265,13 +265,7 @@ namespace NX.Engine.Hive
         /// <returns>The list in any</returns>
         public TickleAreaListClass Get(string key)
         {
-            // Assume none
-            TickleAreaListClass c_Ans = null;
-
-            // Any?
-            if (this.ContainsKey(key)) c_Ans = this[key];
-
-            return c_Ans;
+            return this[key];
         }
         #endregion
     }
@@ -296,7 +290,7 @@ namespace NX.Engine.Hive
         /// The list of bees
         /// 
         /// </summary>
-        public Dictionary<string, BeeClass> Bees { get; private set; } = new Dictionary<string, BeeClass>();
+        public NamedListClass<BeeClass> Bees { get; private set; } = new NamedListClass<BeeClass>();
 
         /// <summary>
         /// 
@@ -347,11 +341,10 @@ namespace NX.Engine.Hive
         public void Add(BeeClass bee)
         {
             // Must have real a bee
-            // TBD
-            if (bee != null) //  && !bee.IsGhost)
+            if (bee != null)
             {
                 // Already there?
-                if (!this.Bees.ContainsKey(bee.Id))
+                if (!this.Bees.Contains(bee.Id))
                 {
                     // Do
                     this.Bees.Add(bee.Id, bee);
@@ -504,13 +497,7 @@ namespace NX.Engine.Hive
         /// <returns>The bee if any</returns>
         public BeeClass GetBee(string id)
         {
-            // Assume none
-            BeeClass c_Ans = null;
-
-            // Any?
-            if (this.Bees.ContainsKey(id)) c_Ans = this.Bees[id];
-
-            return c_Ans;
+            return this.Bees[id];
         }
 
         /// <summary>
@@ -662,7 +649,7 @@ namespace NX.Engine.Hive
             List<string> c_Ans = new List<string>();
 
             // Do we have a DNA?
-            if (this.DNAs.ContainsKey(DNA))
+            if (this.DNAs.Contains(DNA))
             {
                 // Get the URLs
                 c_Ans.AddRange(this.DNAs[DNA].GetLocations());
@@ -684,7 +671,7 @@ namespace NX.Engine.Hive
             List<BeeClass> c_Ans = new List<BeeClass>();
 
             // Do we have a DNA?
-            if (this.DNAs.ContainsKey(DNA))
+            if (this.DNAs.Contains(DNA))
             {
                 // Get the URLs
                 c_Ans.AddRange(this.DNAs[DNA].GetBees());
@@ -717,10 +704,10 @@ namespace NX.Engine.Hive
             List<string> c_Ans = new List<string>();
 
             // Do we have a DNA?
-            if (this.Ports.ContainsKey(port))
+            if (this.Ports.Contains(port))
             {
                 // Get the URLs
-                c_Ans.AddRange(this.DNAs[port].GetLocations());
+                c_Ans.AddRange(this.Ports[port].GetLocations());
             }
 
             return c_Ans;
@@ -739,10 +726,10 @@ namespace NX.Engine.Hive
             List<BeeClass> c_Ans = new List<BeeClass>();
 
             // Do we have a DNA?
-            if (this.Ports.ContainsKey(port))
+            if (this.Ports.Contains(port))
             {
                 // Get the URLs
-                c_Ans.AddRange(this.DNAs[port].GetBees());
+                c_Ans.AddRange(this.Ports[port].GetBees());
             }
 
             return c_Ans;

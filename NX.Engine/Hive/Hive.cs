@@ -40,6 +40,7 @@ using Newtonsoft.Json.Linq;
 
 using NX.Shared;
 using NX.Engine.Hive.Mason;
+using Octokit;
 
 namespace NX.Engine.Hive
 {
@@ -65,6 +66,9 @@ namespace NX.Engine.Hive
         {
             // Flag as so
             this.InInitialize = true;
+
+            // Mark ourselves as a bee
+            this.State = States.Bee;
 
             // Setup the fields
             this.SetupFields();
@@ -150,7 +154,19 @@ namespace NX.Engine.Hive
                 };
 
                 this.Parent.Messenger.CheckAvailability();
-            }
+
+
+                // Handle shutdown
+                AppDomain.CurrentDomain.ProcessExit += delegate (object sender, EventArgs e)
+                {
+                // Are we the queen?
+                if (this.Roster.QueenBee != null && this.Roster.QueenBee.IsSameAs(this.Roster.MeBee))
+                    {
+                    // Bring up the follower
+                    this.Roster.MeBee.FollowerBee.Handshake(HiveClass.States.Ascending);
+                    }
+                };
+            }            
 
             // Out
             this.InInitialize = false;
@@ -195,6 +211,16 @@ namespace NX.Engine.Hive
         {
             get { return this.Roster.BeeCount; }
         }
+
+        /// <summary>
+        /// 
+        /// A list of all the bees
+        /// 
+        /// </summary>
+        public List<BeeClass> Bees
+        {
+            get { return this.Roster.Bees; }
+        }
         #endregion
 
         #region Fields
@@ -203,7 +229,7 @@ namespace NX.Engine.Hive
         /// List of fields that this hive's bees can wonder
         /// 
         /// </summary>
-        public Dictionary<string, FieldClass> Fields { get; private set; } = new Dictionary<string, FieldClass>();
+        public NamedListClass<FieldClass> Fields { get; private set; } = new NamedListClass<FieldClass>();
 
         /// <summary>
         /// 
@@ -222,7 +248,7 @@ namespace NX.Engine.Hive
             }
 
             // Reset
-            this.Fields = new Dictionary<string, FieldClass>();
+            this.Fields = new NamedListClass<FieldClass>();
 
             // Get external
             JArray c_External = this.Parent.GetAsJArray("external");
@@ -314,14 +340,8 @@ namespace NX.Engine.Hive
                 // Valid?
                 if (bOK)
                 {
-                    if (this.Fields.ContainsKey(c_Field.Name))
-                    {
-                        this.Fields[c_Field.Name] = c_Field;
-                    }
-                    else
-                    {
-                        this.Fields.Add(c_Field.Name, c_Field);
-                    }
+                    // Add
+                    this.Fields[c_Field.Name] = c_Field;
                 }
             }
 
@@ -380,17 +400,7 @@ namespace NX.Engine.Hive
         /// <returns>The field</returns>
         public FieldClass GetField(string name)
         {
-            // Assume no field
-            FieldClass c_Ans = null;
-
-            // Do we know of this field
-            if (this.Fields.ContainsKey(name))
-            {
-                // Gte
-                c_Ans = this.Fields[name];
-            }
-
-            return c_Ans;
+            return this.Fields[name];
         }
 
         /// <summary>
@@ -899,6 +909,9 @@ namespace NX.Engine.Hive
             // Assume failure
             BeeClass c_Ans = null;
 
+            // Make the next id
+            string sNextID = "".GUID();
+
             // Get the definition
             BeeDNAClass c_Def = usedna;
             // Did we get one?
@@ -988,7 +1001,9 @@ namespace NX.Engine.Hive
                    if (c_Client != null)
                    {
                        // Get the params
-                       JObject c_Raw = c_Def.AsParameters(this, c_Field, dna, this.Parent.AsParameters, data);
+                       JObject c_Params = this.Parent.AsParameters;
+                       // Make the Docker request
+                       JObject c_Raw = c_Def.AsParameters(this, c_Field, dna, sNextID, c_Params, data);
 
                        // The  container ID
                        string sBeeName = null;
@@ -1010,6 +1025,11 @@ namespace NX.Engine.Hive
                            {
                                // Fit it in
                                c_Resolve.Target.Name = sBeeName;
+                           }
+                           else
+                           {
+                               // Create one
+                               c_Resolve.Target.Name = this.Name + "_" + dna.Replace(".", "_") + "_" + sNextID;
                            }
 
                            // Create
@@ -1151,6 +1171,31 @@ namespace NX.Engine.Hive
             //    this.Parent.LogInfo("{0} {1} {2} worker bee{3}", sKind, iDiff, proc, sS);
             //}
         }
+
+        /// <summary>
+        /// 
+        /// Removes all the processor bees
+        /// 
+        /// </summary>
+        public void KillProcessorBees()
+        {
+            //
+            this.Parent.LogInfo("Killing all processor bees!");
+
+            // Refresh
+            this.Roster.Refresh();
+
+            // Loop thru
+            foreach(BeeClass c_Bee in this.Bees)
+            {
+                // Processor?
+                if(c_Bee.CV.DNA.StartsWith(HiveClass.ProcessorDNAName))
+                {
+                    // Kill like a zombie so no log is generated
+                    c_Bee.Kill(BeeClass.KillReason.NoLogs);
+                }
+            }
+        }
         #endregion
 
         #region Synch
@@ -1224,6 +1269,27 @@ namespace NX.Engine.Hive
                 return this.IMason;
             }
         }
+        #endregion
+
+        #region State
+        public enum States
+        {
+            Unknown,
+
+            Bee,
+
+            Queen,
+            InQueenDuties,
+
+            Ascending
+        }
+
+        /// <summary>
+        /// 
+        /// Current state
+        /// 
+        /// </summary>
+        public States State { get; set; } = States.Unknown;
         #endregion
     }
 }

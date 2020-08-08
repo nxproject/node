@@ -93,7 +93,7 @@ namespace Proc.NginX
         /// A map of processors vs. URL list
         /// 
         /// </summary>
-        private Dictionary<string, List<string>> Map { get; set; } = new Dictionary<string, List<string>>();
+        private NamedListClass<List<string>> Map { get; set; } = new NamedListClass<List<string>>();
         #endregion
 
         #region Methods
@@ -121,17 +121,8 @@ namespace Proc.NginX
             // One we want?
             if (this.ValidDNA(dna))
             {
-                // Already?
-                if (this.Map.ContainsKey(dna))
-                {
-                    // Replace
-                    this.Map[dna] = urls;
-                }
-                else
-                {
-                    // Add
-                    this.Map.Add(dna, urls);
-                }
+                // Add
+                this.Map[dna] = urls;
             }
         }
 

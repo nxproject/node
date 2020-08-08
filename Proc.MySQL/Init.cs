@@ -22,50 +22,24 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using NX.Engine;
 using NX.Shared;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 
-namespace NX.Engine.Hive
+namespace Proc.MySQL
 {
-    public class DockerIFFilterClass
+    /// <summary>
+    /// 
+    /// Initializes the mongodb bumble bee
+    /// 
+    /// </summary>
+    public class Init : FNClass
     {
-        #region Constructor
-        public DockerIFFilterClass(params string[] values)
+        public override void Initialize(EnvironmentClass env)
         {
-            // Make
-            this.Values = new NamedListClass<NamedListClass<bool>>();
+            // Make the bumble bee
+            ManagerClass c_Mgr = env.Globals.Get<ManagerClass>();
 
-            // Parse
-            for(int i=0;i< values.Length;i+=2)
-            {
-                // Add a clause
-                this.AddClause(values[i], values[i + 1]);
-            }
+            base.Initialize(env);
         }
-        #endregion
-
-        #region Properties
-        /// <summary>
-        /// 
-        /// The filters
-        /// 
-        /// </summary>
-        public NamedListClass<NamedListClass<bool>> Values { get; private set; }
-        #endregion
-
-        #region Methods
-        public void AddClause(string field, string value)
-        {
-            // Make inner dictionary
-            NamedListClass<bool> c_Inner = new NamedListClass<bool>();
-            // Set the value
-            c_Inner.Add(value, true);
-
-            // And check the outer
-            this.Values[field] = c_Inner;
-        }
-        #endregion
     }
 }

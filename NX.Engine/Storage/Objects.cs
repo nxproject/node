@@ -65,7 +65,7 @@ namespace NX.Engine
         /// The actual store
         /// 
         /// </summary>
-        private Dictionary<string, object> Values { get; set; } = new Dictionary<string, object>();
+        private NamedListClass<object> Values { get; set; } = new NamedListClass<object>();
         #endregion
 
         #region Methods
@@ -90,7 +90,7 @@ namespace NX.Engine
             }
 
             // Already in memory?
-            if (!this.Values.ContainsKey(name))
+            if (!this.Values.Contains(name))
             {
                 try
                 {
@@ -102,6 +102,9 @@ namespace NX.Engine
                     //
                     this.Parent.LogException("Creating {0}".FormatString(typeof(T).FullName), e);
                     c_Ans = default(T);
+
+                    // Save
+                    this.Values[name] = c_Ans;
                 }
             }
             else
@@ -122,11 +125,8 @@ namespace NX.Engine
         /// <returns>The object stored in the Globals space</returns>
         public void Set<T>(string name, T obj) where T : ChildOfClass<EnvironmentClass>
         {
-            // Remove the object if any
-            if (this.Values.ContainsKey(name)) this.Values.Remove(name);
-
             // And save
-            this.Values.Add(name, obj);
+            this.Values[name] =  obj;
         }
         #endregion
     }

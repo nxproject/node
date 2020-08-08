@@ -1,7 +1,7 @@
 {
   "hive": "test", // The name of the hive
   "tier": "dev", // The tier that the hive runs in, change to latest for production
-  "fields": [], // The list of fields
+  "fieldx": [ "one=10.192.180.160:2375" ], // The list of fields
 
   "repo_project": "nxproject", // The Docker repository name
   "root_folder": "/etc/wd", // Where bee's data is kept
@@ -20,7 +20,7 @@
 
   "qd_uses": [ "Proc.NginX" ],
   "qd_bumble": [ "redis" ],
-  "qd_worker": [ "2", "Chores:1" ],
+  "qd_worker": [ "4", "Chores:3", "Simple:1" ],
 
   "secure_code": "wqfmtohhofyzzrojnhvy", // The security code
   // From https://www.random.org/strings/?num=1&len=20&loweralpha=on&unique=on&format=html&rnd=new

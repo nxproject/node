@@ -22,49 +22,64 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-using NX.Shared;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+/// Packet Manager Requirements
+/// 
+/// Install-Package MySql.Data -Version 8.0.21
+/// 
 
-namespace NX.Engine.Hive
+using System.Collections.Generic;
+using System.Data;
+using MySql.Data.MySqlClient;
+
+using NX.Shared;
+
+namespace Proc.MySQL
 {
-    public class DockerIFFilterClass
+    /// <summary>
+    /// 
+    /// SQL statement
+    /// 
+    /// </summary>
+    public class StatementClass : ChildOfClass<DatabaseClass>
     {
         #region Constructor
-        public DockerIFFilterClass(params string[] values)
+        public StatementClass(DatabaseClass db, string statement)
+            : base(db)
         {
-            // Make
-            this.Values = new NamedListClass<NamedListClass<bool>>();
-
-            // Parse
-            for(int i=0;i< values.Length;i+=2)
-            {
-                // Add a clause
-                this.AddClause(values[i], values[i + 1]);
-            }
+            //
+            this.Cmd = new MySqlCommand(statement, db.Interface);
         }
         #endregion
 
         #region Properties
         /// <summary>
         /// 
-        /// The filters
+        /// The MySQL command
         /// 
         /// </summary>
-        public NamedListClass<NamedListClass<bool>> Values { get; private set; }
+        private MySqlCommand Cmd { get; set; }
         #endregion
 
         #region Methods
-        public void AddClause(string field, string value)
+        /// <summary>
+        /// 
+        /// Executes statement
+        /// 
+        /// </summary>
+        public void Execute()
         {
-            // Make inner dictionary
-            NamedListClass<bool> c_Inner = new NamedListClass<bool>();
-            // Set the value
-            c_Inner.Add(value, true);
+            this.Cmd.ExecuteNonQuery();
+        }
 
-            // And check the outer
-            this.Values[field] = c_Inner;
+        /// <summary>
+        /// 
+        /// Returns one value from statement
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public string GetScalar()
+        {
+            return this.Cmd.ExecuteScalar().ToString();
         }
         #endregion
     }

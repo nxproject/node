@@ -777,17 +777,20 @@ namespace NX.Shared
             // Do each piece
             foreach (string sPiece in values)
             {
-                if (url.EndsWith(URLSeparator) && sPiece.StartsWith(URLSeparator))
+                if (sPiece.HasValue())
                 {
-                    url = url + sPiece.Substring(1);
-                }
-                else if (url.EndsWith(URLSeparator) || sPiece.StartsWith(URLSeparator))
-                {
-                    url += sPiece;
-                }
-                else
-                {
-                    url += URLSeparator + sPiece;
+                    if (url.EndsWith(URLSeparator) && sPiece.StartsWith(URLSeparator))
+                    {
+                        url = url + sPiece.Substring(1);
+                    }
+                    else if (url.EndsWith(URLSeparator) || sPiece.StartsWith(URLSeparator))
+                    {
+                        url += sPiece;
+                    }
+                    else
+                    {
+                        url += URLSeparator + sPiece;
+                    }
                 }
             }
 
@@ -1321,13 +1324,16 @@ namespace NX.Shared
         /// </summary>
         /// <param name="url">The site URL</param>
         /// <returns>True if the return was OK</returns>
-        public static bool NXReturnOK(this JObject value)
+        public static bool NXReturnOK(this JObject value, bool defaultvalue = false)
         {
-            string sAns = null;
+            bool bAns = defaultvalue;
 
-            if (value != null) sAns = value.Get("ok");
+            if (value != null)
+            {
+                bAns = value.Get("ok").ToBoolean();
+            }
 
-            return sAns.ToBoolean();
+            return bAns;
         }
 
         public static string RemoveProtocol(this string value)
@@ -1620,9 +1626,9 @@ namespace NX.Shared
             return c_Ans;
         }
 
-        public static Dictionary<string, string> ToDictionary(this JObject value)
+        public static NamedListClass<string> ToDictionary(this JObject value)
         {
-            Dictionary<string, string> c_Ans = new Dictionary<string, string>();
+            NamedListClass<string> c_Ans = new NamedListClass<string>();
 
             foreach (string sKey in value.Keys())
             {
@@ -2297,9 +2303,9 @@ namespace NX.Shared
             return c_Ans;
         }
 
-        public static Dictionary<string, string> ToDictionary(this JArray values)
+        public static NamedListClass<string> ToDictionary(this JArray values)
         {
-            Dictionary<string, string> c_Ans = new Dictionary<string, string>();
+            NamedListClass<string> c_Ans = new NamedListClass< string>();
 
             if (values != null)
             {
@@ -2308,14 +2314,7 @@ namespace NX.Shared
                     string sKey = values[iLoop].ToString();
                     string sValue = values[iLoop + 1].ToString();
 
-                    if (c_Ans.ContainsKey(sKey))
-                    {
-                        c_Ans[sKey] = sValue;
-                    }
-                    else
-                    {
-                        c_Ans.Add(sKey, sValue);
-                    }
+                    c_Ans[sKey]= sValue;
                 }
             }
 
@@ -2704,34 +2703,6 @@ namespace NX.Shared
             int h = bmp.Height;
 
             System.Drawing.Color c_Fill = fill;
-
-            // Find the most common color in a 10 by 10 area
-            //Color c_Fill = System.Drawing.Color.White;
-            //int iCount = -1;
-            //Dictionary<Color, int> c_Found = new Dictionary<Color, int>();
-            //for(int iRow =0;iRow < 10;iRow++)
-            //{
-            //    for (int iCol = 0; iCol < 10; iCol++)
-            //    {
-            //        System.Drawing.Color c_Pixel = bmp.GetPixel(iRow, iCol);
-            //        if(c_Found.ContainsKey(c_Pixel))
-            //        {
-            //            c_Found[c_Pixel]++;
-            //        }
-            //        else
-            //        {
-            //            c_Found.Add(c_Pixel, 1);
-            //        }
-            //    }
-            //}
-            //foreach (Color c_Pixel in c_Found.Keys)
-            //{
-            //    if (c_Found[c_Pixel] > iCount)
-            //    {
-            //        c_Fill = c_Pixel;
-            //        iCount = c_Found[c_Fill];
-            //    }
-            //}
 
             Func<int, bool> allWhiteRow = row =>
             {
@@ -3861,12 +3832,12 @@ namespace NX.Shared
         #endregion
 
         #region Timezone
-        private static Dictionary<string, TimeZoneInfo> ITimeZones { get; set; }
-        public static Dictionary<string, TimeZoneInfo> TimeZones(this string value)
+        private static NamedListClass<TimeZoneInfo> ITimeZones { get; set; }
+        public static NamedListClass<TimeZoneInfo> TimeZones(this string value)
         {
             if (ITimeZones == null)
             {
-                ITimeZones = new Dictionary<string, TimeZoneInfo>();
+                ITimeZones = new NamedListClass<TimeZoneInfo>();
 
                 var timeZones = TimeZoneInfo.GetSystemTimeZones();
                 foreach (var timeZone in timeZones)

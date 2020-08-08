@@ -54,18 +54,11 @@ namespace NX.Engine.NginX
         {
             get
             {
-                // Assume none
-                InformationClass c_Ans = null;
-
                 // Make the name
                 string sName = name + "." + type;
 
-                // Any?
-                if (this.Data.ContainsKey(sName))
-                {
-                    // Get
-                    c_Ans = this.Data[sName];
-                }
+                // Assume none
+                InformationClass c_Ans = this.Data[sName];
 
                 // If none,  make temp
                 if (c_Ans == null) c_Ans = new InformationClass(this, "", type != Types.Proc);
@@ -81,7 +74,7 @@ namespace NX.Engine.NginX
                 if (value != null)
                 {
                     // Do we have it?
-                    if (this.Data.ContainsKey(sName))
+                    if (this.Data.Contains(sName))
                     {
                         // Delete
                         this.Data.Remove(sName);
@@ -91,17 +84,8 @@ namespace NX.Engine.NginX
                 }
                 else
                 {
-                    // Do we have it?
-                    if (this.Data.ContainsKey(sName))
-                    {
-                        // Change
-                        this.Data[sName] = value;
-                    }
-                    else
-                    {
-                        // Add
-                        this.Data.Add(sName, value);
-                    }
+                    // Add
+                    this.Data[sName] = value;
 
                     // Tell the world
                     this.InformationChanged?.Invoke(name, type);
@@ -116,7 +100,7 @@ namespace NX.Engine.NginX
         /// A table of all information
         /// 
         /// </summary>
-        private Dictionary<string, InformationClass> Data { get; set; } = new Dictionary<string, InformationClass>();
+        private NamedListClass<InformationClass> Data { get; set; } = new NamedListClass<InformationClass>();
         #endregion
 
         #region Events

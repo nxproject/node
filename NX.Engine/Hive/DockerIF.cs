@@ -504,7 +504,7 @@ namespace NX.Engine.Hive
                 c_Ans = this.Client.Containers.ListContainersAsync(new ContainersListParameters()
                 {
                     All = true,
-                    Filters = filter.Values
+                    Filters = filter.Values as IDictionary<string, IDictionary<string, bool>>
                 }).Result;
             }
             catch (Exception e)

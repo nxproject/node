@@ -30,7 +30,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
+using System.Threading;
 using Newtonsoft.Json.Linq;
 
 using NX.Shared;
@@ -88,6 +88,28 @@ namespace NX.Engine.Hive
                 }
 
                 return iAns;
+            }
+        }
+        /// <summary>
+        /// 
+        /// The bees
+        /// 
+        /// </summary>
+        public List<BeeClass> Bees
+        {
+            get
+            {
+                // Start with none
+                List<BeeClass> c_Ans = new List<BeeClass>();
+
+                // Loop thru
+                foreach (FieldClass c_Field in this.Parent.Fields.Values)
+                {
+                    // Add
+                    c_Ans.AddRange(c_Field.Bees.Bees.Values); ;
+                }
+
+                return c_Ans;
             }
         }
         #endregion
@@ -329,6 +351,9 @@ namespace NX.Engine.Hive
             // Tell user
             this.Parent.Parent.LogVerbose("Refreshing hive {0}", this.Parent.Name);
 
+            // Save the queen
+            this.PreviousQueenBee = this.QueenBee;
+
             // Refresh each field
             foreach (FieldClass c_Field in this.Parent.Fields.Values)
             {
@@ -345,11 +370,34 @@ namespace NX.Engine.Hive
                     // 
                     this.Parent.Parent.LogInfo("Creating a ghost bee as {0}", this.Parent.Parent.ID);
                     // Make me
-                    this.Parent.Roster.MeBee = new BeeClass(this.Parent.Fields.Values.First(), 
-                                                    this.Parent.Parent.ID, 
+                    this.Parent.Roster.MeBee = new BeeClass(this.Parent.Fields.Values.First(),
+                                                    this.Parent.Parent.ID,
                                                     BeeClass.Types.Ghost);
                     // Add to roster
                     this.Add(this.Parent.Roster.MeBee);
+                }
+            }
+
+            // If no previous queen, use creator
+            if(this.PreviousQueenBee == null)
+            {
+                this.PreviousQueenBee = this.Get(this.Parent.Parent["creator"]);
+            }
+
+            // Queen changed?
+            if (this.QueenBee != null)
+            {
+                // Get queen
+                BeeClass c_Queen = this.QueenBee;
+
+                // Different than previous queen
+                if (this.PreviousQueenBee == null || !this.PreviousQueenBee.IsSameAs(c_Queen))
+                {
+                    //
+                    this.Parent.Parent.LogInfo("Asking {0} to be queen", c_Queen.Id);
+
+                    // Ascend
+                    c_Queen.Handshake(HiveClass.States.Ascending);
                 }
             }
 
@@ -454,6 +502,13 @@ namespace NX.Engine.Hive
         #region Chain of Command
         /// <summary>
         /// 
+        /// The previous queen, if any
+        /// 
+        /// </summary>
+        private BeeClass PreviousQueenBee { get; set; }
+
+        /// <summary>
+        /// 
         /// The queen
         /// 
         /// </summary>
@@ -540,7 +595,7 @@ namespace NX.Engine.Hive
         /// Duties to be carried out by the Queen
         /// 
         /// </summary>
-        private Dictionary<string, Action> QueenDuties { get; set; } = new Dictionary<string, Action>();
+        private NamedListClass<Action> QueenDuties { get; set; } = new NamedListClass<Action>();
 
         /// <summary>
         /// 
@@ -572,15 +627,8 @@ namespace NX.Engine.Hive
         /// <param name="id">The ID to remove</param>
         public void RemoveQueenToDo(string id)
         {
-            // Multi threaded
-            lock (this.QueenDuties)
-            {
-                // Exists?
-                if (this.QueenDuties.ContainsKey(id))
-                {
-                    this.QueenDuties.Remove(id);
-                }
-            }
+            // Kill
+            this.QueenDuties.Remove(id);
         }
 
         /// <summary>
@@ -588,33 +636,85 @@ namespace NX.Engine.Hive
         /// Off with their heads!
         /// 
         /// </summary>
-        private void CheckForQueen()
+        public void CheckForQueen(bool kill = false)
         {
             // Get the queen
             BeeClass c_Queen = this.QueenBee;
+
+            this.Parent.Parent.LogVerbose("CheckForQueen");
 
             // Am I it?
             if (this.Parent.Roster.MeBee != null)
             {
                 // Am I the queen?
-                if (c_Queen == null || c_Queen.Id.IsSameValue(this.Parent.Roster.MeBee.CV.NXID))
+                if (!kill && (c_Queen == null || 
+                                c_Queen.Id.IsSameValue(this.Parent.Roster.MeBee.CV.NXID) ||
+                                this.Parent.State == HiveClass.States.Ascending))
                 {
                     // Already ascended?
                     if (SafeThreadManagerClass.Get(this.Parent.LabelQueen) == null)
                     {
-                        // YES! Off with their heads
-                        this.Parent.Parent.LogInfo("Bee {0} is becoming queen soon!", this.Parent.Roster.MeBee.Id);
+                        //
+                        this.Parent.Parent.LogInfo("Checking bee {0} as possible queen", this.Parent.Roster.MeBee.Id);
 
-                        // Try to run the task but delay
-                        this.QueenTaskID = 20.SecondsAsTimeSpan().WaitThenCall(delegate ()
-                       {
-                           if (SafeThreadManagerClass.StartThread(this.Parent.LabelQueen,
-                               new System.Threading.ParameterizedThreadStart(QueenToDo)).HasValue())
+                        // Mark ourselves
+                        this.Parent.State = HiveClass.States.Ascending;
+
+                        // Assue none
+                        string sCreator = "";
+                        // Do we have a queen?
+                        if (this.PreviousQueenBee == null)
+                        {
+                            // Do we have a creator?
+                            sCreator = this.Parent.Parent["creator"];
+                        }
+                        else
+                        {
+                            // Use queen bee
+                            sCreator = this.PreviousQueenBee.Id;
+                        }
+
+                        // Do we have a creator?  And is it aanother bee?
+                        if (sCreator.HasValue() && !sCreator.IsSameValue(this.MeBee.Id))
+                        {
+                            // Get creator as bee
+                            BeeClass c_Bee = this.Get(sCreator);
+                            // Doo we have a creator
+                            if (c_Bee != null)
+                            {
+                                //
+                                this.Parent.Parent.LogInfo("Asking bee {0} to relinquish", sCreator);
+
+                                // Tell creator to stand down
+                                if (this.Parent.State == HiveClass.States.Ascending)
+                                {
+                                    // Get permission from previous queen
+                                    if(!c_Bee.Handshake(this.MeBee.Id, true))
+                                    {
+                                        // Reset
+                                        this.Parent.State = HiveClass.States.Bee;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Are we still on track?
+                        if (this.Parent.State == HiveClass.States.Ascending)
+                        {
+                            // YES! Off with their heads
+                            this.Parent.Parent.LogInfo("Bee {0} is becoming queen soon!", this.Parent.Roster.MeBee.Id);
+
+                            // Try to run the task but delay
+                            this.QueenTaskID = 20.SecondsAsTimeSpan().WaitThenCall(delegate ()
                            {
-                               // Just ascended!
-                               this.Parent.Parent.LogInfo("Bee {0} is now queen", this.Parent.Roster.MeBee.Id);
-                           }
-                       });
+                               if (SafeThreadManagerClass.StartThread(this.Parent.LabelQueen,
+                                   new System.Threading.ParameterizedThreadStart(QueenToDo)).HasValue())
+                               {
+                                   // Just ascended!
+                                   this.Parent.Parent.LogInfo("Bee {0} is now queen", this.Parent.Roster.MeBee.Id);
+                               }
+                           });
+                        }
                     }
                 }
                 else
@@ -639,139 +739,180 @@ namespace NX.Engine.Hive
             // Setup
             SafeThreadStatusClass c_Status = status as SafeThreadStatusClass;
 
-            //
-            this.Parent.Parent.LogInfo("Started on queen's duties");
-
-            // Tell the world that the queen changed
-            this.QueenChanged?.Invoke();
-
-            // Forever
-            while (c_Status.IsActive)
+            // Did we get knocked off?
+            if (this.Parent.State == HiveClass.States.Ascending)
             {
-                // Refresh
-                this.Refresh();
+                // Mark oursleves
+                this.Parent.State = HiveClass.States.Queen;
 
-                // Get the list of required items
-                ItemsClass c_Uses = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_uses"));
-                // Loop thru
-                foreach (ItemClass c_Item in c_Uses)
+                //
+                this.Parent.Parent.LogInfo("Started on queen's duties");
+
+                // Tell the world that the queen changed
+                this.QueenChanged?.Invoke();
+
+                // Until someone replaces us
+                while (c_Status.IsActive && this.Parent.State == HiveClass.States.Queen)
                 {
-                    // Use
-                    this.Parent.Parent.Use(c_Item.Priority);
-                }
+                    // Mark oursleves
+                    this.Parent.State = HiveClass.States.InQueenDuties;
 
+                    // Refresh
+                    this.Refresh();
 
-                // Get the list of required bumble bees
-                ItemsClass c_Requests = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_bumble"));
-
-                // Do we not have redis?
-                if (!c_Requests.Contains("redis"))
-                {
-                    // Do we have not redis?
-                    if (!c_Requests.Contains("!redis"))
+                    // Get the list of required items
+                    ItemsClass c_Uses = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_uses"));
+                    // Loop thru
+                    foreach (ItemClass c_Item in c_Uses)
                     {
-                        // Add it
-                        c_Requests.Add(new ItemClass("redis"));
-                    }
-                }
-
-                // Loop thru
-                foreach (ItemClass c_Item in c_Requests)
-                {
-                    // Kill?
-                    if (!c_Item.Priority.StartsWith("!"))
-                    {
-                        // Call
-                        this.Parent.AssureDNACount(c_Item.Priority, 1, 1); ;
-                    }
-                }
-
-                // Get the list of required worker bees
-                c_Requests = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_worker").ToList());
-                // Build table of procs vs. count
-                Dictionary<string, int> c_Counts = new Dictionary<string, int>();
-                // Loop thru
-                foreach (ItemClass c_Item in c_Requests)
-                {
-                    // How many
-                    int iCount = 0;
-
-                    // Handle number only
-                    if (c_Item.Priority.ToInteger(-1) != -1)
-                    {
-                        // 
-                        if (c_Item.Modifiers == null) c_Item.Modifiers = new List<string>();
-                        c_Item.Modifiers.Add(c_Item.Priority);
-                        c_Item.Priority = "";
+                        // Use
+                        this.Parent.Parent.Use(c_Item.Priority);
                     }
 
-                    // DO we have any options?
-                    if (c_Item.ModifierCount > 0)
+
+                    // Get the list of required bumble bees
+                    ItemsClass c_Requests = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_bumble"));
+
+                    // Do we not have redis?
+                    if (!c_Requests.Contains("redis"))
                     {
-                        // Use first
-                        iCount = c_Item.Modifiers[0].ToInteger(0);
+                        // Do we have not redis?
+                        if (!c_Requests.Contains("!redis"))
+                        {
+                            // Add it
+                            c_Requests.Add(new ItemClass("redis"));
+                        }
                     }
 
-                    // Add?
-                    if (c_Counts.ContainsKey(c_Item.Priority))
+                    // Loop thru
+                    foreach (ItemClass c_Item in c_Requests)
                     {
-                        // Replace
+                        // Kill?
+                        if (!c_Item.Priority.StartsWith("!"))
+                        {
+                            // Call
+                            this.Parent.AssureDNACount(c_Item.Priority, 1, 1); ;
+                        }
+                    }
+
+                    // Get the list of required worker bees
+                    c_Requests = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_worker").ToList());
+                    // Build table of procs vs. count
+                    NamedListClass<int> c_Counts = new NamedListClass<int>();
+                    // Loop thru
+                    foreach (ItemClass c_Item in c_Requests)
+                    {
+                        // How many
+                        int iCount = 0;
+
+                        // Handle number only
+                        if (c_Item.Priority.ToInteger(-1) != -1)
+                        {
+                            // 
+                            if (c_Item.Modifiers == null) c_Item.Modifiers = new List<string>();
+                            c_Item.Modifiers.Add(c_Item.Priority);
+                            c_Item.Priority = "";
+                        }
+
+                        // DO we have any options?
+                        if (c_Item.ModifierCount > 0)
+                        {
+                            // Use first
+                            iCount = c_Item.Modifiers[0].ToInteger(0);
+                        }
+
+                        // Add
                         c_Counts[c_Item.Priority] = iCount;
                     }
-                    else
+                    // Make a new array
+                    JArray c_Updated = new JArray();
+                    // Loop thru
+                    foreach (string sProc in c_Counts.Keys)
                     {
-                        // Add
-                        c_Counts.Add(c_Item.Priority, iCount);
-                    }
-                }
-                // Make a new array
-                JArray c_Updated = new JArray();
-                // Loop thru
-                foreach (string sProc in c_Counts.Keys)
-                {
-                    // Get the count
-                    int iCount = c_Counts[sProc];
-                    // Do
-                    this.Parent.AssureDNACount(HiveClass.ProcessorDNAName + "." + sProc, iCount, iCount);
+                        // Get the count
+                        int iCount = c_Counts[sProc];
+                        // Do
+                        this.Parent.AssureDNACount(HiveClass.ProcessorDNAName + "." + sProc, iCount, iCount);
 
-                    // Add to updated list
-                    if (sProc.HasValue())
-                    {
-                        c_Updated.Add(sProc + ":" + iCount);
-                    }
-                    else
-                    {
-                        c_Updated.Add(iCount.ToString());
-                    }
-                }
-
-                // Update the list.  This will remove duplicate proc entries
-                this.Parent.Parent.Set("qd_worker", c_Updated);
-
-                // And do any orchestration
-                lock (this.QueenDuties)
-                {
-                    // Do each
-                    foreach (Action cb in this.QueenDuties.Values)
-                    {
-                        // Just in case
-                        try
+                        // Add to updated list
+                        if (sProc.HasValue())
                         {
-                            cb();
+                            c_Updated.Add(sProc + ":" + iCount);
                         }
-                        catch { }
+                        else
+                        {
+                            c_Updated.Add(iCount.ToString());
+                        }
                     }
+
+                    // Update the list.  This will remove duplicate proc entries
+                    this.Parent.Parent.Set("qd_worker", c_Updated);
+
+                    // And do any orchestration
+                    lock (this.QueenDuties)
+                    {
+                        // Do each
+                        foreach (Action cb in this.QueenDuties.Values)
+                        {
+                            // Just in case
+                            try
+                            {
+                                cb();
+                            }
+                            catch { }
+                        }
+                    }
+
+                    // Mark oursleves
+                    if (this.Parent.State == HiveClass.States.InQueenDuties)
+                    {
+                        this.Parent.State = HiveClass.States.Queen;
+                    }
+
+                    // And do again in ten minutes
+                    c_Status.WaitFor(this.Parent.Parent["qd_every"].ToInteger(1).MinutesAsTimeSpan());
                 }
 
-                // And do again in ten minutes
-                c_Status.WaitFor(this.Parent.Parent["qd_every"].ToInteger(1).MinutesAsTimeSpan());
+                // Mark oursleves
+                this.Parent.State = HiveClass.States.Bee;
+
+                // Tell the world
+                this.QueenChanged?.Invoke();
+
+                // Get the queen
+                BeeClass c_Queen = this.QueenBee;
+
+                // Tell new queen to ascend
+                if(c_Queen != null)
+                {
+                    //
+                    this.Parent.Parent.LogInfo("Asking {0} to be queen", c_Queen.Id);
+
+                    //
+                    if (c_Queen.Handshake(HiveClass.States.Ascending))
+                    {
+                        //
+                        this.Parent.Parent.LogInfo("Queen is now {0}", c_Queen.Id);
+                        //
+                        this.CheckForQueen(true);
+                    }
+                    else
+                    {
+                        // Something went wrong, make ourselves queen again
+                        this.Parent.State = HiveClass.States.Ascending;
+                        // And again
+                        this.CheckForQueen();
+                    }
+                }
+                else
+                {
+                    // No new qeen?
+                    this.Parent.Parent.LogInfo("No queen is available");
+                }
+
+                //
+                this.Parent.Parent.LogInfo("Queen's duties have ended");
             }
-
-            // Tell the world
-            this.QueenChanged?.Invoke();
-
-            //
-            this.Parent.Parent.LogInfo("Queen's duties have ended");
         }
 
         /// <summary>
@@ -804,7 +945,7 @@ namespace NX.Engine.Hive
                     if (c_Follower != null)
                     {
                         // Do not check on ourselves
-                        if (!c_Follower.Id.IsSameValue(c_Me.Id))
+                        if (!c_Follower.IsSameAs(c_Me))
                         {
                             this.Parent.Parent.LogVerbose("Checking on {0}", c_Follower.Id);
 
@@ -812,6 +953,21 @@ namespace NX.Engine.Hive
                             switch (c_Follower.IsAlive())
                             {
                                 case BeeClass.States.Dead:
+                                    // Was the follower the queen?
+                                    if(this.QueenBee != null && c_Follower.IsSameAs(this.QueenBee))
+                                    {
+                                        //
+                                        this.Parent.Parent.LogInfo("Asking {0} to be queen", c_Follower.FollowerBee.Id);
+
+                                        // Ascend the follower of the queen
+                                        if(!c_Follower.FollowerBee.Handshake(HiveClass.States.Ascending))
+                                        {
+                                            // Something went wrong, make ourselves queen
+                                            this.Parent.State = HiveClass.States.Ascending;
+                                            // And again
+                                            this.CheckForQueen();
+                                        }
+                                    }
                                     // Something happened, kill it
                                     c_Follower.Kill(BeeClass.KillReason.DeadAtCheck);
                                     break;

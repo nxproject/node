@@ -35,6 +35,7 @@ using Docker.DotNet.Models;
 using Newtonsoft.Json.Linq;
 
 using NX.Shared;
+using Xceed.Document.NET;
 
 namespace NX.Engine.Hive
 {
@@ -238,21 +239,14 @@ namespace NX.Engine.Hive
             if (source.HasValue())
             {
                 // Assure
-                if (this.Target.Labels == null) this.Target.Labels = new Dictionary<string, string>();
+                if (this.Target.Labels == null) this.Target.Labels = new NamedListClass<string>();
 
                 // Setup
-                IDictionary<string, string> c_Target = this.Target.Labels;
+                NamedListClass<string> c_Target = this.Target.Labels as NamedListClass<string>;
 
                 foreach (string sKey in source.Keys())
                 {
-                    if (c_Target.ContainsKey(sKey))
-                    {
-                        this.Target.Labels[sKey] = source.Get(sKey);
-                    }
-                    else
-                    {
-                        c_Target.Add(sKey, source.Get(sKey));
-                    }
+                    c_Target[sKey] = source.Get(sKey);
                 }
             }
         }
@@ -263,16 +257,16 @@ namespace NX.Engine.Hive
             if (source.HasValue())
             {
                 // Assure
-                if (this.Target.Volumes == null) this.Target.Volumes = new Dictionary<string, EmptyStruct>();
+                if (this.Target.Volumes == null) this.Target.Volumes = new NamedListClass<EmptyStruct>();
 
                 // Setup
-                IDictionary<string, EmptyStruct> c_Target = this.Target.Volumes;
+                NamedListClass<EmptyStruct> c_Target = this.Target.Volumes as NamedListClass<EmptyStruct>;
 
                 foreach (string sKey in source.Keys())
                 {
-                    if (!c_Target.ContainsKey(sKey))
+                    if (!c_Target.Contains(sKey))
                     {
-                        c_Target.Add(sKey, new EmptyStruct());
+                        c_Target[sKey] = new EmptyStruct();
                     }
                 }
             }
@@ -315,16 +309,16 @@ namespace NX.Engine.Hive
             if (source.HasValue())
             {
                 // Assure
-                if (this.Target.ExposedPorts == null) this.Target.ExposedPorts = new Dictionary<string, EmptyStruct>();
+                if (this.Target.ExposedPorts == null) this.Target.ExposedPorts = new NamedListClass<EmptyStruct>();
 
                 // Setup
-                IDictionary<string, EmptyStruct> c_Target = this.Target.ExposedPorts;
+                NamedListClass<EmptyStruct> c_Target = this.Target.ExposedPorts as NamedListClass<EmptyStruct>;
 
                 foreach (string sKey in source.Keys())
                 {
-                    if (!c_Target.ContainsKey(sKey))
+                    if (!c_Target.Contains(sKey))
                     {
-                        c_Target.Add(sKey, new EmptyStruct());
+                        c_Target[sKey] = new EmptyStruct();
                     }
                 }
             }
@@ -337,7 +331,7 @@ namespace NX.Engine.Hive
             {
                 //
                 if (this.Target.HostConfig == null) this.Target.HostConfig = new HostConfig();
-                if (this.Target.ExposedPorts == null) this.Target.ExposedPorts = new Dictionary<string, EmptyStruct>();
+                if (this.Target.ExposedPorts == null) this.Target.ExposedPorts = new NamedListClass<EmptyStruct>();
 
                 // Setup
                 HostConfig c_Target = this.Target.HostConfig;
@@ -936,16 +930,16 @@ namespace NX.Engine.Hive
             return c_Ans;
         }
 
-        private Dictionary<string, IList<PortBinding>> DoPortBindings(JObject values)
+        private NamedListClass<IList<PortBinding>> DoPortBindings(JObject values)
         {
             // Assume none
-            Dictionary<string, IList<PortBinding>> c_Ans = null;
+            NamedListClass<IList<PortBinding>> c_Ans = null;
 
             // Any?
             if (values != null)
             {
                 // Make
-                c_Ans = new Dictionary<string, IList<PortBinding>>();
+                c_Ans = new NamedListClass<IList<PortBinding>>();
 
                 // Loop thru
                 foreach(string sKey in values.Keys())
@@ -1177,10 +1171,10 @@ namespace NX.Engine.Hive
             {
                 // Assure
                 if (this.Target.NetworkingConfig == null) this.Target.NetworkingConfig = new NetworkingConfig();
-                if (this.Target.NetworkingConfig.EndpointsConfig == null) this.Target.NetworkingConfig.EndpointsConfig = new Dictionary<string, EndpointSettings>();
+                if (this.Target.NetworkingConfig.EndpointsConfig == null) this.Target.NetworkingConfig.EndpointsConfig = new NamedListClass<EndpointSettings>();
 
                 // Setup
-                IDictionary<string, EndpointSettings> c_Target = this.Target.NetworkingConfig.EndpointsConfig;
+                NamedListClass<EndpointSettings> c_Target = this.Target.NetworkingConfig.EndpointsConfig as NamedListClass<EndpointSettings>;
 
                 foreach (string sKey in source.Keys())
                 {
@@ -1189,17 +1183,7 @@ namespace NX.Engine.Hive
                     // Any?
                     if(c_EP != null)
                     {
-                        // There?
-                        if(c_Target.ContainsKey(sKey))
-                        {
-                            // Replace
-                            c_Target[sKey] = c_EP;
-                        }
-                        else
-                        {
-                            // Add
-                            c_Target.Add(sKey, c_EP);
-                        }
+                        c_Target[sKey] = c_EP;
                     }
                 }
             }
