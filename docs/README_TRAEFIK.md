@@ -7,7 +7,7 @@ which hives are to be included.
 
 The first hive defined is the one that will host the traefik bumble bee.
 
-You tell the system that you want to use Traefik by calling:
+You tell the system that you want to use Traefik by using:
 ```
 --qd_uses Proc.TraefiK
 ```
