@@ -36,7 +36,7 @@ namespace Route.System
     /// </summary>
     public class Readiness : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "readyness" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "readyness" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Assume OK

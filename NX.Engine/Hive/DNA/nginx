@@ -1,6 +1,6 @@
 ﻿{
-	"@Unique": "Y",
-	"@SkipRecycle": "1",
+	"@Unique": "y",
+	"@SkipRecycle": "y",
 	"@Ports": [
 		"{nginx_port}"
 	],

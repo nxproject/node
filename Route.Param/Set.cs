@@ -45,7 +45,7 @@ namespace Route.Param
     /// </summary>
     public class Set : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST_SECURE, Support.Route};
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(Types.Secured), Support.Route};
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Do we have a name?

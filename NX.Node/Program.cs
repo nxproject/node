@@ -22,13 +22,11 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Newtonsoft.Json.Linq;
 
 using NX.Engine;
 using NX.Shared;
-using Octokit;
 
 namespace NXNode
 {
@@ -78,7 +76,7 @@ namespace NXNode
                     // Assure
                     sMod.AssurePath();
                     // And the UI folder
-                    string sUI = sOut.CombinePath("shared").CombinePath("ui");
+                    string sUI = sOut.CombinePath("modulesui");
                     // Assure
                     sUI.AssurePath();
 
@@ -91,17 +89,37 @@ namespace NXNode
                     // Do each one
                     foreach (string sSDir in c_Dirs)
                     {
-                        //
-                        string sADir = sDir.FormatString(sSDir.GetDirectoryNameFromPath());
-                        // Not were we started
+                        // Get the name
+                        string sAName = sSDir.GetDirectoryNameFromPath();
 
-                        // Look at subdirectories
-                        foreach (string sXDir in sADir.GetDirectoriesInPath())
+                        // According to source
+                        if(sAName.IsSameValue("docs"))
                         {
-                            if (!sWD.IsSameValue(sXDir))
+                            // Do not copy
+                        }
+                        else if(sAName.StartsWith("UI."))
+                        {
+                            // Make sub folder
+                            string sSAUI = sUI.CombinePath(sAName.Substring(1 + sAName.IndexOf(".")).ToLower());
+                            sSAUI.AssurePath();
+
+                            // UI
+                            CopyFolder(c_Env, sSDir, sSAUI);
+                        }                        
+                        else if (!sAName.StartsWith("."))
+                        {
+                            // Valid
+
+                            // Make source
+                            string sADir = sDir.FormatString(sAName);
+                            // Look at subdirectories
+                            foreach (string sXDir in sADir.GetDirectoriesInPath())
                             {
-                                // Copy Folder
-                                CopyFolder(c_Env, sXDir, sMod);
+                                if (!sWD.IsSameValue(sXDir))
+                                {
+                                    // Copy Folder
+                                    CopyFolder(c_Env, sXDir, sMod);
+                                }
                             }
                         }
                     }
@@ -111,14 +129,27 @@ namespace NXNode
                     // Loop thru
                     foreach (ItemClass c_Folder in c_Folders)
                     {
+                        // Do we have a type?
+                        if(!c_Folder.Value.HasValue())
+                        { 
+                            // UI folder?
+                            if(c_Folder.Key.GetFileNameFromPath().StartsWith("UI."))
+                            {
+                                c_Folder.Value = "ui";
+                            }
+                        }
+
                         // Get type
                         switch (c_Folder.Value.IfEmpty())
                         {
                             case "ui":
+                                // Make sub folder
+                                string sSAUI = sUI.CombinePath(sRoot.Substring(1 + sRoot.IndexOf(".")).ToLower());
+                                sSAUI.AssurePath();
                                 // Adjust if needed
-                                string sFolder = c_Folder.Key.Replace(@"..\", sRoot);
+                                string sFolder = c_Folder.Key;
                                 // Copy folder
-                                CopyFolder(c_Env, sFolder, sUI);
+                                CopyFolder(c_Env, sFolder, sSAUI);
                                 break;
 
                             default:
@@ -154,6 +185,11 @@ namespace NXNode
                 {
                     // And recycle
                     c_Env.Start();
+                }
+                else
+                {
+                    // Bye
+                    Environment.Exit(0);
                 }
             }
             else

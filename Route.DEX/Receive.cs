@@ -40,7 +40,7 @@ namespace Route.DEX
         public const string Route = "dex";
         #endregion
 
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST, Support.Route };
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Support.Route };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Use the body

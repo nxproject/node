@@ -41,10 +41,10 @@ Note that capitalization is ignored.
 
 Also route trees should be defined as:
 ```JavaScript
-public override List<string> RouteTree => new List<string>() { RouteClass.GET_ROUTED, "get", ":id" };
+public override List<string> RouteTree => new List<string>() { RouteClass.GET(Types.Routed), "get", ":id" };
 ```
-Note the use of **RouteClass.GET_ROUTED** instead of **RouteClass.GET**.  You can use 
-**RouteClass.GET_ROUTED _SECURE** to also secure the route.
+Note the use of **RouteClass.GET(Types.Routed)** instead of **RouteClass.GET**.  You can use 
+**RouteClass.GET(Types.Routed | Types.Secured)** to also secure the route.
 
 See [NginX](README_NGINX.md), section **Procs** to understand why this is required.
 
@@ -57,7 +57,7 @@ the load balancers.
 You can make routes use the **proc** environment setting by modifying the first parameter,
 which is the HTTP method in the route tree, for example:
 ```JavaScript
-public override List<string> RouteTree => new List<string>() { RouteClass.GET, "echo", "?opt?" };
+public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "echo", "?opt?" };
 ```
 is a non-proc based route as:
 ```
@@ -65,7 +65,7 @@ GET /echo/...
 ```
 but:
 ```JavaScript
-public override List<string> RouteTree => new List<string>() { RouteClass.GET_PROC, "echo", "?opt?" };
+public override List<string> RouteTree => new List<string>() { RouteClass.GET(Types.Routed), "echo", "?opt?" };
 ```
 changes the call to
 ```
@@ -73,7 +73,7 @@ GET /chores/echo/...
 ```
 You can also use the same mechanism for secured routes:
 ```JavaScript
-public override List<string> RouteTree => new List<string>() { RouteClass.POST_PROC_SECURE, "{id}", ":name"};
+public override List<string> RouteTree => new List<string>() { RouteClass.GET(Types.Routed | Types.Secured), "{id}", ":name"};
 ```
 which changes the call to:
 ```

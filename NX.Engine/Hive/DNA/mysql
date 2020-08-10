@@ -1,6 +1,6 @@
 ﻿{
-	"@Unique": "*",
-	"@SkipRecycle": "1",
+	"@Unique": "y",
+	"@SkipRecycle": "y",
 	"@Ports": [
 		"3306",
 		"33060"

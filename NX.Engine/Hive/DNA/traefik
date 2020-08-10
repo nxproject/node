@@ -1,8 +1,8 @@
 ﻿{
 	"@Unique": "*",
-	"@SkipRecycle": "1",
+	"@SkipRecycle": "y",
 	"@Requires": [
-		"consul"
+		"redis"
 	],
 	"@Ports": [
 		"$80",

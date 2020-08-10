@@ -132,7 +132,8 @@ namespace NX.Engine.Hive
             get
             {
                 return this.State.IsSameValue("exited") ||
-                     this.State.IsSameValue("unhealthy");
+                     this.State.IsSameValue("unhealthy") ||
+                     this.State.IsSameValue("restarting");
             }
         }
         #endregion

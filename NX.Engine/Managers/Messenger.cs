@@ -38,11 +38,6 @@ namespace NX.Engine
             : base(env)
         {
             //
-            //this.ID = this.Parent.ApplySystemPrefix(id);
-            //this.AvailabilityChangedCallback = avlchgd;
-            //this.DataReceivedCallback = datarecv;
-
-            //
             this.Redis = this.Parent.Globals.Get<NX.Engine.BumbleBees.Redis.ManagerClass>();
 
             // Link

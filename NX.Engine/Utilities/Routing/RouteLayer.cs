@@ -181,7 +181,7 @@ namespace NX.Engine
                         !sEntry.IsSameValue(RouterClass.UnsecureCode))
                     {
                         // Convert
-                        sEntry = RouterClass.SecureRoutePrefix;
+                        sEntry = RouteClass.SecureRoutePrefix;
                     }
 
                     // Sub-layer exists?

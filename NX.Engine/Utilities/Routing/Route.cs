@@ -41,29 +41,9 @@ namespace NX.Engine
         /// 
         /// </summary>
         #region Constants
-        public const string GET = "GET";
-        public const string POST = "POST";
-        public const string PUT = "PUT";
-        public const string DELETE = "DELETE";
-        public const string PATCH = "PATCH";
-
-        public const string GET_SECURE =  RouterClass.SecureRoutePrefix + "GET";
-        public const string POST_SECURE = RouterClass.SecureRoutePrefix + "POST";
-        public const string PUT_SECURE = RouterClass.SecureRoutePrefix + "PUT";
-        public const string DELETE_SECURE = RouterClass.SecureRoutePrefix + "DELETE";
-        public const string PATCH_SECURE = RouterClass.SecureRoutePrefix + "PATCH";
-
-        public const string GET_ROUTED = RouterClass.RoutedRoutePrefix + "GET";
-        public const string POST_ROUTED = RouterClass.RoutedRoutePrefix + "POST";
-        public const string PUT_ROUTED = RouterClass.RoutedRoutePrefix + "PUT";
-        public const string DELETE_ROUTED = RouterClass.RoutedRoutePrefix + "DELETE";
-        public const string PATCH_ROUTED = RouterClass.RoutedRoutePrefix + "PATCH";
-
-        public const string GET_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "GET";
-        public const string POST_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "POST";
-        public const string PUT_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "PUT";
-        public const string DELETE_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "DELETE";
-        public const string PATCH_ROUTED_SECURE = RouterClass.SecureRoutePrefix + RouterClass.RoutedRoutePrefix + "PATCH";
+        public const string SecureRoutePrefix = "@";
+        public const string RoutedRoutePrefix = "^";
+        public const string HiveRoutePrefix = "%";
 
         public const string ANY = "*";
         #endregion
@@ -76,6 +56,16 @@ namespace NX.Engine
         #region Constructor
         public RouteClass()
         { }
+        #endregion
+
+        #region Enums
+        public enum Types
+        {
+            Normal = 0,
+            Secured = 1,
+            Routed = 1,
+            Hive = 4
+        }
         #endregion
 
         #region IPlugIn
@@ -132,6 +122,43 @@ namespace NX.Engine
         /// <param name="store">The store where the URL params are stored</param>
         public virtual void Call(HTTPCallClass call, StoreClass store)
         { }
+        #endregion
+
+        #region Methods
+        private static string Make(string method, Types type = Types.Normal)
+        {
+            // 
+            if (type.HasFlag(Types.Hive)) method = HiveRoutePrefix + method;
+            if (type.HasFlag(Types.Secured)) method = SecureRoutePrefix + method;
+            if (type.HasFlag(Types.Routed)) method = RoutedRoutePrefix + method;
+
+            return method;
+        }
+
+        public static string GET(Types type = Types.Normal)
+        {
+            return Make("GET", type);
+        }
+
+        public static string POST(Types type = Types.Normal)
+        {
+            return Make("POST", type);
+        }
+
+        public static string PUT(Types type = Types.Normal)
+        {
+            return Make("PUT", type);
+        }
+
+        public static string DELETE(Types type = Types.Normal)
+        {
+            return Make("DELETE", type);
+        }
+
+        public static string PATCH(Types type = Types.Normal)
+        {
+            return Make("PATCH", type);
+        }
         #endregion
     }
 }

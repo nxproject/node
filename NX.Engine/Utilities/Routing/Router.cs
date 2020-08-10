@@ -44,8 +44,7 @@ namespace NX.Engine
     public class RouterClass : ExtManagerClass
     {
         #region Constants
-        public const string SecureRoutePrefix = "@";
-        public const string RoutedRoutePrefix = "^";
+       
         public const string UnsecureCode = "unsecured";
         #endregion
 
@@ -112,7 +111,7 @@ namespace NX.Engine
                 string sAt = nodes[0];
 
                 // Is this a secured route?
-                if (sAt.StartsWith(RouterClass.SecureRoutePrefix))
+                if (sAt.StartsWith(RouteClass.SecureRoutePrefix))
                 {
                     // Change it to normal
                     sAt = sAt.Substring(1);
@@ -120,20 +119,40 @@ namespace NX.Engine
                     if (nodes.Count == 1)
                     {
                         // Add
-                        nodes.Add(RouterClass.SecureRoutePrefix);
+                        nodes.Add(RouteClass.SecureRoutePrefix);
                     }
                     else
                     {
                         // Insert
-                        nodes.Insert(1, RouterClass.SecureRoutePrefix);
+                        nodes.Insert(1, RouteClass.SecureRoutePrefix);
                     }
                 }
 
                 // Routed?
-                if(sAt.StartsWith(RouterClass.RoutedRoutePrefix))
+                if(sAt.StartsWith(RouteClass.RoutedRoutePrefix))
                 {
                     // Get the module name
                     string sModule = route.ModuleName().ToLower();
+                    // Change it to normal
+                    sAt = sAt.Substring(1);
+                    // And add secure to the route
+                    if (nodes.Count == 1)
+                    {
+                        // Add
+                        nodes.Add(sModule);
+                    }
+                    else
+                    {
+                        // Insert
+                        nodes.Insert(1, sModule);
+                    }
+                }
+
+                // Hive?
+                if (sAt.StartsWith(RouteClass.HiveRoutePrefix))
+                {
+                    // Get the module name
+                    string sModule = this.Parent.Hive.Name.MD5HashString().ToLower();
                     // Change it to normal
                     sAt = sAt.Substring(1);
                     // And add secure to the route

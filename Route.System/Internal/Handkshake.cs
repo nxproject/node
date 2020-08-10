@@ -40,7 +40,7 @@ namespace Route.System
     /// </summary>
     public class Handshake : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "handshake", ":request" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "handshake", ":request" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Is ita request?

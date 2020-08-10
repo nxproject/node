@@ -40,7 +40,7 @@ namespace Route.System
     /// </summary>
     public class ID : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "id" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "id" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             call.RespondWithText(call.Env.ID);

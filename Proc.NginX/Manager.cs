@@ -309,7 +309,7 @@ namespace Proc.NginX
             // Open the server
             sBody += c_Field.URL.RemoveProtocol().RemovePort().NginxServerStart();
             // Set the port
-            sBody += this.Parent["nginx_port"].NginxListen();
+            sBody += this.Location.GetPort().NginxListen();
 
             // Do the bees
             // Loop thru

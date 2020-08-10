@@ -19,7 +19,6 @@ The following DNA definitions are part of the base system:
 DNA|Use
 ----|---
 processor|The basic task in the system.  It runs a copy of the NX.Node
-consul|Consul 1.4.4
 minio|Minio (latest)
 mongodb|MoongoDb 3.4.10
 nginx|NginX 1.16.0-1~bionic
@@ -78,7 +77,7 @@ Var|Value
 repo_project|classic
 tier|latest
 
-## @Unique and *
+## @Unique
 
 The @Unique entry is the field where the bee will be created, or in Docker speak,
 which computer will host the container.  Since the DNA for the built-in services
@@ -111,7 +110,7 @@ it is used to generate Volums and Bindings.
 ##@SkipRecycle
 
 The @SkipRecycle flag will be used in the future to detemine if a genome is to be
-recycled when the site changes.  If set to "1", the genome will not be recycled.
+recycled when the site changes.  If set to "y", the genome will not be recycled.
 
 ## Adding your own DNA
 

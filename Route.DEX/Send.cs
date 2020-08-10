@@ -36,7 +36,7 @@ namespace Route.DEX
     /// </summary>
     public class Send : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST, Receive.Route, "send" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Receive.Route, "send" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Must have an URL

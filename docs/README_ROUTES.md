@@ -19,7 +19,7 @@ namespace Route.System
     /// </summary>
     public class Echo : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "echo", "?opt?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "echo", "?opt?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             call.RespondWithStore(store);
@@ -106,7 +106,7 @@ returns:
 Now to show the :key option, let's trun the route tree into:
 
 ```JavaScript
-public override List<string> RouteTree => new List<string>() { RouteClass.GET, "echo", ":dept", "?opt?" };
+public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "echo", ":dept", "?opt?" };
 ```
 
 Now let's try the first example:
@@ -151,7 +151,7 @@ namespace Route.System
     /// </summary>
     public class FN : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST_SECURE, "{id}", ":name"};
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(Types.Secured), "{id}", ":name"};
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Call the function and respond

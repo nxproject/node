@@ -47,7 +47,7 @@ namespace Route.Hive
     /// </summary>
     public class ListBeesWithDNA : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, "list" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "list" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the manager

@@ -36,7 +36,7 @@ namespace Route.System
     /// </summary>
     public class Liveness : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "liveness" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "liveness" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             call.RespondWithStatic("OK");

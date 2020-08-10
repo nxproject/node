@@ -63,7 +63,7 @@ namespace NX.Engine
         private const string KeySettingsFolder = "sett_folder";
         private const string KeyDynamicFolder = "dyn_folder";
         private const string KeyDocumentFolder = "doc_folder";
-        private const string KeyUIFolder = "ui_folder";
+        private const string KeyUI = "ui";
         private const string KeySharedFolder = "shared_folder";
 
         private const string KeyGITURL = "git_url";
@@ -174,10 +174,9 @@ namespace NX.Engine
             this[KeySharedFolder] = this[KeySharedFolder].IfEmpty("/etc/shared");
             this[KeyDynamicFolder] = this.GetFolderPath(this.SharedFolder, KeyDynamicFolder, "dyn");
             this[KeyDocumentFolder] = this.GetFolderPath(this.SharedFolder, KeyDocumentFolder, "files");
-            this[KeyUIFolder] = this.GetFolderPath(this.SharedFolder, KeyUIFolder, "ui");
 
             this["wd"] = this["wd"].IfEmpty("".InContainer() ? "/etc/wd" : "".WorkingDirectory());
-            this["nginx_port"] = this["nginx_port"].IfEmpty("80");
+            this["nginx_port"] = this["nginx_port"].IfEmpty(this.GetAsJArray("use_traefik").HasValue() ? "80" : "$80");
 
             if (this.Process.IsSameValue("{proc}") || !this.Process.HasValue()) this.Process = "";
             this.Verbose = !!this.Verbose;
@@ -594,6 +593,17 @@ namespace NX.Engine
 
         /// <summary>
         /// 
+        /// The UI system to use
+        /// Default: react
+        /// 
+        /// </summary>
+        public string UI
+        {
+            get { return this[KeyUI]; }
+        }
+
+        /// <summary>
+        /// 
         /// prefix to use for all system names
         /// 
         /// </summary>
@@ -644,17 +654,6 @@ namespace NX.Engine
         public string DocumentFolder
         {
             get { return this[KeyDocumentFolder]; }
-        }
-
-        /// <summary>
-        /// 
-        /// Folder to hold the user interface
-        /// Default: #SharedFolder#/ui
-        /// 
-        /// </summary>
-        public string UIFolder
-        {
-            get { return this[KeyUIFolder]; }
         }
 
         #region Git items

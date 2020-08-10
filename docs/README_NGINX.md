@@ -7,6 +7,7 @@ The bumble bee keeps track of changes and will regenerate the nginx
 
 Setting|Meaning
 -------|-------
+nginx_port|The port to use.  The default depens whether [Traefik](README_TRAEFIK.md) is used
 nginx_debug|Set to y if you want a debug log
 nginx_wb|The site for the worker bees, defaults to "workerbees"
 nginx_proc|Allows for routing to specific worker bees
@@ -20,7 +21,7 @@ GET /xxx/...
 ```
 where xxx is the proc value.  In order for this to work properly, you need to:
 
-* Setup the proc routes to be RouteClass.GET_ROUTED or RouteClass.GET_ROUTED_SECURED
+* Setup the proc routes to be RouteClass.GET(Types.Routed) or RouteClass.GET(Types.Routed  | Types.Secured)
 * Create an enviroment setting of:
 ```
 --nginx_proc xxx
@@ -37,7 +38,7 @@ If you do not use **nginx_proc**, the call will go to the first available worker
 
 If you wish to give remote access to the bumble bee you need to:
 
-* Setup the bumble bee routes to be RouteClass.GET_ROUTED or RouteClass.GET_ROUTED_SECURED
+* Setup the bumble bee routes to be RouteClass.GET(Types.Routed) or RouteClass.GET(Types.Routed  | Types.Secured)
 * Create an enviroment setting of:
 ```
 --nginx_bumble genome

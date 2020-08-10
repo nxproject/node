@@ -740,7 +740,8 @@ namespace NX.Engine.Hive
             SafeThreadStatusClass c_Status = status as SafeThreadStatusClass;
 
             // Did we get knocked off?
-            if (this.Parent.State == HiveClass.States.Ascending)
+            if (this.Parent.State == HiveClass.States.Ascending ||
+                this.Parent.State == HiveClass.States.Queen)
             {
                 // Mark oursleves
                 this.Parent.State = HiveClass.States.Queen;

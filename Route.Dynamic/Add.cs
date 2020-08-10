@@ -46,7 +46,7 @@ namespace Route.Dynamic
     /// </summary>
     public class Add : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST_SECURE, Support.Route, "add" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(Types.Secured), Support.Route, "add" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             if (call.Env.DynamicFolder.HasValue() && call.Body.Length > 0)

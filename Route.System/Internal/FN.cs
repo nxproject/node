@@ -36,7 +36,7 @@ namespace Route.System
     /// </summary>
     public class FN : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST_SECURE, "{id}", ":name"};
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(Types.Secured), "{id}", ":name"};
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Call the function and respond

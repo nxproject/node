@@ -39,14 +39,17 @@ namespace Route.UI
     /// </summary>
     public class UI : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
-            // Assure folder
-            call.Env.UIFolder.AssurePath();
+            // Make the folder path
+            string sPath = call.Env.RootFolder.CombinePath("modulesui").CombinePath(call.Env.UI);
 
             // Get the full path
-            string sPath = store.PathFromEntry(call.Env.UIFolder, "path");
+            sPath = store.PathFromEntry(sPath, "path");
+
+            // Assure folder
+            sPath.AssurePath();
 
             // If not a file, then try using index.html
             if (!sPath.FileExists()) sPath = sPath.CombinePath("index.html");

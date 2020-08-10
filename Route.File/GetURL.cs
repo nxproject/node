@@ -46,7 +46,7 @@ namespace Route.File
     /// </summary>
     public class GetURL : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, ":id" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, ":id" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the path to the reverse pointer file

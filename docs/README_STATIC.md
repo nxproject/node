@@ -20,14 +20,17 @@ namespace Route.System
     /// </summary>
     public class UI : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
-            // Assure folder
-            call.Env.UIFolder.AssurePath();
+            // Make the folder path
+            string sPath = call.Env.RootFolder.CombinePath("modulesui").CombinePath(call.Env.UI);
 
             // Get the full path
-            string sPath = store.PathFromEntry(call.Env.UIFolder, "path");
+            sPath = store.PathFromEntry(sPath, "path");
+
+            // Assure folder
+            sPath.AssurePath();
 
             // If not a file, then try using index.html
             if (!sPath.FileExists()) sPath = sPath.CombinePath("index.html");
@@ -44,8 +47,7 @@ elsewhere, it will match whatever the requestor entered.
 
 If what was entered does not exist as a file, **index.html** is appended.
 
-The root path is **ui_folder** and the file must be in that folder or a child folder.
-If the file is not found a 404 Not found error is returned.
+If the resultant path is not found a 404 Not found error is returned.
 
 And I say maybe a static web system, as I can see where with a bit of code, you can
 make this route into a processor and modify the files as they are being returned.
@@ -53,38 +55,33 @@ make this route into a processor and modify the files as they are being returned
 The config for this application looks like:
 ```JSON
 {
-    "uses": [ "Route.UI" ],
-    "ui_folder": "@/etc/ui",
-
-    "qd_worker": [ "4" ],
-    "qd_bumble": [ "traefik" ]
+    "ui": "react"
 }
 ```
+which will use the React boilerplate.
+
+The following choices are available:
+
+Code|System
+bootstrap|[Bootstrap](https://getbootstrap.com)
+html|HTML based system
+qx|[qooxdoo](https://qooxdoo.org/about.html)
+react|[React](https://github.com/facebook/react)
+vue|[Vue](https://vuejs.org)
+
+## Adding your code
 
 If you include your web site pages in the Visual Studio solution you can set the config
 as follows:
 ```JSON
 {
     "make_bee": "y",
-    "uses": [ "Route.UI" ],
+    "ui": "react",
     "code_folder": "folderwithwebsite=ui"
 }
 ```
 The **ui** option at the end of the **code_folder** tells the system that the folder
-contains the website UI.  This code will not be then used for the call of:
-```JavaScript
-env.Use("xxx.xx");
-```
-ad the proper **ui_folder** value will be created.
-
-## Sample sites
-
-There are two sample sites included:
-
-Package|Enviroment setting
--------|------------------
-[Bootstrap](https://getbootstrap.com)|--code_folder "..\UI.Bootstrap=ui" 
-[React](https://github.com/facebook/react)|--code_folder "..\UI.React=ui" 
-[Vue](https://vuejs.org)|--code_folder "..\UI.Vue=ui"
+contains the website UI.  This code will then be added to the proper boilerplate,
+given by the **ui** environemnt setting.
 
 [Back to top](../README.md)

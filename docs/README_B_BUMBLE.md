@@ -24,10 +24,10 @@ Note that capitalization is ignored.
 
 Also route trees should be defined as:
 ```JavaScript
-public override List<string> RouteTree => new List<string>() { RouteClass.GET_ROUTED, "get", ":id" };
+public override List<string> RouteTree => new List<string>() { RouteClass.GET(Types.Routed), "get", ":id" };
 ```
-Note the use of **RouteClass.GET_ROUTED** instead of **RouteClass.GET**.  You can use 
-**RouteClass.GET_ROUTED _SECURE** to also secure the route.
+Note the use of **RouteClass.GET(Types.Routed)** instead of **RouteClass.GET**.  You can use 
+**RouteClass.RouteClass.GET(Types.Routed | Types.Secured)** to also secure the route.
 
 See [NginX](README_NGINX.md), section **Bumble bee access** to understand why this is required.
 

@@ -4165,6 +4165,7 @@ namespace NX.Shared
         {
             return new DateTime(dt.Year, dt.Month, dt.Day, hour, 0, 0);
         }
+
         public static DateTime MoveTo(this DateTime dt, DayOfWeek day)
         {
             int iDays = (int)day - (int)dt.DayOfWeek;
@@ -4202,6 +4203,11 @@ namespace NX.Shared
         public static DateTime Parse(this string date)
         {
             return DateTime.Parse(date);
+        }
+
+        public static string ToTimeStampSecs(this DateTime value)
+        {
+            return value.ToString("yyyy-MM-dd HH:mm:ss");
         }
         #endregion
 

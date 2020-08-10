@@ -50,7 +50,7 @@ namespace Route.File
     /// </summary>
     public class Delete : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.DELETE, Support.Route, "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.DELETE(), Support.Route, "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path

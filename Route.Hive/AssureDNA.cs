@@ -49,7 +49,7 @@ namespace Route.Hive
     /// </summary>
     public class AssureDNA : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, "assure" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "assure" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the manager

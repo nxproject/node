@@ -54,7 +54,7 @@ namespace Route.File
     /// </summary>
     public class MapGet : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, "map", "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "map", "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path

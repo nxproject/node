@@ -50,7 +50,7 @@ namespace Route.USPS
     /// </summary>
     public class Validate : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET_ROUTED, "validate" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(Types.Routed), "validate" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Do

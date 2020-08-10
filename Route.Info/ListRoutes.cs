@@ -40,7 +40,7 @@ namespace Route.Info
     /// </summary>
     public class ListRoutes : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, "listroutes" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "listroutes" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             call.RespondWithJSON(call.Env.Router.AsJObject());

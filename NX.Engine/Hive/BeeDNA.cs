@@ -597,6 +597,20 @@ namespace NX.Engine.Hive
             set { this["@SkipRecycle"] = value.ToString(); }
         }
 
+        /// <summary>
+        /// 
+        /// Is the container unique?
+        /// 
+        /// y - Unique per hive
+        /// * - Unique per system
+        /// 
+        /// </summary>
+        public string Unique
+        {
+            get { return this["@Unique"]; }
+            set { this["@Unique"] = value; }
+        }
+
         ///
         /// 
         /// 

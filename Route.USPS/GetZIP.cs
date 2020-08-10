@@ -50,7 +50,7 @@ namespace Route.USPS
     /// </summary>
     public class GetZIP : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET_ROUTED, "zip" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(Types.Routed), "zip" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Do

@@ -53,7 +53,7 @@ namespace Route.File
     /// </summary>
     public class Folder : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, "folder", "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "folder", "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path

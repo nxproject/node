@@ -159,14 +159,14 @@ namespace NX.Engine.Hive
                 // Handle shutdown
                 AppDomain.CurrentDomain.ProcessExit += delegate (object sender, EventArgs e)
                 {
-                // Are we the queen?
-                if (this.Roster.QueenBee != null && this.Roster.QueenBee.IsSameAs(this.Roster.MeBee))
+                    // Are we the queen?
+                    if (this.Roster.QueenBee != null && this.Roster.QueenBee.IsSameAs(this.Roster.MeBee))
                     {
-                    // Bring up the follower
-                    this.Roster.MeBee.FollowerBee.Handshake(HiveClass.States.Ascending);
+                        // Bring up the follower
+                        this.Roster.MeBee.FollowerBee.Handshake(HiveClass.States.Ascending);
                     }
                 };
-            }            
+            }
 
             // Out
             this.InInitialize = false;
@@ -467,10 +467,10 @@ namespace NX.Engine.Hive
             string sLoc = location.RemoveProtocol().RemovePort();
 
             // Loop thru
-            foreach(FieldClass c_Field in this.Fields.Values)
+            foreach (FieldClass c_Field in this.Fields.Values)
             {
                 // IP match?
-                if(sLoc.IsSameValue(c_Field.URL.RemoveProtocol().RemovePort()))
+                if (sLoc.IsSameValue(c_Field.URL.RemoveProtocol().RemovePort()))
                 {
                     // Fund it
                     c_Ans = c_Field;
@@ -514,7 +514,7 @@ namespace NX.Engine.Hive
                 c_Wait = 5.MinutesAsTimeSpan();
 
                 // If first time, do the setup
-                if(!this.HasSetup)
+                if (!this.HasSetup)
                 {
                     // Only once
                     this.HasSetup = true;
@@ -522,7 +522,7 @@ namespace NX.Engine.Hive
                     // Get the uses list
                     ItemsClass c_Uses = new ItemsClass(this.Parent.GetAsJArray("uses"));
                     // Loop thru
-                    foreach(ItemClass c_Item in c_Uses)
+                    foreach (ItemClass c_Item in c_Uses)
                     {
                         // Load
                         this.Parent.Use(c_Item.Priority);
@@ -1008,31 +1008,41 @@ namespace NX.Engine.Hive
                        // The  container ID
                        string sBeeName = null;
 
-                       // From environemnt
-                       JArray c_Hives = this.Parent.GetAsJArray("hive_" + sDNA);
-                       // Any?
-                       if (c_Hives.HasValue())
+                       // Unique?
+                       switch (c_Def.Unique.IfEmpty().ToLower())
                        {
-                           // Mash
-                           sBeeName = c_Hives.ToList().Join(".").MD5HashString();
+                           case "y":
+                               sBeeName = "";
+                               break;
+
+                           case "*":
+                               // From environemnt
+                               JArray c_Hives = this.Parent.GetAsJArray("hive_" + sDNA);
+                               // Any?
+                               if (c_Hives.HasValue())
+                               {
+                                   // Mash
+                                   sBeeName = c_Hives.ToList().Join(".").MD5HashString();
+                               }
+                               else
+                               {
+                                   sBeeName = "global";
+                               }
+                               break;
+
+                           default:
+                               sBeeName = sNextID;
+                               break;
                        }
+
 
                        // Now the config
                        using (DDNConfigClass c_Resolve = new DDNConfigClass(c_Raw, sDNA.IsSameValue(ProcessorDNAName)))
                        {
-                           // Do we have a name?
-                           if (sBeeName.HasValue())
-                           {
-                               // Fit it in
-                               c_Resolve.Target.Name = sBeeName;
-                           }
-                           else
-                           {
-                               // Create one
-                               c_Resolve.Target.Name = this.Name + "_" + dna.Replace(".", "_") + "_" + sNextID;
-                           }
+                           // Create the name
+                           c_Resolve.Target.Name = this.Name + "_" + dna.Replace(".", "_") + "_" + sBeeName;
 
-                           // Create
+                           // Create container
                            string sID = c_Client.CreateContainer(c_Resolve);
 
                            // Do we have an id?
@@ -1186,10 +1196,10 @@ namespace NX.Engine.Hive
             this.Roster.Refresh();
 
             // Loop thru
-            foreach(BeeClass c_Bee in this.Bees)
+            foreach (BeeClass c_Bee in this.Bees)
             {
                 // Processor?
-                if(c_Bee.CV.DNA.StartsWith(HiveClass.ProcessorDNAName))
+                if (c_Bee.CV.DNA.StartsWith(HiveClass.ProcessorDNAName))
                 {
                     // Kill like a zombie so no log is generated
                     c_Bee.Kill(BeeClass.KillReason.NoLogs);

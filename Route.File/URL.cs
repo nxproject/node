@@ -49,7 +49,7 @@ namespace Route.File
     /// </summary>
     public class URL : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, Support.Route, "url", "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "url", "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path

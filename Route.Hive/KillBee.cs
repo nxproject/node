@@ -46,7 +46,7 @@ namespace Route.Hive
     /// </summary>
     public class KillBee : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.DELETE, Support.Route, "bee" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.DELETE(), Support.Route, "bee" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the manager

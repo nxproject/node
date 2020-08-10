@@ -47,7 +47,7 @@ namespace Route.Hive
     /// </summary>
     public class MakeBee : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST, Support.Route, "make" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Support.Route, "make" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the manager

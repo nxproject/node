@@ -52,7 +52,7 @@ namespace Route.File
     /// </summary>
     public class Put : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST, Support.Route, "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Support.Route, "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path

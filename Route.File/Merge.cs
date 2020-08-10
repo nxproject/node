@@ -48,7 +48,7 @@ namespace Route.File
     /// </summary>
     public class Merge : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST, Support.Route, "merge", "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Support.Route, "merge", "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path

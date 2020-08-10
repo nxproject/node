@@ -44,7 +44,7 @@ namespace Route.System
     /// </summary>
     public class Echo : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "echo", "?opt?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "echo", "?opt?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             call.RespondWithStore(store);

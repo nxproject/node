@@ -128,6 +128,28 @@ in many languages. I know that my conversion work is not done, until then you wi
 see a version number of less than 1.0. And like any programmer, the code will
 change to adapt to new things.
 
+NX.Node is one piece of a multi-part project, so expect changes as I work on the other layers!
+
+## My take on containers
+
+The computer world is and has been in a cycle.  I begun with a "mainframe" that could be
+used by one person at a time, in other words a "personal" computer, just a very big
+"personal" computer.  Time-sharing came into play, as the big, expensive computer could
+then be used by many people at the "same" time.  Each computer sice became the personal computer 
+in the 80's, which begun with the same coputing power of the first mainframes that I  used,
+it just sat on your desk.  Over time, the power of that computer grew and by linking them
+together, we got "the cloud", one really big computer, but made of "litte" computers
+which could "timeshare" the respurces by using containers.
+
+I like "the cloud", but not just to run a billion people on one "application", I want
+to run a different applications for a billion people.  A hive is the platform for such an application.
+
+Imagine going to your dog walker and being able to setup a fairly complex application that
+handles everything from sending out "flyers" to back room accounting, with video conferencing
+and text messages thrown in.  But just for him/her.  And then doing the same, with a bit
+of customization, for the sandwich shop at the corner.  And just for them.
+
+That is what my goal is, and has been since 1983.
 
 ## Acknowledgments
 

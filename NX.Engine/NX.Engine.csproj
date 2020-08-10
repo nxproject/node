@@ -37,9 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Hive\DNA\consul">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Update="Hive\DNA\minio">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -101,12 +98,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Hive\Genomes\base\ubuntu-bionic-core-cloudimg-amd64-root.tar.gz">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Hive\Genomes\consul\docker-entrypoint.sh">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Hive\Genomes\consul\Dockerfile">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Hive\Genomes\minio\Dockerfile">

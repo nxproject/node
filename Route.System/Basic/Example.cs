@@ -42,7 +42,7 @@ namespace Route.System
     /// </summary>
     public class Example : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET, "example" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "example" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             JObject c_Result = new JObject();
