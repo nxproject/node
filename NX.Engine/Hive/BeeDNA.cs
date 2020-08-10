@@ -636,6 +636,9 @@ namespace NX.Engine.Hive
             JObject c_Params = xvalues.Clone();
             // Merge the values
             if (values != null) c_Params.Merge(values.SynchObject);
+            // Add DNA's
+            this.AddDNA(hive, c_Params, "redis");
+            this.AddDNA(hive, c_Params, "nginx");
             // And make a new store
             values = new StoreClass(c_Params);
             //
@@ -826,6 +829,26 @@ namespace NX.Engine.Hive
             }
 
             return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Adds the IP of the DNA, if any
+        /// 
+        /// </summary>
+        /// <param name="values"></param>
+        /// <param name="dna"></param>
+        private void AddDNA(HiveClass hive, JObject values, string dna)
+        {
+
+            // Get the DNA
+            List<string> c_IPs = hive.Roster.GetLocationsForDNA(dna);
+            // Any?
+            if(c_IPs .Count > 0)
+            {
+                // Use first
+                values.Set(dna, c_IPs.First().URLMake().RemoveProtocol());
+            }
         }
         #endregion
     }

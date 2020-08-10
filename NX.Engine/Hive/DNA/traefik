@@ -13,9 +13,8 @@
 		"{shared_folder}/_backups:/etc/backups"
 	],
 	"Cmd": [
-		"--consul",
-		"--consul.endpoint={consul}",
-		"--consul.watch=true",
+		"--providers.redis.endpoints={redis}",
+		"--providers.redis.rootkey=traefik",
 		"--traefikLog.format='json'",
 		"--accessLog.format='json'",
 		"--defaultEntryPoints=http,https",
