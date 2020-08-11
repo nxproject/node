@@ -153,7 +153,7 @@ The **ui** option at the end of the **code_folder** tells the system that the fo
 contains the website UI.  This code will then be added to the proper boilerplate,
 given by the **ui** environemnt setting.
 
-## <nxjs>
+## nxjs
 
 You can include JavaScript in your .html pages by the use of **nxjs** tag.  For example:
 ```HTML
