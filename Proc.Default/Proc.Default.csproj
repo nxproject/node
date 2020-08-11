@@ -4,4 +4,9 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\NX.Engine\NX.Engine.csproj" />
+    <ProjectReference Include="..\NX.Shared\NX.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

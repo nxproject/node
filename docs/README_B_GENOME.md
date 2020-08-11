@@ -59,10 +59,16 @@ Once those are done, execute the following in the command line:
 ```
 NXNode.exe --make_genome y --code_folder foldername --field name=iptodocker
 ```
-The **gnome_source** is optional but the folder should contain all of our DLL's
-to be included in the genome.  It may me used multiple times to include multiple sources.
+The **code_folder** is optional but the folder should contain:
 
-If you leave out the field, the program will assume that is the local Docker instance.
+* Multipe project folders
+* A single project
+* One or more DLL's
+
+The system will copy the appropriate files into the genome.  It may me used multiple times 
+to include multiple sources.
+
+If you leave out the field, the local Docker instance is assumed.
 
 Note that the process uses folder **/build/container**, so any contents in that folder
 will be automatically deleted.

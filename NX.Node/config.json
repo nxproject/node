@@ -18,7 +18,7 @@
 
   // Profile
 
-  "uses": [], // To give the system some flavor
+  "uses": [ ], // To give the system some flavor
 
   // Queens duties
 

@@ -44,8 +44,6 @@ using System.Xml;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using TimeZoneConverter;
-using System.Windows.Markup;
-using System.Reflection.Metadata.Ecma335;
 
 namespace NX.Shared
 {
@@ -2015,6 +2013,18 @@ namespace NX.Shared
         public static bool HasValue(this JObject value)
         {
             return value != null && value.HasValues;
+        }
+
+        public static JObject ToJObject(this Dictionary<string, object> dict)
+        {
+            JObject c_Ans = new JObject();
+
+            foreach(string sKey in dict.Keys)
+            {
+                c_Ans.Set(sKey, dict[sKey].ToStringSafe());
+            }
+
+            return c_Ans;
         }
         #endregion
 

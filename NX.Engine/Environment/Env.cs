@@ -825,7 +825,7 @@ namespace NX.Engine
                         bool bFound = false;
 
                         // Get list of sources
-                        ItemsClass c_Sources = new ItemsClass( this.GetAsJArray("code_folder"));
+                        ItemsClass c_Sources = new ItemsClass( this.GetAsJArray(KeyCodeFolder));
                         // Loop thru
                         foreach (ItemClass c_Item in c_Sources)
                         {

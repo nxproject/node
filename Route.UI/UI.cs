@@ -54,7 +54,7 @@ namespace Route.UI
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Make the folder path
-            string sPath = call.Env.RootFolder.CombinePath("modulesui").CombinePath(call.Env.UI);
+            string sPath = call.Env.RootFolder.CombinePath("modulesui").CombinePath(call.Env.UI.Replace("+", ""));
 
             // Get the full path
             sPath = store.PathFromEntry(sPath, "path");
@@ -79,7 +79,7 @@ namespace Route.UI
             Func<FileStream, Stream> c_Proc = null;
 
             // HTML?
-            if (sPath.GetExtensionFromPath().IsSameValue("html"))
+            if (sPath.GetExtensionFromPath().IsSameValue("html") && call.Env.UI.Contains("+"))
             {
                 // Make JS interpreter
                 var c_Engine = new Engine(cfg => cfg.AllowClr());

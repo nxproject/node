@@ -24,7 +24,7 @@ namespace Route.System
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Make the folder path
-            string sPath = call.Env.RootFolder.CombinePath("modulesui").CombinePath(call.Env.UI);
+            string sPath = call.Env.RootFolder.CombinePath("modulesui").CombinePath(call.Env.UI.Replace("+", ""));
 
             // Get the full path
             sPath = store.PathFromEntry(sPath, "path");
@@ -49,7 +49,7 @@ namespace Route.System
             Func<FileStream, Stream> c_Proc = null;
 
             // HTML?
-            if (sPath.GetExtensionFromPath().IsSameValue("html"))
+            if (sPath.GetExtensionFromPath().IsSameValue("html") && call.Env.UI.Contains("+"))
             {
                 // Make JS interpreter
                 var c_Engine = new Engine(cfg => cfg.AllowClr());
@@ -138,21 +138,6 @@ qx|[qooxdoo](https://qooxdoo.org/about.html)
 react|[React](https://github.com/facebook/react)
 vue|[Vue](https://vuejs.org)
 
-## Adding your code
-
-If you include your web site pages in the Visual Studio solution you can set the config
-as follows:
-```JSON
-{
-    "make_bee": "y",
-    "ui": "react",
-    "code_folder": "folderwithwebsite=ui"
-}
-```
-The **ui** option at the end of the **code_folder** tells the system that the folder
-contains the website UI.  This code will then be added to the proper boilerplate,
-given by the **ui** environemnt setting.
-
 ## nxjs
 
 You can include JavaScript in your .html pages by the use of **nxjs** tag.  For example:
@@ -196,5 +181,11 @@ env|The current environment
 call|The HTTP call
 html|HTML generator
 
+To turn on this feature, call:
+```
+--ui react+
+```
+The plus sign tells the system to support nxjs tags.  You can do this with any of the UI
+systems.
 
 [Back to top](../README.md)

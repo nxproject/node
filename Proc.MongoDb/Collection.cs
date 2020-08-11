@@ -58,7 +58,7 @@ namespace Proc.MongoDb
 
         /// <summary>
         /// 
-        /// The databse interface
+        /// The collection interface
         /// 
         /// </summary>
         private IMongoCollection<BsonDocument> IInterface { get; set; }

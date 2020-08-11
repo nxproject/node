@@ -609,7 +609,7 @@ namespace NX.Engine
         #endregion
 
         #region Site and user properties
-        public SiteInfoClass SiteInfo { get { return this.Parent.SiteInfo; } }
+        //public SiteInfoClass SiteInfo { get { return this.Parent.SiteInfo; } }
         public UserInfoClass UserInfo { get; set; }
         #endregion
     }

@@ -81,81 +81,31 @@ namespace NXNode
                     sUI.AssurePath();
 
                     // Get the root
-                    string sRoot = sDir.Substring(0, sDir.IndexOf("{0}"));
+                    string sRoot = sDir.Substring(0, sDir.IndexOf("{0}") - 1);
                     // Now cut back one
-                    sDir = sDir.Substring(0, sDir.LastIndexOf(@"\"));
-                    // Find all of the directories
-                    List<string> c_Dirs = sRoot.GetDirectoriesInPath();
-                    // Do each one
-                    foreach (string sSDir in c_Dirs)
-                    {
-                        // Get the name
-                        string sAName = sSDir.GetDirectoryNameFromPath();
+                    sDir = sDir.Substring(sDir.IndexOf("{0}") + 3);
 
-                        // According to source
-                        if(sAName.IsSameValue("docs"))
-                        {
-                            // Do not copy
-                        }
-                        else if(sAName.StartsWith("UI."))
-                        {
-                            // Make sub folder
-                            string sSAUI = sUI.CombinePath(sAName.Substring(1 + sAName.IndexOf(".")).ToLower());
-                            sSAUI.AssurePath();
-
-                            // UI
-                            CopyFolder(c_Env, sSDir, sSAUI);
-                        }                        
-                        else if (!sAName.StartsWith("."))
-                        {
-                            // Valid
-
-                            // Make source
-                            string sADir = sDir.FormatString(sAName);
-                            // Look at subdirectories
-                            foreach (string sXDir in sADir.GetDirectoriesInPath())
-                            {
-                                if (!sWD.IsSameValue(sXDir))
-                                {
-                                    // Copy Folder
-                                    CopyFolder(c_Env, sXDir, sMod);
-                                }
-                            }
-                        }
-                    }
+                    //
+                    CopyTree(c_Env, sRoot, sDir, sMod, sUI, sRootFolder);
 
                     // Get the extra folders
-                    ItemsClass c_Folders = new ItemsClass(c_Env.GetAsJArray(EnvironmentClass.KeyCodeFolder));
+                    List<string> c_Folders = c_Env.GetAsJArray(EnvironmentClass.KeyCodeFolder).ToList();
                     // Loop thru
-                    foreach (ItemClass c_Folder in c_Folders)
+                    foreach (string sFolder in c_Folders)
                     {
-                        // Do we have a type?
-                        if(!c_Folder.Value.HasValue())
-                        { 
-                            // UI folder?
-                            if(c_Folder.Key.GetFileNameFromPath().StartsWith("UI."))
-                            {
-                                c_Folder.Value = "ui";
-                            }
-                        }
+                        // Get the directory
+                        string sSource = sFolder;
+                        // Add extra delim
+                        if (!sSource.EndsWith(@"\")) sSource += @"\";
 
-                        // Get type
-                        switch (c_Folder.Value.IfEmpty())
+                        // Root of many projects?
+                        if (!CopyTree(c_Env, sSource, sDir, sMod, sUI))
                         {
-                            case "ui":
-                                // Make sub folder
-                                string sSAUI = sUI.CombinePath(sRoot.Substring(1 + sRoot.IndexOf(".")).ToLower());
-                                sSAUI.AssurePath();
-                                // Adjust if needed
-                                string sFolder = c_Folder.Key;
-                                // Copy folder
-                                CopyFolder(c_Env, sFolder, sSAUI);
-                                break;
-
-                            default:
-                                // Copy folder
-                                CopyFolder(c_Env, c_Folder.Key, sMod);
-                                break;
+                            // If not, see if it is a single project
+                            if(!CopyProject(c_Env, sSource, sDir, sMod, sUI))
+                            {
+                                CopyFolder(c_Env, sSource, sMod);
+                            }
                         }
                     }
 
@@ -199,8 +149,79 @@ namespace NXNode
             }
         }
 
-        private static void CopyFolder(EnvironmentClass env, string source, string target)
+        #region Support
+        private static bool CopyTree(EnvironmentClass env,
+                                            string rootdir,
+                                            string template,
+                                            string moddir,
+                                            string uidir,
+                                            params string[] skip)
         {
+            // Assume failue
+            bool bAns = false;
+
+            // Make skip list
+            List<string> c_Skip = new List<string>(skip);
+
+            // Find all of the directories
+            List<string> c_Dirs = rootdir.GetDirectoriesInPath();
+            // Do each one
+            foreach (string sSDir in c_Dirs)
+            {
+                // If not in skip
+                if (!c_Skip.Contains(sSDir.GetDirectoryNameFromPath()))
+                {
+                    //
+                    if (CopyProject(env, sSDir, template, moddir, uidir)) bAns = true;
+                }
+            }
+
+            return bAns;
+        }
+
+        private static bool CopyProject(EnvironmentClass env,
+                                            string sourcedir,
+                                            string template,
+                                            string moddir,
+                                            string uidir)
+        {
+            // Assume failure
+            bool bAns = false;
+
+            // Get the name
+            string sAName = sourcedir.GetDirectoryNameFromPath();
+
+            // According to source
+            if (sAName.IsSameValue("docs"))
+            {
+                // Do not copy
+            }
+            else if (sAName.StartsWith("UI."))
+            {
+                // Make sub folder
+                string sSAUI = uidir.CombinePath(sAName.Substring(1 + sAName.IndexOf(".")).ToLower());
+                sSAUI.AssurePath();
+
+                // UI
+                bAns = CopyFolder(env, sourcedir, sSAUI);
+            }
+            else if (!sAName.StartsWith("."))
+            {
+                // Make source
+                string sADir = sourcedir + template;
+
+                // Copy all the files to modules
+                bAns = CopyFolder(env, sADir, moddir);
+            }
+
+            return bAns;
+        }
+
+        private static bool CopyFolder(EnvironmentClass env, string source, string target)
+        {
+            // Assume failure
+            bool bAns = false;
+
             if (!source.Contains(";"))
             {
                 // Tell user
@@ -218,15 +239,20 @@ namespace NXNode
                     string sName = sFile.GetFileNameFromPath();
                     // Copy
                     sFile.CopyFile(target + @"\" + sName);
+                    //
+                    bAns = true;
                 }
 
                 // And now each directory
                 foreach (string sDir in source.GetDirectoriesInPath())
                 {
                     // Copy
-                    CopyFolder(env, sDir, target + @"\" + sDir.GetDirectoryNameFromPath());
+                    if (CopyFolder(env, sDir, target + @"\" + sDir.GetDirectoryNameFromPath())) bAns = true;
                 }
             }
+
+            return bAns;
         }
+        #endregion
     }
 }
