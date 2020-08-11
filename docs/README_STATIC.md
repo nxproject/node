@@ -84,4 +84,48 @@ The **ui** option at the end of the **code_folder** tells the system that the fo
 contains the website UI.  This code will then be added to the proper boilerplate,
 given by the **ui** environemnt setting.
 
+## <nxjs>
+
+You can include JavaScript in your .html pages by the use of **nxjs** tag.  For example:
+```HTML
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Hello World!</title>
+</head>
+<body>
+    <nxjs>
+        html.Add(html.h2("Hello World!"), html.p("I am ", env.Hive.Name));
+    </nxjs>
+</body>
+</html>
+```
+would produce the HTML page of:
+
+``` ------------------------------- Top ----------------------------------```
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8">
+    <title>Hello World!</title>
+</head>
+<body>
+    <h2>Hello World!</h2><p>I am test</p>
+</body>
+
+``` ----------------------------- Bottom ---------------------------------```
+
+The following are available in the JavaScript:
+
+Variable|Meaning
+--------|-------
+env|The current environment
+call|The HTTP call
+html|HTML generator
+
+
 [Back to top](../README.md)

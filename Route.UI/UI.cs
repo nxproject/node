@@ -22,7 +22,18 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+/// Packet Manager Requirements
+/// 
+/// Install-Package Jint -Version 2.11.58
+/// Istall-Package HtmlAgilityPack - Version 1.11.24
+/// 
+
+using System;
+using System.IO;
 using System.Collections.Generic;
+
+using HtmlAgilityPack;
+using Jint;
 
 using NX.Engine;
 using NX.Shared;
@@ -48,14 +59,83 @@ namespace Route.UI
             // Get the full path
             sPath = store.PathFromEntry(sPath, "path");
 
+            if(!"".InContainer())
+            {
+                // Get the path
+                sPath = "".WorkingDirectory();
+                // Find where NX.Node is
+                int iPos = sPath.IndexOf("NX.Node");
+                // Make new path
+                sPath = sPath.Substring(0, iPos) + "UI." + call.Env.UI;
+            }
+
             // Assure folder
             sPath.AssurePath();
 
             // If not a file, then try using index.html
             if (!sPath.FileExists()) sPath = sPath.CombinePath("index.html");
 
+            // Assume no processor
+            Func<FileStream, Stream> c_Proc = null;
+
+            // HTML?
+            if (sPath.GetExtensionFromPath().IsSameValue("html"))
+            {
+                // Make JS interpreter
+                var c_Engine = new Engine(cfg => cfg.AllowClr());
+                // Add the objects
+                c_Engine.SetValue("call", call);
+                c_Engine.SetValue("env", call.Env);
+                c_Engine.SetValue("store", store);
+                c_Engine.SetValue("html", new HTMLClass());
+
+                // Make our HTML processor
+                c_Proc = delegate (FileStream stream)
+                {
+                    // Open a reader
+                    using (StreamReader c_Reader = new StreamReader(stream))
+                    {
+                        // Read the page
+                        string sPage = c_Reader.ReadToEnd();
+                        // Build the parser
+                        HtmlDocument c_Page = new HtmlDocument();
+                        //Parse
+                        c_Page.LoadHtml(sPage);
+                        // Find JS tags
+                        var c_Nodes = c_Page.DocumentNode.SelectNodes("//nxjs");
+                        // Any?
+                        if (c_Nodes != null)
+                        {
+                            // Loop thru
+                            foreach (HtmlNode c_Node in c_Nodes)
+                            {
+                                // Make new node
+                                HtmlDocument c_New = new HtmlDocument();
+
+                                // Process
+                                HTMLClass c_HTML = c_Engine.Execute(c_Node.InnerText).GetValue("html").ToObject() as HTMLClass;
+                                // Any?
+                                if (c_HTML != null)
+                                {
+                                    //Parse
+                                    c_New.LoadHtml(c_HTML.ToString());
+                                }
+
+                                // Replace
+                                c_Node.ParentNode.ReplaceChild(c_New.DocumentNode, c_Node);
+                            }
+                        }
+
+                        // Make the output stream
+                        MemoryStream c_Out = new MemoryStream(c_Page.DocumentNode.OuterHtml.ToBytes());
+
+                        return c_Out;
+                    }
+                };
+            }
+
             // And deliver
-            call.RespondWithUIFile(sPath);
+            call.RespondWithUIFile(sPath, c_Proc);
         }
     }
 }

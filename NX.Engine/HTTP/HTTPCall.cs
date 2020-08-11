@@ -531,7 +531,7 @@ namespace NX.Engine
         /// </summary>
         /// <param name="path"></param>
         /// <param name="proc">The stream processor</param>
-        public void RespondWithUIFile(string path, Func<FileStream, FileStream> proc = null)
+        public void RespondWithUIFile(string path, Func<FileStream, Stream> proc = null)
         {
             this.RespondWithFile(path, false, null, proc);
         }
@@ -544,7 +544,7 @@ namespace NX.Engine
         /// <param name="path">The file path</param>
         /// <param name="download">True if the file is to be treated as attachment</param>
         /// <param name="ct">The content-type</param>
-        public void RespondWithFile(string path, bool download = true, string ct = null, Func<FileStream, FileStream> proc = null)
+        public void RespondWithFile(string path, bool download = true, string ct = null, Func<FileStream, Stream> proc = null)
         {
             if (!this.ResponseCompleted)
             {
@@ -553,13 +553,13 @@ namespace NX.Engine
                     using (FileStream c_File = File.OpenRead(path))
                     {
                         // Make local
-                        FileStream c_Local = c_File;
+                        Stream c_Local = c_File;
 
                         // Do we have a processor
                         if (proc != null)
                         {
                             // Process
-                            c_Local = proc(c_Local);
+                            c_Local = proc(c_File);
                             // Rewind
                             c_Local.Seek(0, SeekOrigin.Begin);
                         }

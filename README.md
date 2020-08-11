@@ -94,20 +94,20 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Packages used
 
-* Docker.DotNet 3.125.2
-* DocX 1.7.0
-* HtmlAgilityPack 1.11.24
-* ICSharpCode.SharpZipLib 0.85.4.369
-* iTextSharp 5.5.13.1
-* KubernetesClient 2.0.26
-* Minio 3.1.13
-* MongoDB.Bson 2.10.4
-* MongoDB.Driver 2.10.4
-* Newtonsoft.Json 12.0.3
-* Octokit 0.48.0
-* SocketIOClient 2.0.2.3
-* StackExchange.Redis 2.1.58
-* TimeZoneConverter 3.2.0
+* [Docker.DotNet](https://github.com/dotnet/Docker.DotNet) 3.125.2
+* [DocX](https://github.com/xceedsoftware/DocX) 1.7.0
+* [HtmlAgilityPack](https://github.com/zzzprojects/html-agility-pack) 1.11.24
+* [ICSharpCode.SharpZipLib](https://github.com/icsharpcode/SharpZipLib) 0.85.4.369
+* [iTextSharp](https://github.com/itext/itextsharp) 5.5.13.1
+* [Jint](https://github.com/sebastienros/jint) 2.11.58
+* [Minio](https://github.com/minio/minio) 3.1.13
+* [MongoDB.Bson](http://mongodb.github.io/mongo-java-driver/3.0/bson/) 2.10.4
+* [MongoDB.Driver](https://github.com/mongodb/mongo-csharp-driver) 2.10.4
+* [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) 12.0.3
+* [Octokit](https://github.com/octokit) 0.48.0
+* [SocketIOClient](https://github.com/socketio/socket.io-client) 2.0.2.3
+* [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) 2.1.58
+* [TimeZoneConverter](https://github.com/mj1856/TimeZoneConverter) 3.2.0
 
 ## Why
 
