@@ -67,9 +67,7 @@ And best explained in this sequence:
 * [HTTP](docs/README_HTTP.md)
 * [XML](docs/README_XML.md)
 * [Kubernetes](docs/README_KUBE.md)
-
 * [Where do I put my files](docs/README_FOLDERS.md)
-
 * [How do I debug my code?](docs/README_DEBUG.md)
 
 ## Prerequisites
