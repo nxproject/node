@@ -2019,7 +2019,7 @@ namespace NX.Shared
         {
             JObject c_Ans = new JObject();
 
-            foreach(string sKey in dict.Keys)
+            foreach (string sKey in dict.Keys)
             {
                 c_Ans.Set(sKey, dict[sKey].ToStringSafe());
             }
@@ -2315,7 +2315,7 @@ namespace NX.Shared
 
         public static NamedListClass<string> ToDictionary(this JArray values)
         {
-            NamedListClass<string> c_Ans = new NamedListClass< string>();
+            NamedListClass<string> c_Ans = new NamedListClass<string>();
 
             if (values != null)
             {
@@ -2324,7 +2324,7 @@ namespace NX.Shared
                     string sKey = values[iLoop].ToString();
                     string sValue = values[iLoop + 1].ToString();
 
-                    c_Ans[sKey]= sValue;
+                    c_Ans[sKey] = sValue;
                 }
             }
 
@@ -4274,6 +4274,30 @@ namespace NX.Shared
         public static List<string> Unique(this List<string> values)
         {
             return new List<string>(values.Distinct<string>());
+        }
+
+        public static List<DateTime> FromDBDate(this List<string> values)
+        {
+            List<DateTime> c_Ans = new List<DateTime>();
+
+            foreach (string sValue in values)
+            {
+                if (sValue.HasValue()) c_Ans.Add(sValue.FromDBDate());
+            }
+
+            return c_Ans;
+        }
+
+        public static List<double> ToDouble(this List<string> values)
+        {
+            List<double> c_Ans = new List<double>();
+
+            foreach (string sValue in values)
+            {
+                if (sValue.HasValue()) c_Ans.Add(sValue.ToDouble(0));
+            }
+
+            return c_Ans;
         }
         #endregion
 

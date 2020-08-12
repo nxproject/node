@@ -73,6 +73,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docs\README_B_ROSTER.md = docs\README_B_ROSTER.md
 		docs\README_BB_NGINX.md = docs\README_BB_NGINX.md
 		docs\README_BB_REDIS.md = docs\README_BB_REDIS.md
+		docs\README_DEBUG.md = docs\README_DEBUG.md
 		docs\README_ENV.md = docs\README_ENV.md
 		docs\README_FNS.md = docs\README_FNS.md
 		docs\README_FOLDERS.md = docs\README_FOLDERS.md
@@ -124,7 +125,7 @@ Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "UI.Bootstrap", "UI.Bootstra
 EndProject
 Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "UI.HTML", "UI.HTML\UI.HTML.njsproj", "{C7ED432E-3CC5-4EF9-9464-BB46A8327FD0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proc.Traefik", "Proc.Traefik\Proc.Traefik.csproj", "{B7BB867E-7854-4055-A835-B7A75579D3DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proc.Traefik", "Proc.Traefik\Proc.Traefik.csproj", "{B7BB867E-7854-4055-A835-B7A75579D3DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

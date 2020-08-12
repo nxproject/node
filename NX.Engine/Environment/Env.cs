@@ -503,7 +503,7 @@ namespace NX.Engine
         {
             get
             {
-                if(this.INginXInfo == null) this.INginXInfo = new NginX.ServicesClass(this);
+                if (this.INginXInfo == null) this.INginXInfo = new NginX.ServicesClass(this);
 
                 return this.INginXInfo;
             }
@@ -816,35 +816,24 @@ namespace NX.Engine
                 // Set the path
                 string sPath = "".WorkingDirectory().CombinePath("modules");
                 // Are we running outside?
-                if(!"".InContainer())
+                if (!"".InContainer())
                 {
                     // Does the path exist?
-                    if(!sPath.DirectoryExists())
+                    if (!sPath.DirectoryExists())
                     {
                         // Flag as not found
                         bool bFound = false;
 
-                        // Get list of sources
-                        ItemsClass c_Sources = new ItemsClass( this.GetAsJArray(KeyCodeFolder));
                         // Loop thru
-                        foreach (ItemClass c_Item in c_Sources)
+                        foreach (string sDir in this.GetAsJArray(KeyCodeFolder).ToList())
                         {
-                            // Get the type
-                            string sType = c_Item.Value.IfEmpty("code");
-
-                            // And according to type
-                            switch (sType.ToLower())
+                            // Found?
+                            if (sDir.CombinePath(module+".dll").AdjustPathToOS().FileExists())
                             {
-                                case "code":
-                                    // Found?
-                                    if (c_Item.Key.CombinePath(module).AdjustPathToOS().FileExists())
-                                    {
-                                        // Save
-                                        sPath = c_Item.Key;
-                                        // And flag
-                                        bFound = true;
-                                    }
-                                    break;
+                                // Save
+                                sPath = sDir;
+                                // And flag
+                                bFound = true;
                             }
 
                             // Found?
@@ -1139,6 +1128,22 @@ namespace NX.Engine
         {
             this.Stop();
             this.Start();
+        }
+
+        /// <summary>
+        /// 
+        /// Cretes a debug breakpoint
+        /// 
+        /// </summary>
+        public void Debug()
+        {
+            if (!"".InContainer())
+            {
+                if (System.Diagnostics.Debugger.IsAttached)
+                {
+                    System.Diagnostics.Debugger.Break();
+                }
+            }
         }
         #endregion
 

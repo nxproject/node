@@ -32,6 +32,7 @@ namespace NXNode
 {
     class Program
     {
+        #region Entry point
         static void Main(string[] args)
         {
             // Create working environment
@@ -40,8 +41,13 @@ namespace NXNode
             // Only outside a container
             if (!"".InContainer())
             {
+                // The workign code folders
+                List<string> c_CodeFolders = null;
+                // If not making
+                if (!c_Env.InMakeMode) c_CodeFolders = new List<string>();
+
                 // Do we need to make into container?
-                if (c_Env.MakeGenome)
+                //if (c_Env.MakeGenome )
                 {
                     // Get the root folder
                     string sRootFolder = "".WorkingDirectory();
@@ -86,7 +92,7 @@ namespace NXNode
                     sDir = sDir.Substring(sDir.IndexOf("{0}") + 3);
 
                     //
-                    CopyTree(c_Env, sRoot, sDir, sMod, sUI, sRootFolder);
+                    CopyTree(c_Env, sRoot, sDir, sMod, sUI, c_CodeFolders, sRootFolder);
 
                     // Get the extra folders
                     List<string> c_Folders = c_Env.GetAsJArray(EnvironmentClass.KeyCodeFolder).ToList();
@@ -99,26 +105,40 @@ namespace NXNode
                         if (!sSource.EndsWith(@"\")) sSource += @"\";
 
                         // Root of many projects?
-                        if (!CopyTree(c_Env, sSource, sDir, sMod, sUI))
+                        if (!CopyTree(c_Env, sSource, sDir, sMod, sUI, c_CodeFolders))
                         {
                             // If not, see if it is a single project
-                            if(!CopyProject(c_Env, sSource, sDir, sMod, sUI))
+                            if (!CopyProject(c_Env, sSource, sDir, sMod, sUI, c_CodeFolders))
                             {
-                                CopyFolder(c_Env, sSource, sMod);
+                                // If making genome
+                                if (c_CodeFolders == null)
+                                {
+                                    CopyFolder(c_Env, sSource, sMod);
+                                }
+                                else
+                                {
+                                    c_CodeFolders.Add(sSource);
+                                }
                             }
                         }
                     }
 
                     // Make into image
-                    c_Env.Hive.MakeSelfIntoGenome(sOut);
-                    // Delete
-                    sOut.DeletePath();
+                    if (c_Env.MakeGenome)
+                    {
+                        // Make
 
-                    // Kill all
-                    c_Env.Hive.KillProcessorBees();
+                        c_Env.Hive.MakeSelfIntoGenome(sOut);
 
-                    //
-                    c_Env.LogInfo("Container has been created");
+                        // Delete
+                        sOut.DeletePath();
+
+                        // Kill all
+                        c_Env.Hive.KillProcessorBees();
+
+                        //
+                        c_Env.LogInfo("Container has been created");
+                    }
                 }
 
                 // Do we make a bee?
@@ -133,6 +153,20 @@ namespace NXNode
                 // Normal mode?
                 if (!c_Env.InMakeMode)
                 {
+                    // Cleanup.code folders
+                    for (int i = 0; i < c_CodeFolders.Count; i++)
+                    {
+                        // End in delimiter
+                        if (c_CodeFolders[i].EndsWith(@"\"))
+                        {
+                            // Remove
+                            c_CodeFolders[i] = c_CodeFolders[i].Substring(0, c_CodeFolders[i].Length - 1);
+                        }
+                    }
+
+                    // The new code folder
+                    c_Env.Set(EnvironmentClass.KeyCodeFolder, c_CodeFolders);
+
                     // And recycle
                     c_Env.Start();
                 }
@@ -148,6 +182,7 @@ namespace NXNode
                 c_Env.Start();
             }
         }
+        #endregion
 
         #region Support
         private static bool CopyTree(EnvironmentClass env,
@@ -155,6 +190,7 @@ namespace NXNode
                                             string template,
                                             string moddir,
                                             string uidir,
+                                            List<string> targets,
                                             params string[] skip)
         {
             // Assume failue
@@ -172,7 +208,7 @@ namespace NXNode
                 if (!c_Skip.Contains(sSDir.GetDirectoryNameFromPath()))
                 {
                     //
-                    if (CopyProject(env, sSDir, template, moddir, uidir)) bAns = true;
+                    if (CopyProject(env, sSDir, template, moddir, uidir, targets)) bAns = true;
                 }
             }
 
@@ -183,7 +219,8 @@ namespace NXNode
                                             string sourcedir,
                                             string template,
                                             string moddir,
-                                            string uidir)
+                                            string uidir,
+                                            List<string> targets)
         {
             // Assume failure
             bool bAns = false;
@@ -192,7 +229,7 @@ namespace NXNode
             string sAName = sourcedir.GetDirectoryNameFromPath();
 
             // According to source
-            if (sAName.IsSameValue("docs"))
+            if (sAName.IsSameValue("docs") || !sAName.HasValue())
             {
                 // Do not copy
             }
@@ -203,15 +240,24 @@ namespace NXNode
                 sSAUI.AssurePath();
 
                 // UI
-                bAns = CopyFolder(env, sourcedir, sSAUI);
+                if (targets == null) bAns = CopyFolder(env, sourcedir, sSAUI);
             }
             else if (!sAName.StartsWith("."))
             {
                 // Make source
                 string sADir = sourcedir + template;
 
-                // Copy all the files to modules
-                bAns = CopyFolder(env, sADir, moddir);
+                // Target building?
+                if (targets == null)
+                {
+                    // Copy all the files to modules
+                    bAns = CopyFolder(env, sADir, moddir);
+                }
+                else
+                {
+                    // Add
+                    targets.Add(sADir);
+                }
             }
 
             return bAns;
