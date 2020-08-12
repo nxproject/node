@@ -20,7 +20,7 @@ easily install [Docker Desktop on Windows](https://docs.docker.com/docker-for-wi
 * [Functions](docs/README_FNS.md)
 * [Processes](docs/README_PROCS.md)
 * [Loading processes, routes and functions](docs/README_USE.md)
-* [Environment](docs/EADME.ENV.md)
+* [Environment](docs/README.ENV.md)
 
 ## Containers are bees
 
@@ -70,7 +70,7 @@ And best explained in this sequence:
 
 * [Where do I put my files](docs/README_FOLDERS.md)
 
-* [How do I debug my code?](docs.README_DEBUG.md)
+* [How do I debug my code?](docs/README_DEBUG.md)
 
 ## Prerequisites
 
