@@ -32,39 +32,88 @@ using NX.Shared;
 
 namespace NX.Engine
 {
-    public class Context : BasedObjectClass
+    /// <summary>
+    /// 
+    /// The context where the expression is evaluated
+    /// 
+    /// </summary>
+    public class Context : ChildOfClass<EnvironmentClass>
     {
         #region Constructor
-        public Context(EnvironmentClass call, StoreClass store, Func<string, StoreClass, string> cb = null)
+        public Context(EnvironmentClass call, StoreClass store, Func<ExprCBParams, string> cb = null)
            : base(call)
         {
+            // Start anew
             this.Reset();
 
+            // And load the functions
             if (IFunctions == null) IFunctions = new FunctionsDefinitions();
+
+            // The callback
+            this.Callback = cb;
+
+            // Save the passed store
+            if (store != null) this.Stores["passed"] = store;
         }
         #endregion
 
         #region Properties
-        /// <summary>
-        /// 
-        /// The active HTTP call
-        /// 
-        /// </summary>
-        public EnvironmentClass Env { get { return this.Root as EnvironmentClass; } }
-
-        /// <summary>
-        /// 
-        /// Data store for variables
-        /// 
-        /// </summary>
-        public StoreClass Store { get; set; }
-
+        
         /// <summary>
         /// 
         /// Extra callback
         /// 
         /// </summary>
-        public Func<string, StoreClass, string> Callback {get;set;}
+        public Func<ExprCBParams, string> Callback { get; set; }
+
+        /// <summary>
+        /// 
+        /// The stores
+        /// 
+        /// </summary>
+        public NamedListClass<StoreClass> Stores = new NamedListClass<StoreClass>();
+
+        /// <summary>
+        /// 
+        /// The store to use as default
+        /// 
+        /// </summary>
+        public string UseStore { get; set; }
+
+        /// <summary>
+        /// 
+        /// The documents
+        /// 
+        /// </summary>
+        public NamedListClass<Files.DocumentClass> Documents = new NamedListClass<Files.DocumentClass>();
+
+        /// <summary>
+        /// 
+        /// The document to use as default
+        /// 
+        /// </summary>
+        public string UseDocument { get; set; }
+
+        /// <summary>
+        /// 
+        /// Variables
+        /// 
+        /// </summary>
+        public NamedListClass<string> Vars = new NamedListClass<string>();
+
+        /// <summary>
+        /// 
+        /// To be used by callback
+        /// 
+        /// </summary>
+        public NamedListClass<object> Locals = new NamedListClass<object>();
+
+        /// <summary>
+        /// 
+        /// The local to use as default
+        /// 
+        /// </summary>
+        public string UseLocal { get; set; }
 
         /// <summary>
         /// 
@@ -73,6 +122,11 @@ namespace NX.Engine
         /// </summary>
         public Variables Globals { get; private set; }
 
+        /// <summary>
+        /// 
+        /// The functions
+        /// 
+        /// </summary>
         public FunctionsDefinitions Functions
         {
             get
@@ -95,7 +149,7 @@ namespace NX.Engine
         #endregion
 
         #region Statics
-        public static FunctionsDefinitions IFunctions { get;set;}
+        public static FunctionsDefinitions IFunctions { get; set; }
         #endregion
     }
 }

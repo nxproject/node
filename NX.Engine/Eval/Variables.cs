@@ -32,7 +32,7 @@ using NX.Shared;
 
 namespace NX.Engine
 {
-    public class Variables : BasedObjectClass
+    public class Variables : ChildOfClass<Context>
     {
         #region Constructor
         public Variables(Context ctx)
@@ -66,19 +66,21 @@ namespace NX.Engine
                         break;
 
                     default:
-                        if (this.Context.Callback != null)
+                        using(DatumClass c_Datum = new DatumClass(this.Parent, name))
                         {
-                            c_Ans = this.Context.Callback(name, this.Context.Store);
-                        }
-                        else
-                        {
-                            c_Ans = this.Context.Store[name];
+                            c_Ans = c_Datum.Value;
                         }
                         break;
                 }
                 return c_Ans;
             }
-            set { this.Context.Store[name] = value.ToString(); }
+            set 
+            {
+                using (DatumClass c_Datum = new DatumClass(this.Parent, name))
+                {
+                    c_Datum.Value = value.ToStringSafe();
+                }
+            }
         }
         #endregion
 

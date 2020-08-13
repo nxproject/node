@@ -94,7 +94,8 @@ namespace NX.Engine
                     Tokens.Add(TokenType.FUNCTION);
 
                     // ECANDIDUS - THIS IS WHERE THE ALLOWED TYPE OF DATUM IS DEFINED
-                    regex = new Regex(@"\x5B[\x24\x2A\x5E\x25]?[a-zA-Z_][a-zA-Z0-9_\x3A\x2E]*(?!\s*\()\x5D", RegexOptions.Compiled);
+                    // [ $*^% name :. name ]
+                    regex = new Regex(@"\x5B[\x24\x2A\x5E\x25]?[a-zA-Z_][a-zA-Z0-9_\x3A\x2E]*(?!\s*\()\x5D|[a-zA-Z][a-zA-Z0-9]", RegexOptions.Compiled);
                     Patterns.Add(TokenType.VARIABLE, regex);
                     Tokens.Add(TokenType.VARIABLE);
 

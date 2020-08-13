@@ -33,10 +33,28 @@ using NX.Shared;
 
 namespace NX.Engine
 {
+    /// <summary>
+    /// 
+    /// Expression evaluator
+    /// 
+    /// </summary>
     public static class Expression
     {
         #region Methods
-        public static ExpressionReturn Eval(this EnvironmentClass call, string expr, StoreClass store, Func<string, StoreClass, string> cb = null)
+        public static ExpressionReturn Eval(this EnvironmentClass call, string expr, StoreClass store, Func<ExprCBParams, string> cb = null)
+        {
+            ExpressionReturn c_Ans = new ExpressionReturn();
+
+            using (Context c_Ctx = new Context(call, store, cb))
+            {
+                //
+                c_Ans = c_Ctx.Eval(expr);
+            }
+
+            return c_Ans;
+        }
+
+        public static ExpressionReturn Eval(this Context ctx, string expr)
         {
             ExpressionReturn c_Ans = new ExpressionReturn();
 
@@ -44,30 +62,27 @@ namespace NX.Engine
             expr = expr.Replace("’", "'");
             expr = expr.Replace("`", "'");
 
-            using (Context c_Ctx = new Context(call, store, cb))
+            using (Scanner c_Scanner = new Scanner())
             {
-                using (Scanner c_Scanner = new Scanner())
+                using (ParseTreeEvaluator c_Tree = new ParseTreeEvaluator(ctx))
                 {
-                    using (ParseTreeEvaluator c_Tree = new ParseTreeEvaluator(c_Ctx))
+                    using (Parser c_Parser = new Parser(c_Scanner, expr, c_Tree))
                     {
-                        using (Parser c_Parser = new Parser(c_Scanner, expr, c_Tree))
+                        if (c_Tree.Errors.Count == 0)
                         {
-                            if (c_Tree.Errors.Count == 0)
-                            {
-                                c_Ans.Value = XCVT.ToString(c_Tree.Evaluate(c_Ctx, null));
-                            }
-                            else
-                            {
-                                StringBuilder c_Buffer = new StringBuilder();
+                            c_Ans.Value = XCVT.ToString(c_Tree.Evaluate(ctx, null));
+                        }
+                        else
+                        {
+                            StringBuilder c_Buffer = new StringBuilder();
 
-                                c_Buffer.Append("TBD: {0}".FormatString(c_Scanner.TBD)).Append("; ");
+                            c_Buffer.Append("TBD: {0}".FormatString(c_Scanner.TBD)).Append("; ");
 
-                                foreach(ParseError c_Err in c_Tree.Errors)
-                                {
-                                    c_Buffer.Append(c_Err.ToString()).Append("; ");
-                                }
-                                c_Ans.Error = c_Buffer.ToString();
+                            foreach (ParseError c_Err in c_Tree.Errors)
+                            {
+                                c_Buffer.Append(c_Err.ToString()).Append("; ");
                             }
+                            c_Ans.Error = c_Buffer.ToString();
                         }
                     }
                 }

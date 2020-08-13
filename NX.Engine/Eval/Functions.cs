@@ -55,7 +55,7 @@ namespace NX.Engine
             // Eval
             this.AddFn(new StaticFunction("eval", delegate (Context ctx, object[] ps)
             {
-                ExpressionReturn c_Ret = ctx.Env.Eval(XCVT.ToString(ps[0]), ctx.Store);
+                ExpressionReturn c_Ret = ctx.Eval(XCVT.ToString(ps[0]));
 
                 return c_Ret.Value.IfEmpty();
             }, 1, 1));
@@ -545,10 +545,6 @@ namespace NX.Engine
             {
                 return XCVT.ToString(ps[0]).URLPost(XCVT.ToString(ps[1]));
             }, 2, 2));
-            this.AddFn(new StaticFunction("store", delegate (Context ctx, object[] ps)
-            {
-                return ctx.Store.GetAsStore(XCVT.ToString(ps[0])).SynchObject.ToSimpleString();
-            }, 1, 1));
             this.AddFn(new StaticFunction("ifempty", delegate (Context ctx, object[] ps)
             {
                 return XCVT.ToString(ps[0]).IfEmpty(XCVT.ToString(ps[1]));
@@ -591,10 +587,6 @@ namespace NX.Engine
 
             // Store
 
-            this.AddFn(new StaticFunction("val", delegate (Context ctx, object[] ps)
-            {
-                return ctx.Env.Eval(XCVT.ToString(ps[0]), ctx.Store).Value;
-            }, 1, 1));
             this.AddFn(new StaticFunction("asamt", delegate (Context ctx, object[] ps) { return XCVT.ToDouble(ps[0]); }, 1, 1));
 
             // Name functions
@@ -978,7 +970,7 @@ namespace NX.Engine
 
                         if (ps.Length > 1)
                         {
-                            ctx.Store.Set(XCVT.ToString(ps[1]), c_Wkg);
+                            ctx.Stores[XCVT.ToString(ps[1])] = c_Wkg;
                         }
 
                         sAns = c_Addr.ToString();

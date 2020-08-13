@@ -24,26 +24,26 @@
 
 /// Packet Manager Requirements
 /// 
-/// 
-/// Install-Package Newtonsoft.Json -Version 12.0.3
-/// Install-Package DocX -Version 1.7.0
+/// Install-Package docXn -Version 1.7.0
 /// 
 
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-
 using System.IO;
 
 using Xceed.Words.NET;
 
+using NX.Engine;
 using NX.Shared;
 
-namespace Proc.File
+namespace NX.Engine.Files.Vendors
 {
     /// <summary>
     /// 
-    /// A .docx toolset
+    /// A toolkit to merge .docx files.
+    /// 
+    /// Fields in the .docx file are in the format [xxxx]
     /// 
     /// </summary>
     public class DocXClass : IDisposable
@@ -51,7 +51,7 @@ namespace Proc.File
         #region Constants
         /// <summary>
         /// 
-        /// This is a field regular expression [xxxx]
+        /// The regular expression pattern to match a field
         /// 
         /// </summary>
         private const string PatternData = @"\x5B(.+?)\x5D";
@@ -68,11 +68,6 @@ namespace Proc.File
         #endregion
 
         #region IDisposable
-        /// <summary>
-        /// 
-        /// Housekeeping
-        /// 
-        /// </summary>
         public void Dispose()
         { }
         #endregion
@@ -80,51 +75,57 @@ namespace Proc.File
         #region Properties
         /// <summary>
         /// 
-        /// The merge data.  Internal use only!
+        /// The active document
         /// 
         /// </summary>
-        private StoreClass Data { get; set; }
+        //private byte[] Document { get; set; }
 
         /// <summary>
         /// 
-        /// A list of fields found.  Internal use only!
+        /// The active key/value pairs to merge
+        /// 
+        /// </summary>
+        private StoreClass Data { get; set; }
+        
+        /// <summary>
+        /// 
+        /// List of fields found during a fields search
         /// 
         /// </summary>
         private List<string> Found { get; set; } = new List<string>();
         #endregion
 
-        #region Methods
+        #region Merge
         /// <summary>
         /// 
-        /// Create a merged document
+        /// Merges a store into a .docx template
+        /// 
         /// </summary>
-        /// <param name="doc">The original .docx document</param>
-        /// <param name="values">Data to merge into fields</param>
-        /// <returns></returns>
+        /// <param name="doc">The byte array of the document contents</param>
+        /// <param name="values">The store</param>
+        /// <returns>A byte array of the merged document</returns>
         public byte[] Merge(byte[] doc, StoreClass values)
         {
-            // Assume it failed
+            // Assume it did not go well
             byte[] c_Ans = null;
+
+            // Save the data
+            this.Data = values;
 
             try
             {
-                // Save the data
-                this.Data = values;
-
-                // Read the document
+                // Make into an accessible stream
                 using (MemoryStream c_Stream = new MemoryStream(doc))
                 {
-                    // The wonderful DocX
+                    // Load it into stream
                     using (DocX document = DocX.Load(c_Stream))
                     {
                         // Replace
-                        document.ReplaceText(PatternData, ReplaceFunc, false, RegexOptions.IgnoreCase, null);
+                        document.ReplaceText(PatternData, MergeFunc, false, RegexOptions.IgnoreCase, null);
                         // And write out
                         using (MemoryStream c_Out = new MemoryStream())
                         {
-                            // Move
                             document.SaveAs(c_Out);
-                            // And make into array
                             c_Ans = c_Out.ToArray();
                         }
                     }
@@ -137,28 +138,41 @@ namespace Proc.File
 
         /// <summary>
         /// 
-        /// Returns the field names in a .docx document
+        /// Returns the merge data value for a given field
         /// 
         /// </summary>
-        /// <param name="doc">The .docx document</param>
-        /// <returns>List of field information for the merge fields</returns>
+        /// <param name="field">The field name</param>
+        /// <returns></returns>
+        private string MergeFunc(string field)
+        {
+            return this.Data[field].IfEmpty("");
+        }
+        #endregion
+
+        #region Fields
+        /// <summary>
+        /// 
+        /// Returns a list of fields in the document
+        /// 
+        /// </summary>
+        /// <param name="doc">The byte array of the document contents</param>
+        /// <returns>The list of fields</returns>
         public List<FieldInfoClass> Fields(byte[] doc)
         {
-            // Assume none
+            // Assume no fields
             List<FieldInfoClass> c_Ans = new List<FieldInfoClass>();
 
             try
             {
-                // Read the document
+                // Make into an accessible stream
                 using (MemoryStream c_Stream = new MemoryStream(doc))
                 {
-                    // The wonderful DocX
                     using (DocX document = DocX.Load(c_Stream))
                     {
                         // Empty the list
                         this.Found = new List<string>();
                         // And fill it
-                        document.ReplaceText(PatternData, FindFunc, false, RegexOptions.IgnoreCase, null);
+                        document.ReplaceText(PatternData, FieldsFunc, false, RegexOptions.IgnoreCase, null);
                         // Make 
                         foreach (string sPatt in this.Found)
                         {
@@ -175,30 +189,67 @@ namespace Proc.File
 
         /// <summary>
         /// 
-        /// This is the function used by the Merge code above
+        /// Builds the list of found fields
         /// 
         /// </summary>
-        /// <param name="findStr">The field name found</param>
-        /// <returns>The value for the field</returns>
-        private string ReplaceFunc(string findStr)
+        /// <param name="field"The field found></param>
+        /// <returns>An empty string (for compatibility purposes)</returns>
+        private string FieldsFunc(string field)
         {
-            return this.Data[findStr].IfEmpty("");
-        }
-
-        /// <summary>
-        /// 
-        /// This is the function used by the Fields code above
-        /// 
-        /// </summary>
-        /// <param name="findStr">The field name found</param>
-        /// <returns>An empty string</returns>
-        private string FindFunc(string findStr)
-        {
-            string sFld = findStr.IfEmpty("");
+            string sFld = field.IfEmpty("");
 
             if (this.Found.IndexOf(sFld) == -1) this.Found.Add(sFld);
 
             return "";
+        }
+        #endregion
+
+        #region Tools
+        /// <summary>
+        /// 
+        /// Appends to arrays of byte into one
+        /// 
+        /// </summary>
+        /// <param name="doc1">The first array</param>
+        /// <param name="doc2">The second array</param>
+        /// <param name="atend">If true, doc2 will be appended to the end of doc1, therwise doc1 will be appended at the end of doc2</param>
+        /// <returns></returns>
+        public byte[] Append(byte[] doc1, byte[] doc2, bool atend)
+        {
+            byte[] c_Ans = null;
+
+            if (doc1 == null)
+            {
+                c_Ans = doc2;
+            }
+            else if (doc2 == null)
+            {
+                c_Ans = doc1;
+            }
+            else
+            {
+                using (MemoryStream c_Stream1 = new MemoryStream(doc1))
+                {
+                    using (DocX document1 = DocX.Load(c_Stream1))
+                    {
+                        using (MemoryStream c_Stream2 = new MemoryStream(doc2))
+                        {
+                            using (DocX document2 = DocX.Load(c_Stream2))
+                            {
+                                document1.InsertDocument(document2, atend);
+
+                                using (MemoryStream c_Out = new MemoryStream())
+                                {
+                                    document1.SaveAs(c_Out);
+                                    c_Ans = c_Out.ToArray();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return c_Ans;
         }
         #endregion
     }

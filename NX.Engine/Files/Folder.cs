@@ -24,14 +24,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 
-using Newtonsoft.Json.Linq;
-
-using NX.Engine;
 using NX.Shared;
 
-namespace Proc.File
+namespace NX.Engine.Files
 {
     /// <summary>
     /// 

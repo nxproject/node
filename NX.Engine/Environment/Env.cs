@@ -1062,6 +1062,8 @@ namespace NX.Engine
         /// </summary>
         public void Start()
         {
+            var x = Expression.Eval(this, "a+1", null);
+
             // Do we have an HTTP server?
             if (this.HTTP == null)
             {

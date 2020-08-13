@@ -38,7 +38,7 @@ using NX.Shared;
 using iTextSharp.text.pdf;
 using Minio.DataModel;
 
-namespace Proc.File
+namespace NX.Engine.Files
 {
     public class ManagerClass : BumbleBeeClass
     {

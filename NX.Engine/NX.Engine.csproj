@@ -5,11 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Files\**" />
     <Compile Remove="Vendors\**" />
-    <EmbeddedResource Remove="Files\**" />
     <EmbeddedResource Remove="Vendors\**" />
-    <None Remove="Files\**" />
     <None Remove="Vendors\**" />
   </ItemGroup>
 
@@ -19,14 +16,17 @@
 
   <ItemGroup>
     <PackageReference Include="Docker.DotNet" Version="3.125.2" />
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.11.3" />
     <PackageReference Include="DocX" Version="1.7.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.24" />
     <PackageReference Include="ICSharpCode.SharpZipLib.dll" Version="0.85.4.369" />
     <PackageReference Include="iTextSharp" Version="5.5.13.1" />
+    <PackageReference Include="itextsharp.xmlworker" Version="5.5.13.1" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="3.6.0" />
     <PackageReference Include="Minio" Version="3.1.13" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Octokit" Version="0.48.0" />
+    <PackageReference Include="OpenXmlPowerTools" Version="4.5.3.2" />
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
     <PackageReference Include="System.Drawing.Common" Version="4.7.0" />
     <PackageReference Include="TimeZoneConverter" Version="3.2.0" />
