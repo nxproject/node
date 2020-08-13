@@ -26,6 +26,8 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System;
+
 using NX.Shared;
 
 namespace NX.Engine
@@ -33,7 +35,7 @@ namespace NX.Engine
     public class Context : BasedObjectClass
     {
         #region Constructor
-        public Context(EnvironmentClass call, StoreClass store)
+        public Context(EnvironmentClass call, StoreClass store, Func<string, StoreClass, string> cb = null)
            : base(call)
         {
             this.Reset();
@@ -48,7 +50,7 @@ namespace NX.Engine
         /// The active HTTP call
         /// 
         /// </summary>
-        public EnvironmentClass Env {  get { return this.Root as EnvironmentClass; } }
+        public EnvironmentClass Env { get { return this.Root as EnvironmentClass; } }
 
         /// <summary>
         /// 
@@ -56,6 +58,13 @@ namespace NX.Engine
         /// 
         /// </summary>
         public StoreClass Store { get; set; }
+
+        /// <summary>
+        /// 
+        /// Extra callback
+        /// 
+        /// </summary>
+        public Func<string, StoreClass, string> Callback {get;set;}
 
         /// <summary>
         /// 

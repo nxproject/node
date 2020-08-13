@@ -66,7 +66,14 @@ namespace NX.Engine
                         break;
 
                     default:
-                        c_Ans = this.Context.Store[name];
+                        if (this.Context.Callback != null)
+                        {
+                            c_Ans = this.Context.Callback(name, this.Context.Store);
+                        }
+                        else
+                        {
+                            c_Ans = this.Context.Store[name];
+                        }
                         break;
                 }
                 return c_Ans;

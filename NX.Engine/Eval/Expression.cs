@@ -26,6 +26,7 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System;
 using System.Text;
 
 using NX.Shared;
@@ -35,7 +36,7 @@ namespace NX.Engine
     public static class Expression
     {
         #region Methods
-        public static ExpressionReturn Eval(this EnvironmentClass call, string expr, StoreClass store)
+        public static ExpressionReturn Eval(this EnvironmentClass call, string expr, StoreClass store, Func<string, StoreClass, string> cb = null)
         {
             ExpressionReturn c_Ans = new ExpressionReturn();
 
@@ -43,7 +44,7 @@ namespace NX.Engine
             expr = expr.Replace("’", "'");
             expr = expr.Replace("`", "'");
 
-            using (Context c_Ctx = new Context(call, store))
+            using (Context c_Ctx = new Context(call, store, cb))
             {
                 using (Scanner c_Scanner = new Scanner())
                 {
