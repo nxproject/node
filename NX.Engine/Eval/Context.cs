@@ -117,6 +117,13 @@ namespace NX.Engine
 
         /// <summary>
         /// 
+        /// List of things
+        /// 
+        /// </summary>
+        public NamedListClass<NamedListClass<string>> Lists = new NamedListClass<NamedListClass<string>>();
+
+        /// <summary>
+        /// 
         /// A global storage area
         /// 
         /// </summary>

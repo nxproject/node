@@ -29,7 +29,9 @@ namespace NX.Engine
         public enum Modes
         {
             Get,
-            Set
+            Set,
+
+            Map
         }
         #endregion
 
