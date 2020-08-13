@@ -292,6 +292,20 @@ namespace NX.Shared
             return Regex.Replace(value, @"[^\x20-\x7f" + sAllowed + "]", "");
         }
 
+        public static bool IsNum(this object value)
+        {
+            bool bAns = false;
+
+            int xAns = 0;
+            try
+            {
+                bAns = System.Int32.TryParse(value.ToString(), out xAns);
+            }
+            catch { }
+
+            return bAns;
+        }
+
         public static string NumOnly(this string value)
         {
             return Regex.Replace(value, @"[^0-9]", "");
@@ -428,6 +442,21 @@ namespace NX.Shared
             }
 
             return c_Ans;
+        }
+
+        /// <summary>
+        ///  
+        /// Splits on CR/LF
+        /// 
+        /// </summary>
+        /// <param name="value">The text to split</param>
+        /// <returns>A list of lines</returns>
+        public static List<string> SplitCRLF(this string value)
+        {
+            value = value.Replace("\r\n", "\n");
+            value = value.Replace("\r", "\n");
+
+            return new List<string>(value.Split('\n'));
         }
         #endregion
 

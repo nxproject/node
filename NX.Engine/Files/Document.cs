@@ -241,6 +241,68 @@ namespace NX.Engine.Files
 
         /// <summary>
         /// 
+        /// Gets/sets the value of the file as a PDF string
+        /// 
+        /// </summary>
+        public byte[] ValueAsPDF
+        {
+            get
+            {
+                // Assume noting
+                byte[] abAns = null;
+
+                // According to type
+                switch (this.Extension.ToLower())
+                {
+                    case "pdf":
+                        abAns = this.ValueAsBytes;
+                        break;
+
+                    case "docx":
+                        abAns = ConversionClass.DOCX2PDF(this.ValueAsBytes, this.Name);
+                        break;
+                }
+
+                return abAns;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Gets/sets the value of the file as an HTML string
+        /// 
+        /// </summary>
+        public byte[] ValueAsHTML
+        {
+            get
+            {
+                // Assume noting
+                byte[] abAns = null;
+
+                // According to type
+                switch (this.Extension.ToLower())
+                {
+                   case "docx":
+                        abAns = ConversionClass.DOCX2HTML(this.ValueAsBytes, this.Name);
+                        break;
+                }
+
+                return abAns;
+            }
+            set
+            {
+                // According to type
+                switch (this.Extension.ToLower())
+                {
+                    case "docx":
+                        this.ValueAsBytes = ConversionClass.HTML2DOCX(value, this.Name);
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
         /// The date and time that the file was updated
         /// if new, then DateTime.MaxValue
         /// 
@@ -514,89 +576,7 @@ namespace NX.Engine.Files
         }
         #endregion
 
-        #region PDF
-        /// <summary>
-        /// 
-        /// Returns PDF equivalent of document
-        /// Works for PDF and DOCX only
-        /// 
-        /// </summary>
-        public DocumentClass PDF
-        {
-            get
-            {
-                // Assume us
-                DocumentClass c_Ans = this;
-
-                // Are we PDF?
-                if(!c_Ans.Extension.IsSameValue("pdf") && c_Ans.Extension.IsSameValue("docx"))
-                {
-                    // No, make new document
-                    c_Ans = new DocumentClass(this.Parent, this.MetadataFolder.Path.CombinePath(this.NameOnly + ".pdf"));
-                    // Is it older?
-                    if(c_Ans.WrittenOn < this.WrittenOn)
-                    {
-                        // Get the text
-                        byte[] abDoc = this.Location.ReadFileAsBytes();
-
-                        // Assume failure
-                        string sHTML = string.Empty;
-
-                        // Protect
-                        try
-                        {
-                            // Parse
-                            sHTML = ParseDOCX(this.Name, abDoc);
-                        }
-                        catch (OpenXmlPackageException e)
-                        {
-                            // Image?
-                            if (e.ToString().Contains("Invalid Hyperlink"))
-                            {
-                                // Make into stream
-                                using (MemoryStream c_Stream = new MemoryStream(abDoc))
-                                {
-                                    // Fix
-                                    UriFixer.FixInvalidUri(c_Stream, brokenUri => FixUri(brokenUri));
-                                    // Rewind
-                                    c_Stream.Seek(0, SeekOrigin.Begin);
-                                    // And again
-                                    sHTML = ParseDOCX(this.Name, c_Stream.ToArray());
-                                }
-                            }
-                        }
-
-                        //
-                        using (StringReader c_Reader = new StringReader(sHTML))
-                        {
-                            using (MemoryStream c_Stream = new System.IO.MemoryStream(sHTML.ToBytes()))
-                            {
-                                // Create PDF
-                                Document c_PDF = new Document(PageSize.LETTER, 10f, 10f, 100f, 0f);
-                                // And the writer
-                                PdfWriter c_Writer = PdfWriter.GetInstance(c_PDF, c_Stream);
-                                // Open
-                                c_PDF.Open();
-                                // Convert
-                                XMLWorkerHelper.GetInstance().ParseXHtml(c_Writer, c_PDF, c_Reader);
-                                // Close
-                                c_PDF.Close();
-                                // Get
-                                sHTML = c_Stream.ToArray().FromBytes();
-                            }
-                        }
-
-                        // Save
-                        c_Ans.Value = sHTML;
-                    }
-                }
-
-                return c_Ans;
-            }
-        }
-        #endregion
-
-        #region Statics
+       #region Statics
         /// <summary>
         /// 
         /// Returns the folder that holds the metadata
@@ -675,119 +655,6 @@ namespace NX.Engine.Files
             }
 
             return abAns;
-        }
-
-        /// <summary>
-        /// 
-        /// DOCX parser
-        /// based on: https://stackoverflow.com/questions/46580718/convert-word-doc-and-docx-format-to-pdf-in-net-core-without-microsoft-office-in
-        /// 
-        /// </summary>
-        /// <param name="loc"></param>
-        /// <returns></returns>
-        public static string ParseDOCX(string name, byte[] value)
-        {
-            try
-            {
-                byte[] byteArray = value;
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    memoryStream.Write(byteArray, 0, byteArray.Length);
-                    using (WordprocessingDocument wDoc =
-                                                WordprocessingDocument.Open(memoryStream, true))
-                    {
-                        int imageCounter = 0;
-                        var pageTitle = name;
-                        var part = wDoc.CoreFilePropertiesPart;
-
-                        WmlToHtmlConverterSettings settings = new WmlToHtmlConverterSettings()
-                        {
-                            AdditionalCss = "body { margin: 1cm auto; max-width: 20cm; padding: 0; }",
-                            PageTitle = pageTitle,
-                            FabricateCssClasses = true,
-                            CssClassPrefix = "pt-",
-                            RestrictToSupportedLanguages = false,
-                            RestrictToSupportedNumberingFormats = false,
-                            ImageHandler = imageInfo =>
-                            {
-                                ++imageCounter;
-                                string extension = imageInfo.ContentType.Split('/')[1].ToLower();
-                                ImageFormat imageFormat = null;
-                                if (extension == "png") imageFormat = ImageFormat.Png;
-                                else if (extension == "gif") imageFormat = ImageFormat.Gif;
-                                else if (extension == "bmp") imageFormat = ImageFormat.Bmp;
-                                else if (extension == "jpeg") imageFormat = ImageFormat.Jpeg;
-                                else if (extension == "tiff")
-                                {
-                                    extension = "gif";
-                                    imageFormat = ImageFormat.Gif;
-                                }
-                                else if (extension == "x-wmf")
-                                {
-                                    extension = "wmf";
-                                    imageFormat = ImageFormat.Wmf;
-                                }
-
-                                if (imageFormat == null) return null;
-
-                                string base64 = null;
-                                try
-                                {
-                                    using (MemoryStream ms = new MemoryStream())
-                                    {
-                                        imageInfo.Bitmap.Save(ms, imageFormat);
-                                        var ba = ms.ToArray();
-                                        base64 = System.Convert.ToBase64String(ba);
-                                    }
-                                }
-                                catch (System.Runtime.InteropServices.ExternalException)
-                                { return null; }
-
-                                ImageFormat format = imageInfo.Bitmap.RawFormat;
-                                ImageCodecInfo codec = ImageCodecInfo.GetImageDecoders()
-                                                            .First(c => c.FormatID == format.Guid);
-                                string mimeType = codec.MimeType;
-
-                                string imageSource =
-                                        string.Format("data:{0};base64,{1}", mimeType, base64);
-
-                                XElement img = new XElement(Xhtml.img,
-                                        new XAttribute(NoNamespace.src, imageSource),
-                                        imageInfo.ImgStyleAttribute,
-                                        imageInfo.AltText != null ?
-                                            new XAttribute(NoNamespace.alt, imageInfo.AltText) : null);
-                                return img;
-                            }
-                        };
-
-                        XElement htmlElement = WmlToHtmlConverter.ConvertToHtml(wDoc, settings);
-                        var html = new XDocument(new XDocumentType("html", null, null, null),
-                                                                                    htmlElement);
-                        var htmlString = html.ToString(SaveOptions.DisableFormatting);
-                        return htmlString;
-                    }
-                }
-            }
-            catch
-            {
-                return "The file is either open, please close it or contains corrupt data";
-            }
-        }
-
-        public static Uri FixUri(string brokenUri)
-        {
-            string newURI = string.Empty;
-            if (brokenUri.Contains("mailto:"))
-            {
-                int mailToCount = "mailto:".Length;
-                brokenUri = brokenUri.Remove(0, mailToCount);
-                newURI = brokenUri;
-            }
-            else
-            {
-                newURI = " ";
-            }
-            return new Uri(newURI);
         }
         #endregion
     }
