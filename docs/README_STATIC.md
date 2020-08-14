@@ -134,7 +134,6 @@ The following choices are available:
 Code|System
 bootstrap|[Bootstrap](https://getbootstrap.com)
 html|HTML based system
-qx|[qooxdoo](https://qooxdoo.org/about.html)
 react|[React](https://github.com/facebook/react)
 vue|[Vue](https://vuejs.org)
 

@@ -24,6 +24,7 @@
 
 /// Packet Manager Requirements
 /// 
+/// IInstall-Package Newtonsoft.Json -Version 12.0.3
 /// Install-Package Jint -Version 2.11.58
 /// Istall-Package HtmlAgilityPack - Version 1.11.24
 /// 
@@ -59,7 +60,7 @@ namespace Route.UI
             // Get the full path
             sPath = store.PathFromEntry(sPath, "path");
 
-            if(!"".InContainer())
+            if (!"".InContainer())
             {
                 // Get the path
                 sPath = "".WorkingDirectory();

@@ -14,7 +14,7 @@
 
   // Let's link in React
 
-  "ui": "react",
+  "ui": "qx+",
 
   // Profile
 

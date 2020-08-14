@@ -600,6 +600,7 @@ namespace NX.Engine
         public string UI
         {
             get { return this[KeyUI]; }
+            set { this[KeyUI] = value; }
         }
 
         /// <summary>
