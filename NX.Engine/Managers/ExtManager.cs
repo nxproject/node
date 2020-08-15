@@ -197,8 +197,6 @@ namespace NX.Engine
                                     }
                                     catch { }
 
-                                    
-
                                     //
                                     this.Parent.LogVerbose("Loaded {0}", sName);
                                 }

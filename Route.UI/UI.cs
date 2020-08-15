@@ -60,14 +60,18 @@ namespace Route.UI
             // Get the full path
             sPath = store.PathFromEntry(sPath, "path");
 
-            if (!"".InContainer())
+            if (!"".InContainer() && "".InDebug())
             {
                 // Get the path
-                sPath = "".WorkingDirectory();
-                // Find where NX.Node is
-                int iPos = sPath.IndexOf("NX.Node");
+                sPath = this.GetType().Assembly.Location;
+                // Find where bin is
+                int iPos = sPath.IndexOf(@"\bin\");
+                // Extract
+                sPath = sPath.Substring(0, iPos);
+                // Remove last
+                sPath = sPath.Substring(0, sPath.LastIndexOf(@"\") + 1);
                 // Make new path
-                sPath = sPath.Substring(0, iPos) + "UI." + call.Env.UI;
+                sPath = store.PathFromEntry(sPath + "UI." + call.Env.UI, "path");
             }
 
             // Assure folder
@@ -91,7 +95,7 @@ namespace Route.UI
                 c_Engine.SetValue("html", new HTMLClass());
 
                 // Make our HTML processor
-                c_Proc = delegate (FileStream stream)
+                call.RespondWithUIFile(sPath, delegate (FileStream stream)
                 {
                     // Open a reader
                     using (StreamReader c_Reader = new StreamReader(stream))
@@ -105,7 +109,7 @@ namespace Route.UI
                         // Find JS tags
                         var c_Nodes = c_Page.DocumentNode.SelectNodes("//nxjs");
                         // Any?
-                        if (c_Nodes != null)
+                        if (c_Nodes != null && c_Nodes.Count > 0)
                         {
                             // Loop thru
                             foreach (HtmlNode c_Node in c_Nodes)
@@ -125,18 +129,32 @@ namespace Route.UI
                                 // Replace
                                 c_Node.ParentNode.ReplaceChild(c_New.DocumentNode, c_Node);
                             }
+
+                            // Make the output stream
+                            MemoryStream c_Out = new MemoryStream(c_Page.DocumentNode.OuterHtml.ToBytes());
+
+                            return c_Out;
                         }
-
-                        // Make the output stream
-                        MemoryStream c_Out = new MemoryStream(c_Page.DocumentNode.OuterHtml.ToBytes());
-
-                        return c_Out;
+                        else
+                        {
+                            // Nothing done
+                            return null;
+                        }
                     }
-                };
-            }
+                });
 
-            // And deliver
-            call.RespondWithUIFile(sPath, c_Proc);
+                // Always deliver
+                call.RespondWithUIFile(sPath, c_Proc);
+            }
+            else
+            {
+                // Handle caching
+                call.RespondIf(sPath.GetLastWriteFromPath(), delegate ()
+                {
+                    // And deliver
+                    call.RespondWithUIFile(sPath, c_Proc);
+                });
+            }
         }
     }
 }

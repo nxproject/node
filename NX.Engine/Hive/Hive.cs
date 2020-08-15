@@ -837,15 +837,19 @@ namespace NX.Engine.Hive
                 // Loop thru
                 foreach (BeeClass c_Bee in c_Bees)
                 {
-                    // Refresh CV
-                    c_Bee.CV.Refresh();
-                    // OK?
-                    if (!c_Bee.CV.IsRunning)
+                    // Only valid
+                    if (c_Bee != null)
                     {
-                        // Kill
-                        c_Bee.Kill(BeeClass.KillReason.FoundDead);
-                        // One less
-                        iCount--;
+                        // Refresh CV
+                        c_Bee.CV.Refresh();
+                        // OK?
+                        if (!c_Bee.CV.IsRunning)
+                        {
+                            // Kill
+                            c_Bee.Kill(BeeClass.KillReason.FoundDead);
+                            // One less
+                            iCount--;
+                        }
                     }
                 }
 

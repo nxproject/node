@@ -600,7 +600,6 @@ namespace NX.Engine
         public string UI
         {
             get { return this[KeyUI]; }
-            set { this[KeyUI] = value; }
         }
 
         /// <summary>
@@ -1138,12 +1137,9 @@ namespace NX.Engine
         /// </summary>
         public void Debug()
         {
-            if (!"".InContainer())
+            if (!"".InContainer() && "".InDebug())
             {
-                if (System.Diagnostics.Debugger.IsAttached)
-                {
-                    System.Diagnostics.Debugger.Break();
-                }
+                System.Diagnostics.Debugger.Break();
             }
         }
         #endregion

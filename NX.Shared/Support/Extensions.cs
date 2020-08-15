@@ -3820,9 +3820,16 @@ namespace NX.Shared
         /// Returns true if running in a Dockercontainer
         /// 
         /// </summary>
-        public static bool InContainer(this string vaue)
+        public static bool InContainer(this string value)
         { return Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true"; }
 
+        /// <summary>
+        /// 
+        /// Returns true if running in debug mode
+        /// 
+        /// </summary>
+        public static bool InDebug(this string value)
+        { return System.Diagnostics.Debugger.IsAttached; }
 
         /// <summary>
         /// 

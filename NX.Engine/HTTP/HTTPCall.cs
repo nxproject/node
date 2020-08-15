@@ -369,6 +369,9 @@ namespace NX.Engine
                 // And send back
                 this.Response.StatusCode = (int)code;
 
+                //
+                this.HandleETag();
+
                 this.Response.ContentType = ct;
                 this.Response.ContentLength64 = value.Length;
                 this.Response.OutputStream.Write(value, 0, value.Length);
@@ -418,7 +421,7 @@ namespace NX.Engine
                 string sResp = null;
 
                 // According to type
-                switch(this.ResponseFormat)
+                switch (this.ResponseFormat)
                 {
                     case "xml":
                         sResp = value.ToXML().ToXMLString();
@@ -553,34 +556,36 @@ namespace NX.Engine
                     using (FileStream c_File = File.OpenRead(path))
                     {
                         // Make local
-                        Stream c_Local = c_File;
+                        Stream c_Local = null;
 
                         // Do we have a processor
                         if (proc != null)
                         {
                             // Process
                             c_Local = proc(c_File);
-                            // Rewind
-                            c_Local.Seek(0, SeekOrigin.Begin);
+                            // Any?
+                            if (c_Local != null)
+                            {
+                                // Rewind
+                                c_Local.Seek(0, SeekOrigin.Begin);
+                            }
                         }
 
-                        // And send back
-                        this.Response.StatusCode = (int)HttpStatusCode.OK;
-
-                        this.Response.ContentType = ct.IfEmpty(path.ContentTypeFromPath());
-                        this.Response.ContentLength64 = c_Local.Length;
-                        this.Response.SendChunked = false;
-
-                        if (download)
+                        // No changes?
+                        if (c_Local == null)
                         {
-                            this.Response.ContentType = ct.IfEmpty("application/" + path.GetExtensionFromPath());
-                            this.Response.ContentType = System.Net.Mime.MediaTypeNames.Application.Octet;
-                            this.Response.AddHeader("Content-disposition", "attachment; filename=" + path.GetFileNameFromPath());
+                            // Caching?
+                            this.RespondIf(path.GetLastWriteFromPath(), delegate ()
+                            {
+                                // The original
+                                this.HandleStream(path, ct, download, c_File);
+                            });
                         }
-
-                        c_Local.CopyTo(this.Response.OutputStream);
-                        this.Response.OutputStream.Flush();
-                        this.ResponseEnd();
+                        else
+                        {
+                            // Send the stream
+                            this.HandleStream(path, ct, download, c_Local);
+                        }
                     }
                 }
                 else
@@ -592,6 +597,36 @@ namespace NX.Engine
             }
         }
 
+        private void HandleStream(string path, string ct, bool download,Stream source)
+        {
+            // And send back
+            this.Response.StatusCode = (int)HttpStatusCode.OK;
+
+            //
+            this.HandleETag();
+
+            this.Response.ContentType = ct.IfEmpty(path.ContentTypeFromPath());
+            this.Response.ContentLength64 = source.Length;
+            this.Response.SendChunked = false;
+
+            if (download)
+            {
+                this.Response.ContentType = ct.IfEmpty("application/" + path.GetExtensionFromPath());
+                this.Response.ContentType = System.Net.Mime.MediaTypeNames.Application.Octet;
+                this.Response.AddHeader("Content-disposition", "attachment; filename=" + path.GetFileNameFromPath());
+            }
+
+            source.CopyTo(this.Response.OutputStream);
+            this.Response.OutputStream.Flush();
+            this.ResponseEnd();
+        }
+
+        /// <summary>
+        /// 
+        /// Call for sending texxt
+        /// 
+        /// </summary>
+        /// <param name="value"></param>
         public void RespondWithStatic(string value)
         {
             // Send it back
@@ -606,6 +641,57 @@ namespace NX.Engine
         /// 
         /// </summary>
         public bool ResponseCompleted { get; private set; }
+
+        /// <summary>
+        /// 
+        /// The ETag
+        /// 
+        /// </summary>
+        private string ResponseETag { get; set; }
+
+        /// <summary>
+        /// 
+        /// Handles the check against an etag
+        /// 
+        /// </summary>
+        /// <param name="lw">The last write time for the response</param>
+        /// <param name="cb">Callback if etag mismatch</param>
+        public void RespondIf(DateTime lw, Action cb)
+        {
+            // Make the ETag
+            this.ResponseETag = lw.ToString("R").MD5HashString();
+            // Match
+            if (this.Request.Headers["If-None-Match"].IsSameValue(this.ResponseETag))
+            {
+                if (!this.ResponseCompleted)
+                {
+                    // And send back
+                    this.Response.StatusCode = (int)HttpStatusCode.NotModified;
+
+                    //
+                    this.ResponseEnd();
+                }
+            }
+            else
+            {
+                // Continue
+                if (cb != null) cb();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Handle cache header values
+        /// 
+        /// </summary>
+        private void HandleETag()
+        {
+            // Do we have a date?
+            if (this.ResponseETag.HasValue())
+            {
+                this.Response.AddHeader("Etag", this.ResponseETag);
+            }
+        }
         #endregion
 
         #region Site and user properties

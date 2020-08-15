@@ -16,6 +16,11 @@ The **Do** call above has two parameters, the first is the encapsulation of the 
 Call via the **HTTPCallClass** and the second is the parameters in the call URL using
 the **StoreClass**.
 
+## Caching
+
+The system automatically handles caching for all files.  Because of their nature, html
+files with embedded **nxjs** will not be cached.
+
 ## HTTP authentication
 
 You can define which authentication method to use by calling:
