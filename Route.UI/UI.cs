@@ -55,7 +55,7 @@ namespace Route.UI
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Make the folder path
-            string sPath = call.Env.RootFolder.CombinePath("modulesui").CombinePath(call.Env.UI.Replace("+", ""));
+            string sPath = "".WorkingDirectory().CombinePath("modulesui").CombinePath(call.Env.UI.Replace("+", ""));
 
             // Get the full path
             sPath = store.PathFromEntry(sPath, "path");

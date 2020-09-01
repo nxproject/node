@@ -34,7 +34,7 @@ can be a string, JSON array or JSON object.  This is an example of a config file
 		"10.0.192.68",
 		"10.0.192.69:2788"
 	],
-	"qd_bumble":["redis","percona"],
+	"qd_bumble":["redis","mongodb"],
 	"qd_worker": [ "Portal:2", "Chores:3" ]
 }
 ```

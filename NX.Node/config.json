@@ -1,11 +1,10 @@
 {
   "hive": "test", // The name of the hive
   "tier": "dev", // The tier that the hive runs in, change to latest for production
-  "fieldx": [ "one=10.192.180.160:2375" ], // The list of fields
+  "xfield": [ "one=10.192.180.160:2375" ], // The list of fields
 
   "repo_project": "nxproject", // The Docker repository name
-  "root_folder": "/etc/wd", // Where bee's data is kept
-  "doc_folder": "@/etc/docs", // Where shared documents are kept
+  "root_folder": "/etc/nxproject", // folder where data is kept
 
   // Default values, just to demo
 
@@ -18,13 +17,17 @@
 
   // Profile
 
-  "uses": [ ], // To give the system some flavor
+  "uses": [ "Proc.Office" ], // To give the system some flavor
+
+  // Use Percona
+
+  "nosql": "mongodb",
 
   // Queens duties
 
   "qd_uses": [ "Proc.NginX" ],
   "qd_bumble": [ "redis" ],
-  "qd_worker": [ "4", "Chores:3", "Simple:1" ],
+  "qd_worker": [ "1" ],
 
   "secure_code": "wqfmtohhofyzzrojnhvy", // The security code
   // From https://www.random.org/strings/?num=1&len=20&loweralpha=on&unique=on&format=html&rnd=new
@@ -37,12 +40,12 @@
 
   // These are for development
 
-  "nginx_bumble": [ "redis" ], // Allow access to Redis
-  "nginx_proc": [ "Chores" ], // Map Chores procs
+  //"nginx_bumble": [ "redis" ], // Allow access to Redis
+  //"nginx_proc": [ "Chores" ], // Map Chores procs
 
   "verbose": "n", // Tell me what is going on
-  "make_genome": "n", // Make the genome (reload image) ("y" when ready to release)
-  "make_bee": "n", // Make a bee *"y" when ready to test in a container)
-  "code_folder": [ ] // Folders where extra code is located"
+  "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
+  "make_bee": "y", // Make a bee *"y" when ready to test in a container)
+  "code_folder": [ "C:\\Candid Concepts\\NX\\Office" ] // Folders where extra code is located"
 
 }

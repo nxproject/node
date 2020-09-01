@@ -75,7 +75,7 @@ namespace NXNode
                     sOut.AssurePath();
 
                     // Copy
-                    CopyFolder(c_Env, sWD, sOut);
+                    CopyFolder(c_Env, sWD, sOut, sOut, false);
 
                     // The modules folder
                     string sMod = sOut.CombinePath("modules");
@@ -92,7 +92,7 @@ namespace NXNode
                     sDir = sDir.Substring(sDir.IndexOf("{0}") + 3);
 
                     //
-                    CopyTree(c_Env, sRoot, sDir, sMod, sUI, c_CodeFolders, sRootFolder);
+                    CopyTree(c_Env, sRoot, sDir, sMod, sUI, sOut, c_CodeFolders, sRootFolder);
 
                     // Get the extra folders
                     List<string> c_Folders = c_Env.GetAsJArray(EnvironmentClass.KeyCodeFolder).ToList();
@@ -105,15 +105,15 @@ namespace NXNode
                         if (!sSource.EndsWith(@"\")) sSource += @"\";
 
                         // Root of many projects?
-                        if (!CopyTree(c_Env, sSource, sDir, sMod, sUI, c_CodeFolders))
+                        if (!CopyTree(c_Env, sSource, sDir, sMod, sUI, sOut, c_CodeFolders))
                         {
                             // If not, see if it is a single project
-                            if (!CopyProject(c_Env, sSource, sDir, sMod, sUI, c_CodeFolders))
+                            if (!CopyProject(c_Env, sSource, sDir, sMod, sUI, sOut, c_CodeFolders))
                             {
                                 // If making genome
                                 if (c_CodeFolders == null)
                                 {
-                                    CopyFolder(c_Env, sSource, sMod);
+                                    CopyFolder(c_Env, sSource, sMod, sOut, false);
                                 }
                                 else
                                 {
@@ -190,6 +190,7 @@ namespace NXNode
                                             string template,
                                             string moddir,
                                             string uidir,
+                                            string rootfolder,
                                             List<string> targets,
                                             params string[] skip)
         {
@@ -208,7 +209,7 @@ namespace NXNode
                 if (!c_Skip.Contains(sSDir.GetDirectoryNameFromPath()))
                 {
                     //
-                    if (CopyProject(env, sSDir, template, moddir, uidir, targets)) bAns = true;
+                    if (CopyProject(env, sSDir, template, moddir, uidir, rootfolder, targets)) bAns = true;
                 }
             }
 
@@ -220,6 +221,7 @@ namespace NXNode
                                             string template,
                                             string moddir,
                                             string uidir,
+                                            string rootfodler,
                                             List<string> targets)
         {
             // Assume failure
@@ -240,7 +242,7 @@ namespace NXNode
                 sSAUI.AssurePath();
 
                 // UI
-                if (targets == null) bAns = CopyFolder(env, sourcedir, sSAUI);
+                if (targets == null) bAns = CopyFolder(env, sourcedir, sSAUI, sSAUI, true);
             }
             else if (!sAName.StartsWith("."))
             {
@@ -251,7 +253,7 @@ namespace NXNode
                 if (targets == null)
                 {
                     // Copy all the files to modules
-                    bAns = CopyFolder(env, sADir, moddir);
+                    bAns = CopyFolder(env, sADir, moddir, rootfodler, false);
                 }
                 else
                 {
@@ -263,7 +265,11 @@ namespace NXNode
             return bAns;
         }
 
-        private static bool CopyFolder(EnvironmentClass env, string source, string target)
+        private static bool CopyFolder(EnvironmentClass env, 
+                                        string source, 
+                                        string target, 
+                                        string rootfolder, 
+                                        bool isui)
         {
             // Assume failure
             bool bAns = false;
@@ -276,6 +282,13 @@ namespace NXNode
                 // Make path
                 target.AssurePath();
 
+                // Split
+                string[] asPirces = source.Split(@"\");
+                if(!isui && asPirces[4].IsSameValue("NX.Node"))
+                {
+                    rootfolder = target;
+                }
+
                 // The list
                 List<string> c_Files = source.GetFilesInPath();
                 // Do each file
@@ -283,8 +296,36 @@ namespace NXNode
                 {
                     // Get the actual file name
                     string sName = sFile.GetFileNameFromPath();
-                    // Copy
-                    sFile.CopyFile(target + @"\" + sName);
+
+                    if (isui)
+                    {
+                        // New target
+                        string sTarget = target.CombinePath( sFile.Substring(source.Length+1));
+                        // Copy
+                        sFile.CopyFile(sTarget);
+                    }
+                    else
+                    {
+                        // System?
+                        if (sName.StartsWith("Fn.") ||
+                                sName.StartsWith("Route.") ||
+                                sName.StartsWith("Proc.") ||
+                                target.IsSameValue(rootfolder))
+                        {
+                            // Copy
+                            sFile.CopyFile(target.CombinePath(sName));
+                        }
+                        else
+                        {
+                            // Copy
+                            string sFinal = rootfolder.CombinePath(sName);
+                            if (!sFinal.FileExists() && !target.Replace("/modules", "/").CombinePath(sName).FileExists())
+                            {
+                                sFile.CopyFile(sFinal);
+                            }
+                        }
+                    }
+                    
                     //
                     bAns = true;
                 }
@@ -293,7 +334,7 @@ namespace NXNode
                 foreach (string sDir in source.GetDirectoriesInPath())
                 {
                     // Copy
-                    if (CopyFolder(env, sDir, target + @"\" + sDir.GetDirectoryNameFromPath())) bAns = true;
+                    if (CopyFolder(env, sDir, target.CombinePath(sDir.GetDirectoryNameFromPath()), rootfolder, isui)) bAns = true;
                 }
             }
 

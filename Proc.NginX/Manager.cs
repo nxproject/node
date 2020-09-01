@@ -42,6 +42,9 @@ namespace Proc.NginX
         public ManagerClass(EnvironmentClass env)
             : base(env, "nginx")
         {
+            // Make a starting config
+            this.MakeConfig(false);
+
             // Handle the events
             this.AvailabilityChanged += delegate (bool isavailable)
             {
@@ -134,20 +137,20 @@ namespace Proc.NginX
         /// <param name="cando">True if we can make the config</param>
         private void MakeConfig(bool cando)
         {
+            // The path to the file
+            string sPath = "/etc/nginx";
+            // Assure
+            sPath.AssurePath();
+            // And the file
+            string sFile = sPath.CombinePath("nginx.conf");
+            // Where the default fils are kept
+            string sSource = "".WorkingDirectory().CombinePath("Hive/External/nginx/defaults");
+
             // Can we do this?
-            if (cando)
+            if (cando || !sFile.FileExists())
             {
                 //
                 this.Parent.LogVerbose("Creating nginx.conf");
-
-                // The path to the file
-                string sPath = "/etc/nginx";
-                // Assure
-                sPath.AssurePath();
-                // And the file
-                string sFile = sPath.CombinePath("nginx.conf");
-                // Where the default fils are kept
-                string sSource = "/etc/wd/Hive/External/nginx/defaults";
 
                 // Make the new config
                 string sConf = this.MakeNginxConfig();
@@ -155,28 +158,19 @@ namespace Proc.NginX
                 if (!sConf.IsExactSameValue(sFile.ReadFile()))
                 {
                     // Copy from sources
-                    this.Parent.LogVerbose("{0} files copied {1} => {2}", sSource.CopyDirectoryTree(sPath), 
-                                            sSource, 
+                    this.Parent.LogInfo("{0} files copied {1} => {2}", sSource.CopyDirectoryTree(sPath),
+                                            sSource,
                                             sPath);
 
                     // Write out
                     sFile.WriteFile(sConf);
 
                     //
-                    this.Parent.LogInfo("Nginx.conf has changed");
+                    this.Parent.LogInfo("Nginx.conf has changed - {0}, {1} bytes", sFile, sConf.Length);
                     //this.Parent.LogVerbose(sConf);
 
-                    // If we have a field, restart container
-                    if (this.Bee != null)
-                    {
-                        // Get the DokerIF
-                        DockerIFClass c_Client = this.Field.DockerIF;
-                        // Any?
-                        if (c_Client != null)
-                        {
-                            c_Client.RestartContainer(this.Bee.DockerID);
-                        }
-                    }
+                    // Recycle
+                    this.Parent.Hive.RecycleDNA("nginx");
                 }
                 //
                 this.Parent.LogVerbose("End of nginx.conf maintenance");
@@ -255,7 +249,7 @@ namespace Proc.NginX
             //
             ItemsClass c_Bees = new ItemsClass(c_Env.GetAsJArray("nginx_bumble"));
             // Loop thru
-            foreach(ItemClass c_Bee in c_Bees)
+            foreach (ItemClass c_Bee in c_Bees)
             {
                 // Get the information
                 InformationClass c_Info = this.Parent.NginXInfo[c_Bee.Key, ServicesClass.Types.BumbleBee];
@@ -280,13 +274,13 @@ namespace Proc.NginX
                 c_Info.Apply(c_Proc);
 
                 // Add the DNA
-                sBody += c_Info.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(HiveClass.ProcessorDNAName + "." +  c_Proc.Key));
+                sBody += c_Info.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(HiveClass.ProcessorDNAName + "." + c_Proc.Key));
             }
 
             // Make the worker bees 
             // Add the DNA
             sBody += sWBSite.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(HiveClass.ProcessorDNAName + "."));
-            
+
             // 
             sBody += "Locations".NginxComment(1, true);
 
@@ -295,12 +289,12 @@ namespace Proc.NginX
             // Get the field to use
             string sField = this.Parent["field_nginx"];
             // Any?
-            if(sField.HasValue())
+            if (sField.HasValue())
             {
                 // Get
                 FieldClass c_Poss = this.Parent.Hive.GetField(sField);
                 // Valid?
-                if(c_Poss != null)
+                if (c_Poss != null)
                 {
                     // Use it
                     c_Field = c_Poss;
@@ -309,7 +303,8 @@ namespace Proc.NginX
             // Open the server
             sBody += c_Field.URL.RemoveProtocol().RemovePort().NginxServerStart();
             // Set the port
-            sBody += this.Location.GetPort().NginxListen();
+            string sPort = this.Parent.GetAsJArray("use_traefik").HasValue() ? this.Location.GetPort() : this.Parent["nginx_port"].NumOnly();
+            sBody += sPort.NginxListen();
 
             // Do the bees
             // Loop thru
@@ -319,7 +314,7 @@ namespace Proc.NginX
                 InformationClass c_Info = this.Parent.NginXInfo[c_Bee.Key, ServicesClass.Types.BumbleBee];
                 // Apply the entry
                 c_Info.Apply(c_Bee);
-                
+
                 // Add the DNA
                 sBody += c_Info.NginxLocation("",
                     c_Info.NginxRemove(),

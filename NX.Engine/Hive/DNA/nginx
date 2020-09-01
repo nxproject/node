@@ -6,7 +6,10 @@
 	],
 	"@Map": [
 		"{shared_folder}/nginx/logs:/etc/nginx/logs",
-		"{shared_folder}/nginx/default:/etc/nginx"
+		"{shared_folder}/nginx:/etc/nginx"
+	],
+	"@Copy": [
+		"Hive/External/nginx/defaults:{shared_folder}/nginx"
 	],
 	"Image": "{repo_project}/nginx:{tier}",
 	"WorkingDir": "/etc/wd"

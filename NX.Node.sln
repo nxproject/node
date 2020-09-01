@@ -123,6 +123,8 @@ Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "UI.HTML", "UI.HTML\UI.HTML.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proc.Traefik", "Proc.Traefik\Proc.Traefik.csproj", "{B7BB867E-7854-4055-A835-B7A75579D3DC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Concentrator", "Concentrator\Concentrator.csproj", "{DD10A0DF-7BF4-4CB4-A3D4-7B4C1BC507A6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -234,6 +236,10 @@ Global
 		{B7BB867E-7854-4055-A835-B7A75579D3DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7BB867E-7854-4055-A835-B7A75579D3DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7BB867E-7854-4055-A835-B7A75579D3DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD10A0DF-7BF4-4CB4-A3D4-7B4C1BC507A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD10A0DF-7BF4-4CB4-A3D4-7B4C1BC507A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD10A0DF-7BF4-4CB4-A3D4-7B4C1BC507A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD10A0DF-7BF4-4CB4-A3D4-7B4C1BC507A6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -274,6 +280,7 @@ Global
 		{C66E80AF-AB73-48A8-86F8-F1E4C3D19F5B} = {1ED3F8B1-1354-4DC8-B86D-C27E4431625B}
 		{C7ED432E-3CC5-4EF9-9464-BB46A8327FD0} = {1ED3F8B1-1354-4DC8-B86D-C27E4431625B}
 		{B7BB867E-7854-4055-A835-B7A75579D3DC} = {C368A216-11C1-47A6-A4AA-626EC430E138}
+		{DD10A0DF-7BF4-4CB4-A3D4-7B4C1BC507A6} = {058AF47E-8CC7-49EC-8C9B-CFB48CD80A93}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {FC856DE7-32A6-44B5-8E43-30FBEC634219}

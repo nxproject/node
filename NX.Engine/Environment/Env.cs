@@ -171,12 +171,13 @@ namespace NX.Engine
             this[KeyRepoProject] = this[KeyRepoProject].IfEmpty("nxproject");
 
             this[KeyRootFolder] = this[KeyRootFolder].IfEmpty("".WorkingDirectory());
-            this[KeySharedFolder] = this[KeySharedFolder].IfEmpty("/etc/shared");
+            this[KeySharedFolder] = this.GetFolderPath(this.RootFolder,KeySharedFolder,"shared");
             this[KeyDynamicFolder] = this.GetFolderPath(this.SharedFolder, KeyDynamicFolder, "dyn");
             this[KeyDocumentFolder] = this.GetFolderPath(this.SharedFolder, KeyDocumentFolder, "files");
 
             this["wd"] = this["wd"].IfEmpty("".InContainer() ? "/etc/wd" : "".WorkingDirectory());
             this["nginx_port"] = this["nginx_port"].IfEmpty(this.GetAsJArray("use_traefik").HasValue() ? "80" : "$80");
+            this["nosql"] = this["nosql"].IfEmpty("mongodb");
 
             if (this.Process.IsSameValue("{proc}") || !this.Process.HasValue()) this.Process = "";
             this.Verbose = !!this.Verbose;

@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.Globalization" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\NX.Engine\NX.Engine.csproj" />
     <ProjectReference Include="..\NX.Shared\NX.Shared.csproj" />
   </ItemGroup>

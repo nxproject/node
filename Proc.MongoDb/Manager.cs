@@ -46,7 +46,7 @@ namespace Proc.MongoDb
     {
         #region Constructor
         public ManagerClass(EnvironmentClass env)
-            : base(env, env["nosql"].IfEmpty("perconanosql"))
+            : base(env, env["nosql"])
         {
             // Handle the event
             this.AvailabilityChanged += delegate (bool isavailable)

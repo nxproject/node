@@ -990,7 +990,7 @@ namespace NX.Shared
 
             return abAns;
         }
-        // <summary>
+
         /// 
         /// Does an HTTP POST
         /// 
@@ -2971,7 +2971,7 @@ namespace NX.Shared
             return path1 + path2;
         }
 
-        public static string AdjustPathToOS(this string path)
+        public static string AdjustPathToOS(this string path, bool adddrive = false)
         {
             // Make into Windows
             string sAns = path.IfEmpty().Replace("/", @"\");
@@ -2981,6 +2981,9 @@ namespace NX.Shared
                 // Into Linux
                 sAns = sAns.Replace(@"\", "/");
             }
+            //
+            if (adddrive && !"".IsLinux() && !sAns.Matches(@"^[A-Za-z]\:.*")) sAns = "c:" + sAns;
+
             return sAns;
         }
 

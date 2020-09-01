@@ -160,10 +160,16 @@ namespace NX.Engine.Hive
                 AppDomain.CurrentDomain.ProcessExit += delegate (object sender, EventArgs e)
                 {
                     // Are we the queen?
-                    if (this.Roster.QueenBee != null && this.Roster.QueenBee.IsSameAs(this.Roster.MeBee))
+                    if (this.Roster.QueenBee != null &&
+                            this.Roster.MeBee != null &&
+                            this.Roster.QueenBee.IsSameAs(this.Roster.MeBee))
                     {
                         // Bring up the follower
-                        this.Roster.MeBee.FollowerBee.Handshake(HiveClass.States.Ascending);
+                        if (this.Roster.MeBee.FollowerBee != null &&
+                            !this.Roster.MeBee.FollowerBee.Id.IsSameValue(this.Roster.MeBee.Id))
+                        {
+                            this.Roster.MeBee.FollowerBee.Handshake(HiveClass.States.Ascending);
+                        }
                     }
                 };
             }
@@ -530,6 +536,9 @@ namespace NX.Engine.Hive
 
                     // And handle process option
                     this.Parent.Use("Proc." + this.Parent.Process.IfEmpty("Default"));
+
+                    // Tell the world
+                    this.SetupCompleted?.Invoke(this.HasSetup);
                 }
             }
 
@@ -829,6 +838,7 @@ namespace NX.Engine.Hive
             // Must have a task
             if (task.HasValue())
             {
+                //
                 // Get a list of the containers
                 List<BeeClass> c_Bees = this.Roster.GetBeesForDNA(task);
                 // Get the count
@@ -838,7 +848,7 @@ namespace NX.Engine.Hive
                 foreach (BeeClass c_Bee in c_Bees)
                 {
                     // Only valid
-                    if (c_Bee != null)
+                    if (c_Bee != null && !c_Bee.IsGhost)
                     {
                         // Refresh CV
                         c_Bee.CV.Refresh();
@@ -853,8 +863,8 @@ namespace NX.Engine.Hive
                     }
                 }
 
-                //// And how many we have changed
-                //int iDiff = 0;
+                // And how many we have changed
+                int iDiff = 0;
 
                 // Too many?
                 while (iCount > max)
@@ -867,7 +877,7 @@ namespace NX.Engine.Hive
                     c_Bee.Kill(BeeClass.KillReason.TooMany);
                     // Update
                     iCount--;
-                    //iDiff--;
+                    iDiff--;
                 }
 
                 // Too few?
@@ -879,21 +889,46 @@ namespace NX.Engine.Hive
                     this.Roster.Add(c_Bee);
                     // Update
                     iCount++;
-                    //iDiff++;
+                    iDiff++;
                 }
 
-                //// Any changes?
-                //if (iDiff != 0)
-                //{
-                //    // What kind
-                //    string sKind = iDiff > 0 ? "Added" : "Removed";
-                //    // Make positive
-                //    if (iDiff < 0) iDiff = -iDiff;
-                //    // Plural
-                //    string sS = iDiff != 1 ? "s" : "";
-                //    // Tell user
-                //    this.Parent.LogInfo("{0} {1} {2} bee{3}", sKind, iDiff,task, sS);
-                //}
+                // Any changes?
+                if (iDiff != 0)
+                {
+                    // What kind
+                    string sKind = iDiff > 0 ? "Added" : "Removed";
+                    // Make positive
+                    if (iDiff < 0) iDiff = -iDiff;
+                    // Plural
+                    string sS = iDiff != 1 ? "s" : "";
+                    // Tell user
+                    this.Parent.LogInfo("{0} {1} {2} bee{3}", sKind, iDiff, task, sS);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Recycles bees taht have a given DNA
+        /// 
+        /// </summary>
+        /// <param name="task"></param>
+        public void RecycleDNA(string task)
+        {
+            // Get a list of the containers
+            List<BeeClass> c_Bees = this.Roster.GetBeesForDNA(task);
+
+            // Loop thru
+            foreach(BeeClass c_Bee in c_Bees)
+            {
+                // Get DOckerIF
+                DockerIFClass c_IF = c_Bee.Field.DockerIF;
+                // Any?
+                if(c_IF != null)
+                {
+                    // Recycle
+                    c_IF.RestartContainer(c_Bee.DockerID, c_Bee.Id, task);
+                }
             }
         }
         #endregion
@@ -1016,7 +1051,7 @@ namespace NX.Engine.Hive
                        switch (c_Def.Unique.IfEmpty().ToLower())
                        {
                            case "y":
-                               sBeeName = "";
+                               sBeeName = dna.IfEmpty().MD5HashString();
                                break;
 
                            case "*":
@@ -1304,6 +1339,23 @@ namespace NX.Engine.Hive
         /// 
         /// </summary>
         public States State { get; set; } = States.Unknown;
+        #endregion
+
+        #region Events
+        /// <summary>
+        /// 
+        /// The delegate for the SetupCompleted event
+        /// 
+        /// </summary>
+        /// <param name="isavailable">Is the bee available</param>
+        public delegate void OnSetupCompletedHandler(bool hassetup);
+
+        /// <summary>
+        /// 
+        /// Defines the event to be raised when the hhive has been setup
+        /// 
+        /// </summary>
+        public event OnSetupCompletedHandler SetupCompleted;
         #endregion
     }
 }

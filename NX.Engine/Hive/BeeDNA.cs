@@ -554,6 +554,22 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// A JSON array of source:target mappings that are copied.
+        /// The source is relative to the workign directoty
+        /// 
+        /// Example:
+        /// 
+        /// Hive/sources:/etc/data
+        /// 
+        /// </summary>
+        public JArray Copy
+        {
+            get { return this.GetAsJArray("@Copy"); }
+            set { this.Set("@Copy", value); }
+        }
+
+        /// <summary>
+        /// 
         /// A JSON array of ports that are to be translated to public
         /// 
         /// Example:
@@ -755,8 +771,33 @@ namespace NX.Engine.Hive
                 }
             }
 
-            // Any ports
-            if (this.Ports.HasValue())
+            // Handle copying
+            if (this.Copy.HasValue())
+            {
+                // Process it
+                for (int iLoop = 0; iLoop < this.Copy.Count; iLoop++)
+                {
+                    // Get the string
+                    string sDef = values.Format(this.Copy.Get(iLoop));
+                    
+                    // Break up
+                    int iPos = sDef.IndexOf(":");
+                    // Valid?
+                    if (iPos != -1)
+                    {
+                        string sSource = "".WorkingDirectory().CombinePath( sDef.Substring(0, iPos));
+                        string sTarget = sDef.Substring(iPos + 1);
+
+                        // Assure target
+                        sTarget.AssurePath();
+                        // Copy
+                        sSource.CopyDirectoryTree(sTarget);
+                    }
+                }
+            }
+
+                // Any ports
+                if (this.Ports.HasValue())
             {
                 //
                 JObject c_Bindings = c_HostConfig.AssureJObject("PortBindings");

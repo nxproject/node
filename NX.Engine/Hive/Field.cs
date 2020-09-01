@@ -269,16 +269,20 @@ namespace NX.Engine.Hive
                         BeeCVClass c_CV = new BeeCVClass(this, c_Raw);
                         // Make the bee
                         BeeClass c_Bee = new BeeClass(this, c_CV);
-                        // Did it exit?
-                        if (!c_Bee.CV.IsInTrouble)
+                        // Skip ghost
+                        if (!c_Bee.IsGhost)
                         {
-                            // Tell tracker
-                            this.Bees.SawBee(c_Bee);
-                        }
-                        else
-                        {
-                            // Kill it
-                            c_Bee.Kill(BeeClass.KillReason.FoundDead);
+                            // Did it exit?
+                            if (!c_Bee.CV.IsInTrouble)
+                            {
+                                // Tell tracker
+                                this.Bees.SawBee(c_Bee);
+                            }
+                            else
+                            {
+                                // Kill it
+                                c_Bee.Kill(BeeClass.KillReason.FoundDead);
+                            }
                         }
                     }
                 }

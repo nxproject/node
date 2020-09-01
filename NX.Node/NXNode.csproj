@@ -10,6 +10,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="NUglify" Version="1.6.4" />
+    <PackageReference Include="System.Globalization" Version="4.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Fn.System\Fn.System.csproj" />
     <ProjectReference Include="..\NX.Shared\NX.Shared.csproj" />
     <ProjectReference Include="..\Route.System\Route.System.csproj" />

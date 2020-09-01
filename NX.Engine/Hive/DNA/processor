@@ -4,9 +4,8 @@
   ],
   "@Map": [
     "{shared_folder}:/etc/shared",
-    "{shared_folder}/bee/B{id}/etc/private",
     "{shared_folder}/files:/etc/files",
-    "{shared_folder}/nginx/default:/etc/nginx"
+    "{shared_folder}/nginx:/etc/nginx"
   ],
   "Cmd": [
     "dotnet",

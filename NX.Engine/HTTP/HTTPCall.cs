@@ -180,6 +180,13 @@ namespace NX.Engine
         ///  
         /// </summary>
         public EnvironmentClass Env { get { return this.Parent; } }
+
+        /// <summary>
+        /// 
+        /// The ID if a JSON Rpc call
+        /// 
+        /// </summary>
+        public string JSONRpcID { get; set; }
         #endregion
 
         /// <summary>
@@ -428,6 +435,17 @@ namespace NX.Engine
                         break;
 
                     default:
+                        // JSON Rpc?
+                        if(this.JSONRpcID.HasValue())
+                        {
+                            // Adjust
+                            JObject c_JRPC = new JObject();
+                            c_JRPC.Set("jsonrpc", "2.0");
+                            c_JRPC.Set("id", this.JSONRpcID);
+                            c_JRPC.Set("result", value);
+
+                            value = c_JRPC;
+                        }
                         sResp = value.ToSimpleString();
                         break;
                 }
@@ -460,7 +478,21 @@ namespace NX.Engine
                             break;
 
                         default:
-                            sResp = value.ToSimpleString();
+                            // JSON Rpc?
+                            if (this.JSONRpcID.HasValue())
+                            {
+                                // Adjust
+                                JObject c_JRPC = new JObject();
+                                c_JRPC.Set("jsonrpc", "2.0");
+                                c_JRPC.Set("id", this.JSONRpcID);
+                                c_JRPC.Set("result", value);
+
+                                sResp = c_JRPC.ToSimpleString();
+                            }
+                            else
+                            {
+                                sResp = value.ToSimpleString();
+                            }
                             break;
                     }
 
@@ -578,13 +610,13 @@ namespace NX.Engine
                             this.RespondIf(path.GetLastWriteFromPath(), delegate ()
                             {
                                 // The original
-                                this.HandleStream(path, ct, download, c_File);
+                                this.RespondWithStream(path, ct, download, c_File);
                             });
                         }
                         else
                         {
                             // Send the stream
-                            this.HandleStream(path, ct, download, c_Local);
+                            this.RespondWithStream(path, ct, download, c_Local);
                         }
                     }
                 }
@@ -597,7 +629,16 @@ namespace NX.Engine
             }
         }
 
-        private void HandleStream(string path, string ct, bool download,Stream source)
+        /// <summary>
+        /// 
+        /// Handle the processign stream
+        /// 
+        /// </summary>
+        /// <param name="path">The file path</param>
+        /// <param name="ct">The content-type</param>
+        /// <param name="download">True if the file is to be treated as attachment</param>
+        /// <param name="source">The source stream</param>
+        public void RespondWithStream(string path, string ct, bool download, Stream source)
         {
             // And send back
             this.Response.StatusCode = (int)HttpStatusCode.OK;
@@ -644,10 +685,33 @@ namespace NX.Engine
 
         /// <summary>
         /// 
+        /// The last modified timestamp
+        /// 
+        /// </summary>
+        public DateTime? RespondLastModified { get; set; }
+
+        /// <summary>
+        /// 
         /// The ETag
         /// 
         /// </summary>
-        private string ResponseETag { get; set; }
+        private string ResponseETag
+        {
+            get
+            {
+                // Assume none
+                string sAns = null;
+
+                // Any?
+                if(this.RespondLastModified != null)
+                {
+                    // Make tag
+                    sAns = ((DateTime)this.RespondLastModified).ToString("R").MD5HashString();
+                }
+
+                return sAns;
+            }
+        }
 
         /// <summary>
         /// 
@@ -658,8 +722,8 @@ namespace NX.Engine
         /// <param name="cb">Callback if etag mismatch</param>
         public void RespondIf(DateTime lw, Action cb)
         {
-            // Make the ETag
-            this.ResponseETag = lw.ToString("R").MD5HashString();
+            // Set
+            this.RespondLastModified = lw;
             // Match
             if (this.Request.Headers["If-None-Match"].IsSameValue(this.ResponseETag))
             {

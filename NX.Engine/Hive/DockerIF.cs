@@ -601,11 +601,13 @@ namespace NX.Engine.Hive
         /// 
         /// </summary>
         /// <param name="id">The container id</param>
-        public void RestartContainer(string id)
+        public void RestartContainer(string id, string name, string task)
         {
             // Protect
             try
             {
+                this.Parent.Parent.Parent.LogInfo("RESTARTING {0}:{1}", task, name);
+
                 // Stop it
                 this.Client.Containers.RestartContainerAsync(id,
                     new ContainerRestartParameters()
@@ -703,7 +705,10 @@ namespace NX.Engine.Hive
         /// <param name="e">The exception</param>
         private void HandleException(string fn, Exception e)
         {
-            this.Parent.Parent.Parent.LogException("DockerIF: " + fn, e);
+            if (e.GetAllExceptions().IndexOf("NotFound") == -1)
+            {
+                this.Parent.Parent.Parent.LogException("DockerIF: " + fn, e);
+            }
         }
 
         /// <summary>

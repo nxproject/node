@@ -344,7 +344,7 @@ namespace NX.Shared
                     foreach (ItemClass c_Item in c_Items)
                     {
                         // Store
-                        this.Add(c_Item.Key, c_Item.Value.IfEmpty());
+                        this.Add(c_Item.Key, c_Item.Value.IfEmpty().URLDecode());
                     }
                     break;
             }

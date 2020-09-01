@@ -82,34 +82,38 @@ namespace NX.Engine
             // Assume none
             T c_Ans;
 
-            // Name missing?
-            if(!name.HasValue())
+            //
+            lock (this)
             {
-                // Sse the type
-                name = typeof(T).FullName;
-            }
-
-            // Already in memory?
-            if (!this.Values.Contains(name))
-            {
-                try
+                // Name missing?
+                if (!name.HasValue())
                 {
-                    // Nope, make one
-                    c_Ans = (T)Activator.CreateInstance(typeof(T), this.Parent);                    
+                    // Sse the type
+                    name = typeof(T).FullName;
                 }
-                catch (Exception e)
+
+                // Already in memory?
+                if (!this.Values.Contains(name))
                 {
-                    //
-                    this.Parent.LogException("Creating {0}".FormatString(typeof(T).FullName), e);
-                    c_Ans = default(T);
+                    try
+                    {
+                        // Nope, make one
+                        c_Ans = (T)Activator.CreateInstance(typeof(T), this.Parent);
+                    }
+                    catch (Exception e)
+                    {
+                        //
+                        this.Parent.LogException("Creating {0}".FormatString(typeof(T).FullName), e);
+                        c_Ans = default(T);
+                    }
 
                     // Save
-                    this.Values[name] = c_Ans;
+                    this.Values.Add(name, c_Ans);
                 }
-            }
-            else
-            {
-                c_Ans = (T)this.Values[name];
+                else
+                {
+                    c_Ans = (T)this.Values[name];
+                }
             }
 
             //
