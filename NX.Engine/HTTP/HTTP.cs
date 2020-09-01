@@ -28,6 +28,8 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Threading;
 
+using Newtonsoft.Json.Linq;
+
 using NX.Shared;
 
 namespace NX.Engine
@@ -243,16 +245,6 @@ namespace NX.Engine
                                 c_Params.Parse(sURL.Substring(iPos + 1), StoreClass.ParseTypes.URL);
                                 // And remove from the URL
                                 sURL = sURL.Substring(0, iPos);
-                            }
-
-                            // JSON Rpc?
-                            if(c_Params["jsonrpc"].IsSameValue("2.0"))
-                            {
-                                // Save
-                                c_Call.JSONRpcID = c_Params["jsonrpc"];
-                                // Adjust
-                                c_Params = new StoreClass(c_Params.GetAsJObject("params"));
-
                             }
 
                             // Split the URL

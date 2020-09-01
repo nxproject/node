@@ -277,6 +277,31 @@ namespace NX.Engine
 
                         // Simple conversion
                         c_Ans = sBody.ToJObject();
+
+                        // Handle JSON RPC 2.0
+                        // JSON Rpc?
+                        if (c_Ans.Get("jsonrpc").IsSameValue("2.0"))
+                        {
+                            // Save
+                            this.JSONRpcID = c_Ans.Get("id");
+                            // Get the params
+                            string sFn = c_Ans.Get("method");
+                            JArray c_P = c_Ans.GetJArray("params");
+                            // Delete
+                            c_Ans.Remove("method");
+                            c_Ans.Remove("params");
+                            // Fill
+                            if (c_P != null)
+                            {
+                                // Loop thru
+                                for (int i = 0; i < c_P.Count; i++)
+                                {
+                                    // Merge
+                                    c_Ans.Merge(c_P.GetJObject(i));
+                                }
+                            }
+                            c_Ans.Set("fn", sFn);
+                        }
                     }
                 }
                 catch { }
