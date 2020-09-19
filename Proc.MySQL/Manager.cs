@@ -69,7 +69,7 @@ namespace Proc.MySQL
             get
             {
                 // Do we know of it?
-                if(!this.Cache.Contains(db))
+                if(!this.Cache.ContainsKey(db))
                 {
                     // Make
                     this.Cache[db] = new DatabaseClass(this, db);

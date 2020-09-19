@@ -90,7 +90,7 @@ namespace Route.Dynamic
                     // Write the new DLL
                     sPath.WriteFileAsBytes(abCode);
                     // Load it
-                    call.Env.LoadDynamic(sPath);
+                    call.Env.Use(sPath);
 
                     call.RespondWithOK();
                 }

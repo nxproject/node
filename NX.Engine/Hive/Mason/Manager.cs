@@ -114,7 +114,7 @@ namespace NX.Engine.Hive.Mason
             lock (this)
             {
                 // Do we know it already?
-                if (this.WorkQueues.Contains(queue))
+                if (this.WorkQueues.ContainsKey(queue))
                 {
                     // Map
                     QueueClass c_WQ = this.WorkQueues[queue];

@@ -352,7 +352,7 @@ namespace Proc.NginX
         /// <returns>The snippet</returns>
         public static string NginxRemove(this InformationClass loc)
         {
-            return loc.Location.NginxRemove();
+            return loc.Rewrite ? loc.Location.NginxRemove() : null;
         }
 
         /// <summary>

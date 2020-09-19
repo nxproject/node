@@ -35,15 +35,18 @@ namespace NX.Shared
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class NamedListClass<T> : Dictionary<string, T>
+    public class NamedListClass<T> 
     {
         #region Constructor
         public NamedListClass()
-        { }
+        {
+            //
+            this.SynchObject = new Dictionary<string, T>();
+        }
         #endregion
 
         #region Indexer
-        public new T this[string key] 
+        public T this[string key] 
         {
             get
             {
@@ -53,9 +56,9 @@ namespace NX.Shared
                 lock (this)
                 {
                     //
-                    if (base.ContainsKey(key))
+                    if (this.SynchObject.ContainsKey(key))
                     {
-                        c_Ans = base[key];
+                        c_Ans = this.SynchObject[key];
                     }
                 }
 
@@ -67,13 +70,13 @@ namespace NX.Shared
                 lock (this)
                 {
                     //
-                    if (base.ContainsKey(key))
+                    if (this.SynchObject.ContainsKey(key))
                     {
-                        base[key] = value;
+                        this.SynchObject[key] = value;
                     }
                     else
                     {
-                        base.Add(key, value);
+                        this.SynchObject.Add(key, value);
                     }
                 }
             }
@@ -81,18 +84,20 @@ namespace NX.Shared
         #endregion
 
         #region Properties
+        private Dictionary<string, T> SynchObject { get; set; }
+
         /// <summary>
         /// 
         /// Returns the keys
         /// 
         /// </summary>
-        public new ICollection<string> Keys
+        public ICollection<string> Keys
         {
             get
             {
                 lock (this)
                 {
-                    return new List<string>(base.Keys);
+                    return new List<string>(this.SynchObject.Keys);
                 }
             }
         }
@@ -102,16 +107,23 @@ namespace NX.Shared
         /// Returns the values
         /// 
         /// </summary>
-        public new ICollection<T> Values
+        public ICollection<T> Values
         {
             get
             {
                 lock (this)
                 {
-                    return new List<T>(base.Values);
+                    return new List<T>(this.SynchObject.Values);
                 }
             }
         }
+
+        /// <summary>
+        /// 
+        /// Returns the number of entries
+        /// 
+        /// </summary>
+        public int Count {  get { return this.SynchObject.Count; } }
         #endregion
 
         #region Methods
@@ -122,7 +134,7 @@ namespace NX.Shared
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
-        public new void Add(string key, T value)
+        public void Add(string key, T value)
         {
             this[key] = value;
         }
@@ -135,7 +147,7 @@ namespace NX.Shared
         /// <param name="item"></param>
         public void Add(KeyValuePair<string, T> item)
         {
-            this.Add(item.Key, item.Value);
+            this[item.Key] = item.Value;
         }
 
         /// <summary>
@@ -157,7 +169,7 @@ namespace NX.Shared
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public new bool ContainsKey(string key)
+        public bool ContainsKey(string key)
         {
             bool bAns = false;
 
@@ -165,7 +177,7 @@ namespace NX.Shared
             lock (this)
             {
                 //
-                bAns = base.ContainsKey(key);
+                bAns = this.SynchObject.ContainsKey(key);
             }
 
             return bAns;
@@ -190,7 +202,7 @@ namespace NX.Shared
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public new bool Remove(string key)
+        public bool Remove(string key)
         {
             bool bAns = false;
 
@@ -198,9 +210,9 @@ namespace NX.Shared
             lock (this)
             {
                 //
-                if (base.ContainsKey(key))
+                if (this.SynchObject.ContainsKey(key))
                 {
-                    bAns = base.Remove(key);
+                    bAns = this.SynchObject.Remove(key);
                 }
             }
 
@@ -219,11 +231,11 @@ namespace NX.Shared
             throw new NotImplementedException();
         }
 
-        public new bool TryGetValue(string key, [MaybeNullWhen(false)] out T value)
+        public bool TryGetValue(string key, [MaybeNullWhen(false)] out T value)
         {
             lock(this)
             {
-                return base.TryGetValue(key, out value);
+                return this.SynchObject.TryGetValue(key, out value);
             };
         }
         #endregion

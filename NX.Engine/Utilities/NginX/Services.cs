@@ -71,10 +71,10 @@ namespace NX.Engine.NginX
                 string sName = name + "." + type;
 
                 // Any?
-                if (value != null)
+                if (value == null)
                 {
                     // Do we have it?
-                    if (this.Data.Contains(sName))
+                    if (this.Data.ContainsKey(sName))
                     {
                         // Delete
                         this.Data.Remove(sName);

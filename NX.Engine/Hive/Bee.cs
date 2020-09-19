@@ -58,21 +58,6 @@ namespace NX.Engine.Hive
             // Back way
             this.IsGhost = this.CV.IsGhost;
             this.IsVirtual = this.CV.IsVirtual;
-
-            // Loop thru
-            foreach (Port c_Port in this.CV.Ports)
-            {
-                // Make the TickleArea
-                TickleAreaClass c_EP = new TickleAreaClass(this, c_Port.PublicPort.ToString(),
-                                                                    c_Port.PrivatePort.ToString());
-
-                // Is it reachable?
-                if (c_EP.IsAvailable)
-                {
-                    // Add
-                    this.TickleAreas.Add(c_EP);
-                }
-            }
         }
 
         internal BeeClass()
@@ -87,7 +72,7 @@ namespace NX.Engine.Hive
             this.IsVirtual = type == Types.Virtual;
 
             // Save in case
-            string sLoc = id;
+            this.OriginalID = id;
             // Handle virtual
             if (this.IsVirtual)
             {
@@ -97,40 +82,6 @@ namespace NX.Engine.Hive
 
             // Phony
             this.CV = new BeeCVClass(field, id, type);
-
-            // Setup by type
-            if (this.IsGhost)
-            {
-                // If ghost, phony the URL
-                this.IURL = "localhost:{0}".FormatString(this.Parent.Parent.Parent.HTTPPort).URLMake();
-
-                // Make the TickleArea
-                TickleAreaClass c_EP = new TickleAreaClass(this, this.Parent.Parent.Parent.HTTPPort.ToString(),
-                                                                    this.Parent.Parent.Parent.HTTPPort.ToString());
-                // Add
-                this.TickleAreas.Add(c_EP);
-            }
-            else if (this.IsVirtual)
-            {
-                // Parse 
-                ItemClass c_Info = new ItemClass(sLoc);
-
-                // Must have modifier (port)
-                if (c_Info.ModifierCount > 0)
-                {
-                    // The key portion is the DNA
-                    this.CV.DNA = c_Info.Key;
-
-                    // Make a tickle area with the rest
-                    TickleAreaClass c_Tickle = new TickleAreaClass(this, 
-                                                                c_Info.Modifiers[0], 
-                                                                c_Info.Modifiers[0],
-                                                                c_Info.Value +  ":" + c_Info.Modifiers[0]);
-
-                    // Add
-                    this.TickleAreas.Add(c_Tickle);
-                }
-            }
         }
         #endregion
 
@@ -176,11 +127,34 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// The name or DockerID of the bee
+        /// 
+        /// </summary>
+        public string FullID
+        {
+            get
+            {
+                string sAns = "";
+
+                if(this.CV.Names != null)
+                {
+                    sAns += this.CV.Names.Join(", ");
+                }
+                else
+                {
+                    sAns = this.DockerID;
+                }
+
+                return sAns.Replace("/", "");
+            }
+        }
+
+        /// <summary>
+        /// 
         ///  Is this bee a ghost?
         ///  
         /// </summary>
         public bool IsGhost { get; private set; }
-
 
         /// <summary>
         ///  Is this bee virtual?
@@ -204,13 +178,6 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
-        /// Areas where the bee can be tickled (open ports)
-        /// 
-        /// </summary>
-        public List<TickleAreaClass> TickleAreas { get; private set; } = new List<TickleAreaClass>();
-
-        /// <summary>
-        /// 
         /// The field where the bee resides
         /// 
         /// </summary>
@@ -218,6 +185,13 @@ namespace NX.Engine.Hive
         {
             get { return this.Parent; }
         }
+
+        /// <summary>
+        /// 
+        /// used by virtual bees
+        /// 
+        /// </summary>
+        private string OriginalID { get; set; }
         #endregion
 
         #region Chain of Command
@@ -238,7 +212,7 @@ namespace NX.Engine.Hive
         /// </summary>
         public BeeClass LeaderBee
         {
-            get { return this.Field.Bees.LeaderBee(this); }
+            get { return this.Field.LeaderBee(this); }
         }
 
         /// <summary>
@@ -248,7 +222,7 @@ namespace NX.Engine.Hive
         /// </summary>
         public BeeClass FollowerBee
         {
-            get { return this.Field.Bees.FollowerBee(this); }
+            get { return this.Field.FollowerBee(this); }
         }
 
         /// <summary>
@@ -271,7 +245,7 @@ namespace NX.Engine.Hive
                     if (this.IsVirtual)
                     {
                         // Use first tickle area
-                        TickleAreaClass c_Only = this.TickleAreas.First();
+                        TickleAreaClass c_Only = this.GetTickleAreas().First();
                         // Any?
                         if (c_Only != null)
                         {
@@ -282,7 +256,7 @@ namespace NX.Engine.Hive
                     else
                     {
                         // Find the proper tickle area
-                        foreach (TickleAreaClass c_TA in this.TickleAreas)
+                        foreach (TickleAreaClass c_TA in this.GetTickleAreas())
                         {
                             // Is this the one?
                             if (c_TA.PrivatePort.IsSameValue(this.Parent.Parent.Parent.HTTPPort.ToString()))
@@ -315,6 +289,12 @@ namespace NX.Engine.Hive
         #endregion
 
         #region Methods
+        public List<TickleAreaClass> GetTickleAreas()
+        {
+            //
+            return this.CV.TickleAreas;
+        }
+
         /// <summary>
         /// 
         /// Dumps bee
@@ -332,7 +312,7 @@ namespace NX.Engine.Hive
             c_Buffer.AppendLine("DNA: {0}".FormatString(this.CV.DNA));
             c_Buffer.AppendLine("Tickle Points:");
 
-            foreach (TickleAreaClass c_EP in this.TickleAreas)
+            foreach (TickleAreaClass c_EP in this.GetTickleAreas())
             {
                 c_Buffer.AppendLine("Location: {0}".FormatString(c_EP.Location));
                 c_Buffer.AppendLine("DNA: {0}".FormatString(c_EP.DNA));
@@ -357,20 +337,21 @@ namespace NX.Engine.Hive
             // Available?
             if (c_Client != null && reason != KillReason.Zombie)
             {
-                // Dump the logs
-                this.Parent.Parent.Parent.LogInfo("Dump for bee {0}, reason: {1}", this.Id.IfEmpty(this.CV.Id), reason);
                 // Oly if wanted
                 if (reason != KillReason.NoLogs)
                 {
+                    // Dump the logs
+                    this.Parent.Parent.Parent.LogInfo("Dump for bee {0}, reason: {1}".FormatString(this.Id.IfEmpty(this.FullID), reason));
+
                     c_Client.GetLogs(this.CV.Id);
                 }
+
+                this.Parent.Parent.Roster.Remove(this, reason);
 
                 //
                 c_Client.RemoveContainer(this.CV.Id);
 
                 // Remove from roster
-                this.Parent.Parent.Roster.Remove(this);
-
                 // Synch
                 if (this.Parent.Parent.Synch != null)
                 {
@@ -467,7 +448,7 @@ namespace NX.Engine.Hive
             string sURL = this.URL.IfEmpty().Trim();
 
             //
-            this.Parent.Parent.Parent.LogVerbose("Checking bee {0} at {1}", this.Id, sURL);
+            this.Parent.Parent.Parent.LogVerbose("Checking bee {0} at {1}".FormatString(this.Id, sURL));
 
             // Any?
             if (sURL.HasValue())
@@ -476,7 +457,7 @@ namespace NX.Engine.Hive
                 string sID = sURL.URLNX("id").NXReturnValue();
 
                 //
-                this.Parent.Parent.Parent.LogVerbose("Return was {0}", sID);
+                this.Parent.Parent.Parent.LogVerbose("Return was {0}".FormatString(sID));
 
                 // ID's must match
                 eAns = sID.IsSameValue(this.Id) ? States.Alive : States.Dead;

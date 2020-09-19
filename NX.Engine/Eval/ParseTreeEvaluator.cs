@@ -139,7 +139,7 @@ namespace NX.Engine
             }
             string key = funcNode.Token.Text.ToLowerInvariant();
 
-            if (!root.Context.Functions.Contains(key))
+            if (!root.Context.Functions.ContainsKey(key))
             {
                 // JGN - VIRTUAL FN COULD GO HERE
                 tree.Errors.Add(new ParseError("Function not defined: " + funcNode.Token.Text + "()", 1042, this));

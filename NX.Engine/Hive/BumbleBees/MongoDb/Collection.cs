@@ -22,49 +22,87 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-using NX.Shared;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+/// Packet Manager Requirements
+/// 
+/// Install-Package MongoDb.Driver -Version 2.10.4
+/// Install-Package MongoDb.Bson -Version 2.10.4
+/// 
 
-namespace NX.Engine.Hive
+using System.Collections.Generic;
+
+using MongoDB.Driver;
+using MongoDB.Bson;
+
+using NX.Shared;
+
+namespace NX.Engine.BumbleBees.MongoDb
 {
-    public class DockerIFFilterClass
+    public class CollectionClass : ChildOfClass<DatabaseClass>
     {
         #region Constructor
-        public DockerIFFilterClass(params string[] values)
+        public CollectionClass(DatabaseClass db, string name)
+            : base(db)
         {
-            // Make
-            this.Values = new Dictionary<string, IDictionary<string, bool>>();
-
-            // Parse
-            for(int i=0;i< values.Length;i+=2)
-            {
-                // Add a clause
-                this.AddClause(values[i], values[i + 1]);
-            }
+            //
+            this.Name = name;
         }
         #endregion
 
         #region Properties
         /// <summary>
         /// 
-        /// The filters
+        /// The name of the database
         /// 
         /// </summary>
-        public IDictionary<string, IDictionary<string, bool>> Values { get; private set; }
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// 
+        /// The collection interface
+        /// 
+        /// </summary>
+        private IMongoCollection<BsonDocument> IInterface { get; set; }
+        public IMongoCollection<BsonDocument> Interface
+        {
+            get
+            {
+                // Already setup?
+                if (this.IInterface == null && this.Parent.IsAvailable)
+                {
+                    // Make
+                    this.IInterface = this.Parent.Interface.GetCollection< BsonDocument>(this.Name);
+                }
+
+                return this.IInterface;
+            }
+        }
         #endregion
 
         #region Methods
-        public void AddClause(string field, string value)
+        /// <summary>
+        /// 
+        /// Drops a database
+        /// 
+        /// </summary>
+        public void Drop()
         {
-            // Make inner dictionary
-            Dictionary<string, bool> c_Inner = new Dictionary<string, bool>();
-            // Set the value
-            c_Inner.Add(value, true);
+            // Can we do it?
+            if (this.Parent.IsAvailable)
+            {
+                // Do
+                this.Parent.Interface.DropCollection(this.Name);
+            }
+        }
 
-            // And check the outer
-            this.Values[field] = c_Inner;
+        /// <summary>
+        /// 
+        /// Resets a database
+        /// 
+        /// </summary>
+        public void Reset()
+        {
+            // Clear
+            this.IInterface = null;
         }
         #endregion
     }

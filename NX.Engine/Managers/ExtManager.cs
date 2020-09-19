@@ -25,6 +25,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.Loader;
 
 using NX.Shared;
 
@@ -65,7 +66,21 @@ namespace NX.Engine
             get { return new List<string>(this.Cache.Keys); }
         }
 
+        /// <summary>
+        /// 
+        /// List of files loaded
+        /// 
+        /// </summary>
         private List<string> Loaded { get; set; } = new List<string>();
+
+        /// <summary>
+        /// 
+        /// The context
+        /// 
+        /// </summary>
+        private AssemblyLoadContext LoadCtx { get; set; }
+
+        private AssemblyDependencyResolver Resolver { get; set; }
         #endregion
 
         #region Methods
@@ -157,52 +172,52 @@ namespace NX.Engine
                     // Add to done
                     this.Loaded.Add(file);
 
-                    // Load the assembly
-                    Assembly c_Assm = Assembly.LoadFile(file);
+                    // Default
+                    Assembly c_Assm = file.LoadAssembly();
 
-                    // Get the types in the assembly
-                    System.Type[] sc_Types = c_Assm.GetTypes();
-                    // And do each one
-                    foreach (Type c_Type in sc_Types)
+                    // Did we get an assemble?
+                    if (c_Assm != null)
                     {
-                        // One bad type should not ruin the assembly
-                        try
+                        // Get the types in the assembly
+                        System.Type[] sc_Types = c_Assm.GetTypes();
+                        // And do each one
+                        foreach (Type c_Type in sc_Types)
                         {
-                            // Is the type one of ours?
-                            if (!c_Type.IsInterface && c_Type.CanBeTreatedAsType(this.Type))
+                            // One bad type should not ruin the assembly
+                            try
                             {
-                                // Create
-                                IPlugIn c_Plug = Activator.CreateInstance(c_Type) as IPlugIn;
-                                // Ws it created?
-                                if (c_Plug != null && !string.IsNullOrEmpty(c_Plug.Name))
+                                // Is the type one of ours?
+                                if (!c_Type.IsInterface && c_Type.CanBeTreatedAsType(this.Type))
                                 {
-                                    // Adjust name
-                                    string sName = c_Plug.ObjectFullName();
-
-                                    // Make room
-                                    if (this.Cache == null) this.Cache = new NamedListClass<Type>();
-
-                                    // Add
-                                    this.Cache[sName] = c_Type;
-
-                                    //
-                                    try
+                                    // Create
+                                    IPlugIn c_Plug = Activator.CreateInstance(c_Type) as IPlugIn;
+                                    // Ws it created?
+                                    if (c_Plug != null && !string.IsNullOrEmpty(c_Plug.Name))
                                     {
-                                        if (sName.StartsWith("File."))
+                                        // Adjust name
+                                        string sName = c_Plug.ObjectFullName();
+
+                                        // Make room
+                                        if (this.Cache == null) this.Cache = new NamedListClass<Type>();
+
+                                        // Add
+                                        this.Cache[sName] = c_Type;
+
+                                        //
+                                        try
                                         {
-                                            var a = 1;
-                                        }
                                             // And finally initialize
                                             c_Plug.Initialize(this.Parent);
-                                    }
-                                    catch { }
+                                        }
+                                        catch { }
 
-                                    //
-                                    this.Parent.LogVerbose("Loaded {0}", sName);
+                                        //
+                                        this.Parent.LogVerbose("Loaded {0}".FormatString(sName));
+                                    }
                                 }
                             }
+                            catch { }
                         }
-                        catch { }
                     }
                 }
                 catch { }
@@ -252,7 +267,7 @@ namespace NX.Engine
         /// <returns>Trues if it is a name we know</returns>
         public bool Exists(string name)
         {
-            return this.Cache.Contains(name);
+            return this.Cache.ContainsKey(name);
         }
         #endregion
     }

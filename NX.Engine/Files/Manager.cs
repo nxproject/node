@@ -54,7 +54,7 @@ namespace NX.Engine.Files
         /// </summary>
         /// <param name="env">The current environment</param>
         public ManagerClass(EnvironmentClass env)
-            : base(env, "minio")
+            : base(env, !env["minio_disk"].ToBoolean() ? "minio" : null)
         {
             // Handle the event
             this.AvailabilityChanged += delegate (bool isavailable)
@@ -91,13 +91,17 @@ namespace NX.Engine.Files
                             // Loop thru
                             foreach (string sFile in c_Files)
                             {
-                                // Make the document
-                                using (DocumentClass c_Doc = new DocumentClass(this, sFile.Substring(sRoot.Length)))
+                                // Skip our own files
+                                if (sFile.IndexOf("_minio") == -1)
                                 {
-                                    // Copy from local to Minio
-                                    c_Doc.ValueAsBytes = sFile.ReadFileAsBytes();
-                                    // Delete local copy
-                                    sFile.DeleteFile();
+                                    // Make the document
+                                    using (DocumentClass c_Doc = new DocumentClass(this, sFile.Substring(sRoot.Length)))
+                                    {
+                                        // Copy from local to Minio
+                                        c_Doc.ValueAsBytes = sFile.ReadFileAsBytes();
+                                        // Delete local copy
+                                        sFile.DeleteFile();
+                                    }
                                 }
                             }
                         }
@@ -120,7 +124,7 @@ namespace NX.Engine.Files
 
         /// <summary>
         /// 
-        /// Is the client available
+        /// Is the manager available?
         /// 
         /// </summary>
         public override bool IsAvailable => this.Client != null;
@@ -647,7 +651,6 @@ namespace NX.Engine.Files
 
             return c_Ans;
         }
-
 
         /// <summary>
         /// 

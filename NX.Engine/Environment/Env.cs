@@ -29,6 +29,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 using Newtonsoft.Json.Linq;
 using Octokit;
@@ -171,13 +172,14 @@ namespace NX.Engine
             this[KeyRepoProject] = this[KeyRepoProject].IfEmpty("nxproject");
 
             this[KeyRootFolder] = this[KeyRootFolder].IfEmpty("".WorkingDirectory());
-            this[KeySharedFolder] = this.GetFolderPath(this.RootFolder,KeySharedFolder,"shared");
+            this[KeySharedFolder] = this.GetFolderPath(this.RootFolder, KeySharedFolder, "shared");
             this[KeyDynamicFolder] = this.GetFolderPath(this.SharedFolder, KeyDynamicFolder, "dyn");
             this[KeyDocumentFolder] = this.GetFolderPath(this.SharedFolder, KeyDocumentFolder, "files");
 
             this["wd"] = this["wd"].IfEmpty("".InContainer() ? "/etc/wd" : "".WorkingDirectory());
             this["nginx_port"] = this["nginx_port"].IfEmpty(this.GetAsJArray("use_traefik").HasValue() ? "80" : "$80");
             this["nosql"] = this["nosql"].IfEmpty("mongodb");
+            //if (!this.GetAsJArray("field").HasValue()) this.Set("field", "".GetLocalIP() + ":2375");
 
             if (this.Process.IsSameValue("{proc}") || !this.Process.HasValue()) this.Process = "";
             this.Verbose = !!this.Verbose;
@@ -187,10 +189,10 @@ namespace NX.Engine
 
             // -------------------------------------------------------------
 
-            this.LogVerbose("Params: {0}", this.SynchObject.ToSimpleString());
+            this.LogVerbose("Params: {0}".FormatString(this.SynchObject.ToSimpleString()));
 
             // Tell user
-            this.LogInfo("ID is {0} in hive {1}:{2}", this.ID, this[KeyHive], this.Tier);
+            this.LogInfo("ID is {0} in hive {1}:{2}".FormatString(this.ID, this[KeyHive], this.Tier));
             this.LogInfo("Root folder is {0}".FormatString(this.RootFolder));
             this.LogInfo("Documents folder is {0}".FormatString(this.DocumentFolder));
 
@@ -391,7 +393,7 @@ namespace NX.Engine
                 if (this.IRouter == null)
                 {
                     this.IRouter = new RouterClass(this);
-                    this.IRouter.Load();
+                    //this.IRouter.Load();
                 }
                 return this.IRouter;
             }
@@ -410,7 +412,7 @@ namespace NX.Engine
                 if (this.IProcs == null)
                 {
                     this.IProcs = new ProcsClass(this);
-                    this.IProcs.Load();
+                    //this.IProcs.Load();
                 }
                 return this.IProcs;
             }
@@ -429,7 +431,7 @@ namespace NX.Engine
                 if (this.IFNS == null)
                 {
                     this.IFNS = new FNSClass(this);
-                    this.IFNS.Load();
+                    //this.IFNS.Load();
                 }
                 return this.IFNS;
             }
@@ -764,19 +766,38 @@ namespace NX.Engine
         /// 
         /// </summary>
         /// <param name="path">The path to the dll</param>
-        public void LoadDynamic(string path, Profiles profile = Profiles.Fns | Profiles.Procs | Profiles.Routes)
+        public void LoadModule(string path, Profiles profile = Profiles.Fns | Profiles.Procs | Profiles.Routes)
         {
             // Do we have a name?
             if (path.HasValue())
             {
+                // In case just the name
+                //if (!path.GetDirectoryFromPath().HasValue()) path = "".WorkingDirectory().CombinePath(path);
+
                 // Load any functions
                 if (profile.Contains(Profiles.Fns)) this.FNS.LoadFile(path);
                 // Load any routes
                 if (profile.Contains(Profiles.Routes)) this.Router.LoadFile(path);
                 // Load any processors
                 if (profile.Contains(Profiles.Procs)) this.Procs.LoadFile(path);
+
+                this.LogVerbose("Loaded {0}".FormatString(path));
             }
         }
+
+        //public void LoadDLL(string filename)
+        //{
+        //    try
+        //    {
+        //        Assembly c_Assm =  Assembly.LoadFile("".WorkingDirectory().CombinePath(filename + ".dll"));
+
+        //        this.LogInfo("LoadDLL: {0} loaded - {1}", filename, c_Assm.FullName);
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        this.LogException("At LoaDLL {0}".FormatString(filename), e);
+        //    }
+        //}
 
         /// <summary>
         /// 
@@ -794,7 +815,7 @@ namespace NX.Engine
         public void Use(string module, Profiles profile = Profiles.Fns | Profiles.Procs | Profiles.Routes)
         {
             //
-            this.LogVerbose("Using {0}", module);
+            this.LogVerbose("Using {0}".FormatString(module));
 
             // Remove the .dll if any
             if (module.EndsWith(".dll")) module = module.Substring(0, module.Length - 1);
@@ -814,59 +835,8 @@ namespace NX.Engine
             // NX module?
             if (module.Contains("."))
             {
-                // Set the path
-                string sPath = "".WorkingDirectory().CombinePath("modules");
-                // Are we running outside?
-                if (!"".InContainer())
-                {
-                    // Does the path exist?
-                    if (!sPath.DirectoryExists())
-                    {
-                        // Flag as not found
-                        bool bFound = false;
-
-                        // Loop thru
-                        foreach (string sDir in this.GetAsJArray(KeyCodeFolder).ToList())
-                        {
-                            // Found?
-                            if (sDir.CombinePath(module+".dll").AdjustPathToOS().FileExists())
-                            {
-                                // Save
-                                sPath = sDir;
-                                // And flag
-                                bFound = true;
-                            }
-
-                            // Found?
-                            if (bFound) break;
-                        }
-
-                        // Did we find it?
-                        if (!bFound)
-                        {
-                            // Possibly in Visual Studio Debug
-
-                            // Get working directory
-                            string sWD = "".WorkingDirectory();
-                            // Replace NX.Node with the module
-                            sPath = sWD.Replace("NX.Node", module);
-                        }
-                    }
-                }
-
-                // Add the file name itself
-                sPath = sPath.CombinePath(module + ".dll");
-
-                // Is it a real file?
-                if (sPath.AdjustPathToOS().FileExists())
-                {
-                    // Add to system
-                    this.LoadDynamic(sPath, profile);
-                }
-                else
-                {
-                    this.LogVerbose("Path {0} not found", sPath);
-                }
+                // Load
+                this.LoadModule(module + ".dll", profile);
             }
             else if (sGPath.HasValue())
             {
@@ -903,7 +873,7 @@ namespace NX.Engine
                     // Load
                     string sFile = c_Git.FetchFile(sRepo, module);
                     // Add to system
-                    this.LoadDynamic(sFile, profile);
+                    this.LoadModule(sFile, profile);
                 }
             }
         }
@@ -919,31 +889,12 @@ namespace NX.Engine
         /// </summary>
         /// <param name="prefix">The text after the timestamp</param>
         /// <param name="msg">The message. The first value is the format string</param>
-        public static void ITimestamp(string prefix, params object[] msg)
+        public static void ITimestamp(string prefix, string msg)
         {
             string sTS = "".Now().ToString(SysConstantClass.DateFormat) + " ";
 
-            // Do we format?
-            if (msg.Length > 1)
-            {
-                // Get the format
-                string sFmt = msg[0].ToStringSafe();
-                // Make sub
-                object[] c_Tmp = new object[msg.Length - 1];
-                Array.Copy(msg, 1, c_Tmp, 0, c_Tmp.Length);
-                //
-                Console.WriteLine(sTS + prefix.IfEmpty() + string.Format(sFmt, c_Tmp));
-            }
-            else if (msg.Length == 0)
-            {
-                // Write
-                Console.WriteLine(sTS + prefix.IfEmpty());
-            }
-            else
-            {
-                // Write
-                Console.WriteLine(sTS + prefix.IfEmpty() + msg[0].ToStringSafe());
-            }
+            // Write
+            Console.WriteLine(sTS + prefix.IfEmpty() + msg);
         }
 
         /// <summary>
@@ -952,7 +903,7 @@ namespace NX.Engine
         /// 
         /// </summary>
         /// <param name="msg">The message. The first value is the format string</param>
-        public static void ILogInfo(params object[] msg)
+        public static void ILogInfo(string msg)
         {
             EnvironmentClass.ITimestamp("", msg);
         }
@@ -963,9 +914,9 @@ namespace NX.Engine
         /// 
         /// </summary>
         /// <param name="msg">The message. The first value is the format string</param>
-        public static void ILogError(params object[] msg)
+        public static void ILogError(string msg)
         {
-            EnvironmentClass.ITimestamp("ERROR: ", msg);
+            EnvironmentClass.ITimestamp("".LPad(5, "*") + " ERROR: ", msg);
         }
 
         /// <summary>
@@ -1001,9 +952,9 @@ namespace NX.Engine
         /// 
         /// </summary>
         /// <param name="msg">The message. The first value is the format string</param>
-        public void LogInfo(params object[] msg)
+        public void LogInfo(string msg)
         {
-            EnvironmentClass.ILogInfo(msg);
+            EnvironmentClass.ITimestamp("", msg);
         }
 
         /// <summary>
@@ -1012,9 +963,9 @@ namespace NX.Engine
         /// 
         /// </summary>
         /// <param name="msg">The message. The first value is the format string</param>
-        public void LogError(params object[] msg)
+        public void LogError(string msg)
         {
-            EnvironmentClass.ILogError("ERROR: ", msg);
+            EnvironmentClass.ILogError(msg);
         }
 
         /// <summary>
@@ -1046,7 +997,7 @@ namespace NX.Engine
         /// 
         /// </summary>
         /// <param name="msg">The message. The first value is the format string</param>
-        public void LogVerbose(params object[] msg)
+        public void LogVerbose(string msg)
         {
             if (this.Verbose)
             {
@@ -1058,32 +1009,14 @@ namespace NX.Engine
         #region Control
         /// <summary>
         /// 
-        /// Starts the HTTP server
+        /// Starts the system
         /// 
         /// </summary>
         public void Start()
         {
-           // Do we have an HTTP server?
+            // Do we have an HTTP server?
             if (this.HTTP == null)
             {
-                // Reset internal
-                if (this.IFNS != null)
-                {
-                    this.IFNS.Dispose();
-                    this.IFNS = null;
-                }
-
-                if (this.IRouter != null)
-                {
-                    this.IRouter.Dispose();
-                    this.IRouter = null;
-                }
-
-                if (this.IProcs != null)
-                {
-                    this.IProcs.Dispose();
-                    this.IProcs = null;
-                }
 
                 // Create it
                 this.HTTP = new HTTPClass(this);
@@ -1103,33 +1036,42 @@ namespace NX.Engine
                 var a = this.FNS;
                 var b = this.Router;
                 var c = this.Procs;
+
+                // Create the hive
+                var x = this.Hive;
+
+                // Load the built-in
+                this.Use("Fn.System");
+                this.Use("Proc.Default");
+                this.Use("Route.System");
+                this.Use("Route.UI");
             }
         }
 
-        /// <summary>
-        /// 
-        /// Stops the HTTP server
-        /// 
-        /// </summary>
-        public void Stop()
-        {
-            if (this.HTTP != null)
-            {
-                this.HTTP.Dispose();
-                this.HTTP = null;
-            }
-        }
+        ///// <summary>
+        ///// 
+        ///// Stops the HTTP server
+        ///// 
+        ///// </summary>
+        //public void Stop()
+        //{
+        //    if (this.HTTP != null)
+        //    {
+        //        this.HTTP.Dispose();
+        //        this.HTTP = null;
+        //    }
+        //}
 
-        /// <summary>
-        /// 
-        /// Recycle the HTTP server
-        /// 
-        /// </summary>
-        public void Recycle()
-        {
-            this.Stop();
-            this.Start();
-        }
+        ///// <summary>
+        ///// 
+        ///// Recycle the HTTP server
+        ///// 
+        ///// </summary>
+        //public void Recycle()
+        //{
+        //    this.Stop();
+        //    this.StartX();
+        //}
 
         /// <summary>
         /// 

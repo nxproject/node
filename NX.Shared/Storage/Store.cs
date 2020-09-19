@@ -301,8 +301,7 @@ namespace NX.Shared
             // Workarea
             List<string> c_Pieces = null;
             string sKey = null;
-            string sValue = null;
-
+            
             // And depending on the type of parsing
             switch (type)
             {

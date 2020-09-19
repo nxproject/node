@@ -24,59 +24,42 @@
 
 /// Packet Manager Requirements
 /// 
-/// Install-Package SocketIOClient -Version 2.0.2.6
+/// Install-Package MongoDb.Driver -Version 2.10.4
 /// 
 
 using System.Collections.Generic;
 
-using SocketIOClient;
+using MongoDB.Driver;
 
-using NX.Engine;
-using NX.Engine.Hive;
-using NX.Engine.NginX;
 using NX.Shared;
-using iTextSharp.text.factories;
 
-namespace Proc.SocketIO
+namespace NX.Engine.BumbleBees.MongoDb
 {
     /// <summary>
     /// 
-    /// Socket.IO interface
+    /// MongoDb interface
     /// 
     /// </summary>
     public class ManagerClass : BumbleBeeClass
     {
         #region Constructor
         public ManagerClass(EnvironmentClass env)
-            : base(env, "socketio")
+            : base(env, env["nosql"])
         {
-            // Handle NginX
-            this.SetNginxInformation("socket.io", false);
-
-            // Handle the events
+            // Handle the event
             this.AvailabilityChanged += delegate (bool isavailable)
             {
-                // Clear
-                if (this.Client != null)
+                // Kill current
+                if (this.IClient != null)
                 {
-                    this.Client = null;
+                    this.IClient = null;
                 }
 
-                // Is Socket.IO available
-                if (this.IsAvailable)
+                // Reset all databases
+                foreach(DatabaseClass c_DB in this.Cache.Values)
                 {
-                    // Create
-                    this.Client = new SocketIOClient.SocketIO(this.Location.URLMake());
-
-                    // Handle disconnection
-                    this.Client.OnDisconnected += delegate (object sender, string e)
-                    {
-                        // Redo
-                        this.Client.ConnectAsync();
-                    };
-
-                    // Connect
-                    this.Client.ConnectAsync();
+                    // Reset
+                    c_DB.Reset();
                 }
             };
 
@@ -86,18 +69,18 @@ namespace Proc.SocketIO
         #endregion
 
         #region Indexer
-        public EventClass this[string name]
+        public DatabaseClass this[string db]
         {
             get
             {
-                // Do we already know it?
-                if(!this.Map.ContainsKey(name))
+                // Do we know of it?
+                if(!this.Cache.ContainsKey(db))
                 {
-                    // Create
-                    this.Map[name] = new EventClass(this, name);
+                    // Make
+                    this.Cache[db] = new DatabaseClass(this, db);
                 }
 
-                return this.Map[name];
+                return this.Cache[db];
             }
         }
         #endregion
@@ -105,20 +88,52 @@ namespace Proc.SocketIO
         #region Properties
         /// <summary>
         /// 
-        /// The Socket.IO client
+        /// The MongoDb client
         /// 
         /// </summary>
-        internal SocketIOClient.SocketIO Client { get; set; }
-        
+        private MongoClient IClient { get; set; }
+        public MongoClient Client
+        {
+            get
+            {
+                if (this.IClient == null && this.Location.HasValue())
+                {
+                    this.IClient = new MongoClient("mongodb://" + this.Location.RemoveProtocol());
+                }
+
+                return this.IClient;
+            }
+        }
+
         /// <summary>
         /// 
-        /// A map of rooms
+        /// Cache of databases
         /// 
         /// </summary>
-        private NamedListClass<EventClass> Map { get; set; } = new NamedListClass<EventClass>();
-        #endregion
+        private NamedListClass<DatabaseClass> Cache { get; set; } = new NamedListClass<DatabaseClass>();
 
-        #region Methods
+        /// <summary>
+        /// 
+        /// Het a list of databases
+        /// 
+        /// </summary>
+        public List<string> Databases
+        {
+            get
+            {
+                // Assume none
+                List<string> c_Ans = new List<string>();
+
+                // can we get them?
+                if(this.IsAvailable && this.Client != null)
+                {
+                    // Do so
+                    this.Client.ListDatabaseNames().ForEachAsync(db => c_Ans.Add(db));
+                }
+
+                return c_Ans;
+            }
+        }
         #endregion
     }
 }

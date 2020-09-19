@@ -164,7 +164,7 @@ namespace NX.Shared
         /// </summary>
         /// <param name="match">The item to match</param>
         /// <returns>The index or -1 if none</returns>
-        public int IndexOf(ItemClass item)
+        public new int IndexOf(ItemClass item)
         {
             return this.IndexOf(item.Priority);
         }
@@ -188,7 +188,7 @@ namespace NX.Shared
         /// </summary>
         /// <param name="match">The item to match</param>
         /// <returns>True if found</returns>
-        public bool Contains(ItemClass item)
+        public new bool Contains(ItemClass item)
         {
             return this.IndexOf(item.Priority) != -1;
         }

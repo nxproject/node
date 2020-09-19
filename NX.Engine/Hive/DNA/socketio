@@ -2,11 +2,16 @@
 	"@Unique": "y",
 	"@SkipRecycle": "y",
 	"@Ports": [
-		"80"
+		"3000"
 	],
-	"@Map": [
-		"{shared_folder}/socketio:/etc/wd"
+	"Cmd": [
+		"node",
+		"/etc/wd/server.js"
 	],
 	"Image": "{repo_project}/socketio:{tier}",
+	"Env": [
+		"DEBUG=true" //,
+		//"API_KEY={socketio_key}"
+	],
 	"WorkingDir": "/etc/wd"
 }

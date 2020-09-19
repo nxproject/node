@@ -90,6 +90,7 @@ namespace NX.Engine.Hive
                 return iAns;
             }
         }
+
         /// <summary>
         /// 
         /// The bees
@@ -106,10 +107,33 @@ namespace NX.Engine.Hive
                 foreach (FieldClass c_Field in this.Parent.Fields.Values)
                 {
                     // Add
-                    c_Ans.AddRange(c_Field.Bees.Bees.Values); ;
+                    c_Ans.AddRange(c_Field.Bees.Values); ;
                 }
 
                 return c_Ans;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Has a refresh taken place?
+        /// 
+        /// </summary>
+        public bool HasSetup
+        {
+            get
+            {
+                // Assume none
+                bool bAns = this.Parent.Fields.Values.Count > 0;
+
+                // Loop thru
+                foreach (FieldClass c_Field in this.Parent.Fields.Values)
+                {
+                    // Get the URLs
+                    if (!c_Field.HasSetup) bAns = false;
+                }
+
+                return bAns;
             }
         }
         #endregion
@@ -180,7 +204,10 @@ namespace NX.Engine.Hive
         public void Add(BeeClass bee)
         {
             // Add
-            if (bee != null) bee.Field.Bees.Add(bee);
+            if (bee != null)
+            {
+                bee.Field.AddBee(bee);
+            }
         }
 
         /// <summary>
@@ -189,7 +216,7 @@ namespace NX.Engine.Hive
         /// 
         /// </summary>
         /// <param name="dockerid">The Docker ID</param>
-        public void Remove(string dockerid)
+        public void Remove(string dockerid, BeeClass.KillReason reason)
         {
             // Assume not here
             BeeClass c_Bee = this.GetByDockerID(dockerid);
@@ -198,7 +225,7 @@ namespace NX.Engine.Hive
             if (c_Bee != null)
             {
                 // Remove
-                this.Remove(c_Bee);
+                this.Remove(c_Bee, reason);
             }
         }
 
@@ -208,10 +235,13 @@ namespace NX.Engine.Hive
         /// 
         /// </summary>
         /// <param name="bee">The bee to delete</param>
-        public void Remove(BeeClass bee)
+        public void Remove(BeeClass bee, BeeClass.KillReason reason)
         {
             // Remove
-            if (bee != null) bee.Field.Bees.Remove(bee);
+            if (bee != null)
+            {
+                bee.Field.RemoveBee(bee, reason);
+            }
         }
 
         /// <summary>
@@ -228,12 +258,21 @@ namespace NX.Engine.Hive
             // Loop thru
             foreach (FieldClass c_Field in this.Parent.Fields.Values)
             {
-                // Get the URLs
-                c_Ans.AddRange(c_Field.GetDNAs());
+                // Get the IDs
+                List<string> c_BIDs = new List<string>(c_Field.Bees.Keys);
+                // Loop thru
+                foreach (string sBID in c_BIDs)
+                {
+                    // Get the bee
+                    BeeClass c_Bee = c_Field.Bees[sBID];
+                    // DNA already seen?
+                    if (!c_Ans.Contains(c_Bee.CV.DNA))
+                    {
+                        // Add
+                        c_Ans.Add(c_Bee.CV.DNA);
+                    }
+                }
             }
-
-            // Unique
-            c_Ans = c_Ans.Unique();
 
             return c_Ans;
         }
@@ -245,7 +284,7 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="DNA">The DNA</param>
         /// <returns>A list of bees</returns>
-        public List<BeeClass> GetBeesForDNA(string DNA)
+        public List<BeeClass> GetBeesForDNA(string dna)
         {
             // Assume none
             List<BeeClass> c_Ans = new List<BeeClass>();
@@ -253,8 +292,20 @@ namespace NX.Engine.Hive
             // Loop thru
             foreach (FieldClass c_Field in this.Parent.Fields.Values)
             {
-                // Get the URLs
-                c_Ans.AddRange(c_Field.GetBeesForDNA(DNA));
+                // Get the IDs
+                List<string> c_BIDs = new List<string>(c_Field.Bees.Keys);
+                // Loop thru
+                foreach (string sBID in c_BIDs)
+                {
+                    // Get the bee
+                    BeeClass c_Bee = c_Field.Bees[sBID];
+                    // Is this the DNA we are looking for?
+                    if (c_Bee.CV.DNA.IsSameValue(dna))
+                    {
+                        // Add
+                        c_Ans.Add(c_Bee);
+                    }
+                }
             }
 
             return c_Ans;
@@ -288,54 +339,28 @@ namespace NX.Engine.Hive
             // Loop thru
             foreach (FieldClass c_Field in this.Parent.Fields.Values)
             {
-                // Add
-                c_Ans.AddRange(c_Field.GetLocationsForDNA(DNA));
-            }
+                // Get the IDs
+                List<string> c_BIDs = new List<string>(c_Field.Bees.Keys);
+                // Loop thru
+                foreach (string sBID in c_BIDs)
+                {
+                    // Get the bee
+                    BeeClass c_Bee = c_Field.Bees[sBID];
 
-            return c_Ans;
-        }
-
-        /// <summary>
-        /// 
-        /// Returns a list of ports
-        /// 
-        /// </summary>
-        /// <returns>The list of all ports</returns>
-        public List<string> GetPorts()
-        {
-            // Assume none
-            List<string> c_Ans = new List<string>();
-
-            // Loop thru
-            foreach (FieldClass c_Field in this.Parent.Fields.Values)
-            {
-                // Get the URLs
-                c_Ans.AddRange(c_Field.GetPorts());
-            }
-
-            // Unique
-            c_Ans = c_Ans.Unique();
-
-            return c_Ans;
-        }
-
-        /// <summary>
-        /// 
-        /// Returns the URLs for a given port
-        /// 
-        /// </summary>
-        /// <param name="port">The port</param>
-        /// <returns>The list of locations</returns>
-        public List<string> GetLocationsForPort(string port)
-        {
-            // Assume none
-            List<string> c_Ans = new List<string>();
-
-            // Loop thru
-            foreach (FieldClass c_Field in this.Parent.Fields.Values)
-            {
-                // Add
-                c_Ans.AddRange(c_Field.GetLocationsForPort(port));
+                    if (c_Bee.CV.DNA.IsSameValue(DNA))
+                    {
+                        // Loop thru tickle Areas
+                        foreach (TickleAreaClass c_TA in c_Bee.GetTickleAreas())
+                        {
+                            // Already seen?
+                            if (!c_Ans.Contains(c_TA.Location))
+                            {
+                                // Add
+                                c_Ans.Add(c_TA.Location);
+                            }
+                        }
+                    }
+                }
             }
 
             return c_Ans;
@@ -349,7 +374,7 @@ namespace NX.Engine.Hive
         public void Refresh()
         {
             // Tell user
-            this.Parent.Parent.LogVerbose("Refreshing hive {0}", this.Parent.Name);
+            this.Parent.Parent.LogVerbose("Refreshing hive {0}".FormatString(this.Parent.Name));
 
             // Save the queen
             this.PreviousQueenBee = this.QueenBee;
@@ -368,7 +393,7 @@ namespace NX.Engine.Hive
                 if (this.Parent.Roster.MeBee == null)
                 {
                     // 
-                    this.Parent.Parent.LogInfo("Creating a ghost bee as {0}", this.Parent.Parent.ID);
+                    this.Parent.Parent.LogInfo("Creating a ghost bee as {0}".FormatString(this.Parent.Parent.ID));
                     // Make me
                     this.Parent.Roster.MeBee = new BeeClass(this.Parent.Fields.Values.First(),
                                                     this.Parent.Parent.ID,
@@ -379,7 +404,7 @@ namespace NX.Engine.Hive
             }
 
             // If no previous queen, use creator
-            if(this.PreviousQueenBee == null)
+            if (this.PreviousQueenBee == null)
             {
                 this.PreviousQueenBee = this.Get(this.Parent.Parent["creator"]);
             }
@@ -394,7 +419,7 @@ namespace NX.Engine.Hive
                 if (this.PreviousQueenBee == null || !this.PreviousQueenBee.IsSameAs(c_Queen))
                 {
                     //
-                    this.Parent.Parent.LogInfo("Asking {0} to be queen", c_Queen.Id);
+                    this.Parent.Parent.LogInfo("Asking {0} to be queen".FormatString(c_Queen.Id));
 
                     // Ascend
                     c_Queen.Handshake(HiveClass.States.Ascending);
@@ -405,7 +430,7 @@ namespace NX.Engine.Hive
             this.CheckForQueen();
 
             // Tell user
-            this.Parent.Parent.LogVerbose("End of refresh for hive {0}", this.Parent.Name);
+            this.Parent.Parent.LogVerbose("End of refresh for hive {0}".FormatString(this.Parent.Name));
         }
         #endregion
 
@@ -434,42 +459,15 @@ namespace NX.Engine.Hive
         /// <param name="changed">The list of DNAs that changed</param>
         public void SignalDNAChanged(List<string> changed)
         {
-            // Handle the DNA changes
-            if (this.DNAChanged != null)
+            // Do each
+            foreach (string sDNA in changed)
             {
-                // Do each
-                foreach (string sDNA in changed)
+                try
                 {
                     // Call event
                     this.DNAChanged?.Invoke(sDNA, this.GetLocationsForDNA(sDNA));
                 }
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// Defines the event to be raised when a port is added/deleted
-        /// 
-        /// </summary>
-        public event OnChangedHandler PortChanged;
-
-        /// <summary>
-        /// 
-        /// Signals chnages in the DNA
-        /// 
-        /// </summary>
-        /// <param name="changed">The list of ports that changed</param>
-        public void SignalPortChanged(List<string> changed)
-        {
-            // Handle the DNA changes
-            if (this.DNAChanged != null)
-            {
-                // Do each
-                foreach (string sPort in changed)
-                {
-                    // Call event
-                    this.PortChanged?.Invoke(sPort, this.GetLocationsForPort(sPort));
-                }
+                catch { }
             }
         }
 
@@ -523,7 +521,7 @@ namespace NX.Engine.Hive
                 foreach (FieldClass c_Field in this.Parent.Fields.Values)
                 {
                     // Get the field leader
-                    BeeClass c_FieldLeader = c_Field.LeaderBee;
+                    BeeClass c_FieldLeader = c_Field.LeaderBee();
                     // Any?
                     if (c_FieldLeader != null)
                     {
@@ -647,7 +645,7 @@ namespace NX.Engine.Hive
             if (this.Parent.Roster.MeBee != null)
             {
                 // Am I the queen?
-                if (!kill && (c_Queen == null || 
+                if (!kill && (c_Queen == null ||
                                 c_Queen.Id.IsSameValue(this.Parent.Roster.MeBee.CV.NXID) ||
                                 this.Parent.State == HiveClass.States.Ascending))
                 {
@@ -655,7 +653,7 @@ namespace NX.Engine.Hive
                     if (SafeThreadManagerClass.Get(this.Parent.LabelQueen) == null)
                     {
                         //
-                        this.Parent.Parent.LogInfo("Checking bee {0} as possible queen", this.Parent.Roster.MeBee.Id);
+                        this.Parent.Parent.LogInfo("Checking bee {0} as possible queen".FormatString(this.Parent.Roster.MeBee.Id));
 
                         // Mark ourselves
                         this.Parent.State = HiveClass.States.Ascending;
@@ -683,13 +681,13 @@ namespace NX.Engine.Hive
                             if (c_Bee != null)
                             {
                                 //
-                                this.Parent.Parent.LogInfo("Asking bee {0} to relinquish", sCreator);
+                                this.Parent.Parent.LogInfo("Asking bee {0} to relinquish".FormatString(sCreator));
 
                                 // Tell creator to stand down
                                 if (this.Parent.State == HiveClass.States.Ascending)
                                 {
                                     // Get permission from previous queen
-                                    if(!c_Bee.Handshake(this.MeBee.Id, true))
+                                    if (!c_Bee.Handshake(this.MeBee.Id, true))
                                     {
                                         // Reset
                                         this.Parent.State = HiveClass.States.Bee;
@@ -697,12 +695,12 @@ namespace NX.Engine.Hive
                                 }
                             }
                         }
-                        
+
                         // Are we still on track?
                         if (this.Parent.State == HiveClass.States.Ascending)
                         {
                             // YES! Off with their heads
-                            this.Parent.Parent.LogInfo("Bee {0} is becoming queen soon!", this.Parent.Roster.MeBee.Id);
+                            this.Parent.Parent.LogInfo("Bee {0} is becoming queen soon!".FormatString(this.Parent.Roster.MeBee.Id));
 
                             // Try to run the task but delay
                             this.QueenTaskID = 20.SecondsAsTimeSpan().WaitThenCall(delegate ()
@@ -711,7 +709,7 @@ namespace NX.Engine.Hive
                                    new System.Threading.ParameterizedThreadStart(QueenToDo)).HasValue())
                                {
                                    // Just ascended!
-                                   this.Parent.Parent.LogInfo("Bee {0} is now queen", this.Parent.Roster.MeBee.Id);
+                                   this.Parent.Parent.LogInfo("Bee {0} is now queen".FormatString(this.Parent.Roster.MeBee.Id));
                                }
                            });
                         }
@@ -884,16 +882,16 @@ namespace NX.Engine.Hive
                 BeeClass c_Queen = this.QueenBee;
 
                 // Tell new queen to ascend
-                if(c_Queen != null)
+                if (c_Queen != null)
                 {
                     //
-                    this.Parent.Parent.LogInfo("Asking {0} to be queen", c_Queen.Id);
+                    this.Parent.Parent.LogInfo("Asking {0} to be queen".FormatString(c_Queen.Id));
 
                     //
                     if (c_Queen.Handshake(HiveClass.States.Ascending))
                     {
                         //
-                        this.Parent.Parent.LogInfo("Queen is now {0}", c_Queen.Id);
+                        this.Parent.Parent.LogInfo("Queen is now {0}".FormatString(c_Queen.Id));
                         //
                         this.CheckForQueen(true);
                     }
@@ -913,6 +911,10 @@ namespace NX.Engine.Hive
 
                 //
                 this.Parent.Parent.LogInfo("Queen's duties have ended");
+            }
+            else
+            {
+                this.Parent.Parent.LogInfo("Queen status is {0}, expected queen".FormatString(this.Parent.State));
             }
         }
 
@@ -948,20 +950,20 @@ namespace NX.Engine.Hive
                         // Do not check on ourselves
                         if (!c_Follower.IsSameAs(c_Me))
                         {
-                            this.Parent.Parent.LogVerbose("Checking on {0}", c_Follower.Id);
+                            this.Parent.Parent.LogVerbose("Checking on {0}".FormatString(c_Follower.Id));
 
                             // Check
                             switch (c_Follower.IsAlive())
                             {
                                 case BeeClass.States.Dead:
                                     // Was the follower the queen?
-                                    if(this.QueenBee != null && c_Follower.IsSameAs(this.QueenBee))
+                                    if (this.QueenBee != null && c_Follower.IsSameAs(this.QueenBee))
                                     {
                                         //
-                                        this.Parent.Parent.LogInfo("Asking {0} to be queen", c_Follower.FollowerBee.Id);
+                                        this.Parent.Parent.LogInfo("Asking {0} to be queen".FormatString(c_Follower.FollowerBee.Id));
 
                                         // Ascend the follower of the queen
-                                        if(!c_Follower.FollowerBee.Handshake(HiveClass.States.Ascending))
+                                        if (!c_Follower.FollowerBee.Handshake(HiveClass.States.Ascending))
                                         {
                                             // Something went wrong, make ourselves queen
                                             this.Parent.State = HiveClass.States.Ascending;
@@ -975,12 +977,12 @@ namespace NX.Engine.Hive
 
                                 case BeeClass.States.Hiccup:
                                     // Not answering
-                                    this.Parent.Parent.LogVerbose("Bee {0} is having issues", c_Follower.Id);
+                                    this.Parent.Parent.LogVerbose("Bee {0} is having issues".FormatString(c_Follower.Id));
                                     break;
 
                                 case BeeClass.States.Alive:
                                     // Alive
-                                    this.Parent.Parent.LogVerbose("Bee {0} is alive", c_Follower.Id);
+                                    this.Parent.Parent.LogVerbose("Bee {0} is alive".FormatString(c_Follower.Id));
                                     break;
                             }
                         }

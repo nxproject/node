@@ -42,103 +42,71 @@ namespace NXNode
             if (!"".InContainer())
             {
                 // The workign code folders
-                List<string> c_CodeFolders = null;
-                // If not making
-                if (!c_Env.InMakeMode) c_CodeFolders = new List<string>();
-
-                // Do we need to make into container?
-                //if (c_Env.MakeGenome )
+                List<string> c_CodeFolders = c_Env.GetAsJArray("code_folder").ToList(); ;
+                // Get the root folder
+                string sBaseFolder = "".WorkingDirectory();
+                // Do we have a bin?
+                int iPos = sBaseFolder.IndexOf(@"\bin\");
+                if (iPos != -1)
                 {
-                    // Get the root folder
-                    string sRootFolder = "".WorkingDirectory();
-                    // Do we have a bin?
-                    int iPos = sRootFolder.IndexOf(@"\bin\");
-                    if (iPos != -1)
+                    // Remove tail
+                    sBaseFolder = sBaseFolder.Substring(0, iPos);
+                }
+                // Add parent
+                c_CodeFolders.Add(sBaseFolder.Substring(0, sBaseFolder.LastIndexOf(@"\")));
+                
+                // Get the working directory
+                string sWD = "".WorkingDirectory();
+
+                // Loop thru
+                foreach(string sStartFolder in c_CodeFolders)
+                {
+                    // Loop thru children
+                    foreach(string sAtDir in sStartFolder.GetDirectoriesInPath())
                     {
-                        // Remove tail
-                        sRootFolder = sRootFolder.Substring(0, iPos);
-                    }
-                    // Get the name
-                    sRootFolder = sRootFolder.GetDirectoryNameFromPath();
-
-                    // Get the working directory
-                    string sWD = "".WorkingDirectory();
-                    string sDir = sWD;
-                    // Find ourselves and extract the root
-                    sDir = sDir.Replace(sRootFolder, "{0}");
-                    // And make the output directory
-                    // A folder inside ourselves
-                    string sOut = "/build/container";
-                    // And it is empty
-                    sOut.DeletePath();
-                    // Make sure it exists
-                    sOut.AssurePath();
-
-                    // Copy
-                    CopyFolder(c_Env, sWD, sOut, sOut, false);
-
-                    // The modules folder
-                    string sMod = sOut.CombinePath("modules");
-                    // Assure
-                    sMod.AssurePath();
-                    // And the UI folder
-                    string sUI = sOut.CombinePath("modulesui");
-                    // Assure
-                    sUI.AssurePath();
-
-                    // Get the root
-                    string sRoot = sDir.Substring(0, sDir.IndexOf("{0}") - 1);
-                    // Now cut back one
-                    sDir = sDir.Substring(sDir.IndexOf("{0}") + 3);
-
-                    //
-                    CopyTree(c_Env, sRoot, sDir, sMod, sUI, sOut, c_CodeFolders, sRootFolder);
-
-                    // Get the extra folders
-                    List<string> c_Folders = c_Env.GetAsJArray(EnvironmentClass.KeyCodeFolder).ToList();
-                    // Loop thru
-                    foreach (string sFolder in c_Folders)
-                    {
-                        // Get the directory
-                        string sSource = sFolder;
-                        // Add extra delim
-                        if (!sSource.EndsWith(@"\")) sSource += @"\";
-
-                        // Root of many projects?
-                        if (!CopyTree(c_Env, sSource, sDir, sMod, sUI, sOut, c_CodeFolders))
+                        // Skip if working directory
+                        if(!sBaseFolder.IsSameValue(sAtDir))
                         {
-                            // If not, see if it is a single project
-                            if (!CopyProject(c_Env, sSource, sDir, sMod, sUI, sOut, c_CodeFolders))
+                            // Get the folder name
+                            string sFolder = sAtDir.GetDirectoryNameFromPath();
+                            // UI?
+                            if (sFolder.StartsWith("UI.", StringComparison.InvariantCultureIgnoreCase))
                             {
-                                // If making genome
-                                if (c_CodeFolders == null)
+                                // Set target
+                                string sTargetDir = "".WorkingDirectory().CombinePath(sFolder.ToLower()).AdjustPathToOS();
+                                // Assure
+                                sTargetDir.AssurePath();
+
+                                // UI
+                                CopyFolder(sAtDir, sTargetDir);
+                            }
+                            else
+                            {
+                                // Move to bin
+                                string sBinFolder = sAtDir.CombinePath("bin").CombinePath("".InDebug() ? "Debug" : "Release").AdjustPathToOS();
+                                // Loop thru code
+                                foreach (string sCodeFolder in sBinFolder.GetDirectoriesInPath())
                                 {
-                                    CopyFolder(c_Env, sSource, sMod, sOut, false);
-                                }
-                                else
-                                {
-                                    c_CodeFolders.Add(sSource);
+                                    // Do the folder
+                                    CopyFolder(sCodeFolder, "".WorkingDirectory());
                                 }
                             }
                         }
                     }
+                }
 
-                    // Make into image
-                    if (c_Env.MakeGenome)
-                    {
-                        // Make
+                // Make into image
+                if (c_Env.MakeGenome)
+                {
+                    // Make
 
-                        c_Env.Hive.MakeSelfIntoGenome(sOut);
+                    c_Env.Hive.MakeSelfIntoGenome("".WorkingDirectory());
 
-                        // Delete
-                        sOut.DeletePath();
+                    // Kill all
+                    c_Env.Hive.KillProcessorBees();
 
-                        // Kill all
-                        c_Env.Hive.KillProcessorBees();
-
-                        //
-                        c_Env.LogInfo("Container has been created");
-                    }
+                    //
+                    c_Env.LogInfo("Container has been created");
                 }
 
                 // Do we make a bee?
@@ -153,20 +121,6 @@ namespace NXNode
                 // Normal mode?
                 if (!c_Env.InMakeMode)
                 {
-                    // Cleanup.code folders
-                    for (int i = 0; i < c_CodeFolders.Count; i++)
-                    {
-                        // End in delimiter
-                        if (c_CodeFolders[i].EndsWith(@"\"))
-                        {
-                            // Remove
-                            c_CodeFolders[i] = c_CodeFolders[i].Substring(0, c_CodeFolders[i].Length - 1);
-                        }
-                    }
-
-                    // The new code folder
-                    c_Env.Set(EnvironmentClass.KeyCodeFolder, c_CodeFolders);
-
                     // And recycle
                     c_Env.Start();
                 }
@@ -185,160 +139,33 @@ namespace NXNode
         #endregion
 
         #region Support
-        private static bool CopyTree(EnvironmentClass env,
-                                            string rootdir,
-                                            string template,
-                                            string moddir,
-                                            string uidir,
-                                            string rootfolder,
-                                            List<string> targets,
-                                            params string[] skip)
+        private static void CopyFolder(string source, string target)
         {
-            // Assume failue
-            bool bAns = false;
+            // Assure target
+            target.AssurePath();
 
-            // Make skip list
-            List<string> c_Skip = new List<string>(skip);
-
-            // Find all of the directories
-            List<string> c_Dirs = rootdir.GetDirectoriesInPath();
-            // Do each one
-            foreach (string sSDir in c_Dirs)
+            // The list
+            List<string> c_Files = source.GetFilesInPath();
+            // Do each file
+            foreach (string sFile in c_Files)
             {
-                // If not in skip
-                if (!c_Skip.Contains(sSDir.GetDirectoryNameFromPath()))
-                {
-                    //
-                    if (CopyProject(env, sSDir, template, moddir, uidir, rootfolder, targets)) bAns = true;
-                }
+                // Copy
+                sFile.CopyFile(target.CombinePath(sFile.GetFileNameFromPath().AdjustPathToOS()));
             }
 
-            return bAns;
-        }
-
-        private static bool CopyProject(EnvironmentClass env,
-                                            string sourcedir,
-                                            string template,
-                                            string moddir,
-                                            string uidir,
-                                            string rootfodler,
-                                            List<string> targets)
-        {
-            // Assume failure
-            bool bAns = false;
-
-            // Get the name
-            string sAName = sourcedir.GetDirectoryNameFromPath();
-
-            // According to source
-            if (sAName.IsSameValue("docs") || !sAName.HasValue())
+            // And now each directory
+            foreach (string sDir in source.GetDirectoriesInPath())
             {
-                // Do not copy
-            }
-            else if (sAName.StartsWith("UI."))
-            {
-                // Make sub folder
-                string sSAUI = uidir.CombinePath(sAName.Substring(1 + sAName.IndexOf(".")).ToLower());
-                sSAUI.AssurePath();
-
-                // UI
-                if (targets == null) bAns = CopyFolder(env, sourcedir, sSAUI, sSAUI, true);
-            }
-            else if (!sAName.StartsWith("."))
-            {
-                // Make source
-                string sADir = sourcedir + template;
-
-                // Target building?
-                if (targets == null)
-                {
-                    // Copy all the files to modules
-                    bAns = CopyFolder(env, sADir, moddir, rootfodler, false);
-                }
-                else
-                {
-                    // Add
-                    targets.Add(sADir);
-                }
-            }
-
-            return bAns;
-        }
-
-        private static bool CopyFolder(EnvironmentClass env, 
-                                        string source, 
-                                        string target, 
-                                        string rootfolder, 
-                                        bool isui)
-        {
-            // Assume failure
-            bool bAns = false;
-
-            if (!source.Contains(";"))
-            {
-                // Tell user
-                env.LogVerbose(source + " => " + target);
-
-                // Make path
-                target.AssurePath();
-
-                // Split
-                string[] asPirces = source.Split(@"\");
-                if(!isui && asPirces[4].IsSameValue("NX.Node"))
-                {
-                    rootfolder = target;
-                }
-
-                // The list
-                List<string> c_Files = source.GetFilesInPath();
-                // Do each file
-                foreach (string sFile in c_Files)
-                {
-                    // Get the actual file name
-                    string sName = sFile.GetFileNameFromPath();
-
-                    if (isui)
-                    {
-                        // New target
-                        string sTarget = target.CombinePath( sFile.Substring(source.Length+1));
-                        // Copy
-                        sFile.CopyFile(sTarget);
-                    }
-                    else
-                    {
-                        // System?
-                        if (sName.StartsWith("Fn.") ||
-                                sName.StartsWith("Route.") ||
-                                sName.StartsWith("Proc.") ||
-                                target.IsSameValue(rootfolder))
-                        {
-                            // Copy
-                            sFile.CopyFile(target.CombinePath(sName));
-                        }
-                        else
-                        {
-                            // Copy
-                            string sFinal = rootfolder.CombinePath(sName);
-                            if (!sFinal.FileExists() && !target.Replace("/modules", "/").CombinePath(sName).FileExists())
-                            {
-                                sFile.CopyFile(sFinal);
-                            }
-                        }
-                    }
-                    
-                    //
-                    bAns = true;
-                }
-
-                // And now each directory
-                foreach (string sDir in source.GetDirectoriesInPath())
+                // Get the name
+                string sName = sDir.GetDirectoryNameFromPath();
+                // Skip system
+                if (!sName.StartsWith("."))
                 {
                     // Copy
-                    if (CopyFolder(env, sDir, target.CombinePath(sDir.GetDirectoryNameFromPath()), rootfolder, isui)) bAns = true;
+                    CopyFolder(source.CombinePath(sName).AdjustPathToOS(),
+                                target.CombinePath(sName).AdjustPathToOS());
                 }
             }
-
-            return bAns;
         }
         #endregion
     }

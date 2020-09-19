@@ -49,16 +49,6 @@ namespace NX.Engine
         { }
         #endregion
 
-        #region IDisposable
-        /// <summary>
-        /// 
-        /// Housekeeping
-        /// 
-        /// </summary>
-        public void Dispose()
-        { }
-        #endregion
-
         #region Properties
         /// <summary>
         /// 
@@ -93,7 +83,7 @@ namespace NX.Engine
                 }
 
                 // Already in memory?
-                if (!this.Values.Contains(name))
+                if (!this.Values.ContainsKey(name))
                 {
                     try
                     {

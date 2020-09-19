@@ -22,6 +22,7 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 
 using NX.Engine.Hive;
@@ -35,63 +36,66 @@ namespace NX.Engine
         public BumbleBeeClass(EnvironmentClass env, string genome)
             : base(env)
         {
-            // Tell world
-            this.Parent.LogVerbose("{0} bumble bee created", genome);
-
-            // Save
-            this.Genome = genome;
-
-            // Track queen changes
-            this.Parent.Hive.Roster.QueenChanged += delegate ()
+            // Only if a genome is given
+            if (genome.HasValue())
             {
+                // Tell world
+                this.Parent.LogVerbose("{0} bumble bee created".FormatString(genome));
+
+                // Save
+                this.Genome = genome;
+
+                // Track queen changes
+                this.Parent.Hive.Roster.QueenChanged += delegate ()
+                {
                 // Signal
                 this.SignalQueenChange();
-            };
+                };
 
-            // Track task changes
-            this.Tracker = new Hive.TrackerClass(this.Parent.Hive, TrackerClass.TrackType.DNA,
-                delegate (string value, List<string> url)
-                {
+                // Track task changes
+                this.Tracker = new Hive.TrackerClass(this.Parent.Hive, TrackerClass.TrackType.DNA,
+                    delegate (string value, List<string> url)
+                    {
                     // Reset
                     this.Location = null;
-                    this.Field = null;
-                    this.Bee = null;
+                        this.Field = null;
+                        this.Bee = null;
 
                     // Did we get someone to talk to?
                     if (url.Count > 0)
-                    {
+                        {
                         // Set the location
                         this.Location = url[0];
                         // And now the field from the location
                         this.Field = this.Parent.Hive.FieldFromLocation(this.Location);
                         // Do we have one?
                         if (this.Field != null)
-                        {
+                            {
                             // And the bee
                             this.Bee = this.Field.BeeFromLocation(this.Location);
+                            }
                         }
-                    }
 
                     //
-                    this.Parent.LogInfo("{0} genome bumble bee is {1}available", this.Genome, this.Location.HasValue() ? "" : "not ");
+                    this.Parent.LogInfo("{0} genome bumble bee is {1}available".FormatString(this.Genome, this.Location.HasValue() ? "" : "not "));
 
                     // Tell the world
                     this.AvailabilityChanged?.Invoke(this.IsAvailable);
 
-                }, this.Genome);
+                    }, this.Genome);
 
-            // And once we are running
-            if (this.Parent.Hive.HasSetup)
-            {
-                // And assure at least one
-                this.Parent.Hive.AssureDNACount(this.Genome, 1);
-            }
-            else
-            {
+                // Handle the setup
                 this.Parent.Hive.SetupCompleted += delegate (bool hassetup)
                 {
                     this.Parent.Hive.AssureDNACount(this.Genome, 1);
                 };
+
+                // And once we are running
+                if (this.Parent.Hive.HasSetup)
+                {
+                    // And assure at least one
+                    this.Parent.Hive.AssureDNACount(this.Genome, 1);
+                }
             }
         }
         #endregion
@@ -130,7 +134,14 @@ namespace NX.Engine
         /// Returns true manager is available
         /// 
         /// </summary>
-        public virtual bool IsAvailable { get { return this.Location.HasValue(); } }
+        public virtual bool IsAvailable
+        {
+            get
+            {
+                // Do we have a location?
+                return this.Location.HasValue();
+            }
+        }
 
         /// <summary>
         /// 
@@ -184,8 +195,20 @@ namespace NX.Engine
         /// </summary>
         public void CheckForAvailability()
         {
-            // Check current
-            this.Tracker.Trigger(this.Genome, this.Parent.Hive.Roster.GetLocationsForDNA(this.Genome));
+            // Protect
+            try
+            {
+                // Tracking?
+                if (this.Tracker!= null)
+                {
+                    // Check current
+                    this.Tracker.Trigger(this.Genome, this.Parent.Hive.Roster.GetLocationsForDNA(this.Genome));
+                }
+            }
+            catch (Exception e)
+            {
+                this.Parent.LogException(e);
+            }
         }
 
         /// <summary>
@@ -208,8 +231,12 @@ namespace NX.Engine
         /// <param name="rewrite">If true, the location will be removed from the URL</param>
         public void SetNginxInformation(string location, bool rewrite)
         {
+            // Make
+            var c_Info = new NginX.InformationClass(this.Parent.NginXInfo, location, rewrite);
             // Set
-            this.Parent.NginXInfo[this.Genome, NginX.ServicesClass.Types.BumbleBee] = new NginX.InformationClass(this.Parent.NginXInfo, location, rewrite);
+            this.Parent.NginXInfo[this.Genome, NginX.ServicesClass.Types.BumbleBee] = c_Info;
+            // And update environment
+            this.Parent.Add("nginx_bumble", this.Genome + "=" + location);
         }
         #endregion
 

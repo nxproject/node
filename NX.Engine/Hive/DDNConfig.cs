@@ -239,10 +239,10 @@ namespace NX.Engine.Hive
             if (source.HasValue())
             {
                 // Assure
-                if (this.Target.Labels == null) this.Target.Labels = new NamedListClass<string>();
+                if (this.Target.Labels == null) this.Target.Labels = new Dictionary<string, string>();
 
                 // Setup
-                NamedListClass<string> c_Target = this.Target.Labels as NamedListClass<string>;
+                Dictionary<string, string> c_Target = this.Target.Labels as Dictionary<string, string>;
 
                 foreach (string sKey in source.Keys())
                 {
@@ -257,14 +257,14 @@ namespace NX.Engine.Hive
             if (source.HasValue())
             {
                 // Assure
-                if (this.Target.Volumes == null) this.Target.Volumes = new NamedListClass<EmptyStruct>();
+                if (this.Target.Volumes == null) this.Target.Volumes = new Dictionary<string, EmptyStruct >();
 
                 // Setup
-                NamedListClass<EmptyStruct> c_Target = this.Target.Volumes as NamedListClass<EmptyStruct>;
+                Dictionary<string, EmptyStruct> c_Target = this.Target.Volumes as Dictionary<string, EmptyStruct>;
 
                 foreach (string sKey in source.Keys())
                 {
-                    if (!c_Target.Contains(sKey))
+                    if (!c_Target.ContainsKey(sKey))
                     {
                         c_Target[sKey] = new EmptyStruct();
                     }
@@ -309,14 +309,14 @@ namespace NX.Engine.Hive
             if (source.HasValue())
             {
                 // Assure
-                if (this.Target.ExposedPorts == null) this.Target.ExposedPorts = new NamedListClass<EmptyStruct>();
+                if (this.Target.ExposedPorts == null) this.Target.ExposedPorts = new Dictionary<string, EmptyStruct>();
 
                 // Setup
-                NamedListClass<EmptyStruct> c_Target = this.Target.ExposedPorts as NamedListClass<EmptyStruct>;
+                Dictionary<string, EmptyStruct> c_Target = this.Target.ExposedPorts as Dictionary<string, EmptyStruct>;
 
                 foreach (string sKey in source.Keys())
                 {
-                    if (!c_Target.Contains(sKey))
+                    if (!c_Target.ContainsKey(sKey))
                     {
                         c_Target[sKey] = new EmptyStruct();
                     }
@@ -331,7 +331,7 @@ namespace NX.Engine.Hive
             {
                 //
                 if (this.Target.HostConfig == null) this.Target.HostConfig = new HostConfig();
-                if (this.Target.ExposedPorts == null) this.Target.ExposedPorts = new NamedListClass<EmptyStruct>();
+                if (this.Target.ExposedPorts == null) this.Target.ExposedPorts = new Dictionary<string, EmptyStruct>();
 
                 // Setup
                 HostConfig c_Target = this.Target.HostConfig;
@@ -930,16 +930,16 @@ namespace NX.Engine.Hive
             return c_Ans;
         }
 
-        private NamedListClass<IList<PortBinding>> DoPortBindings(JObject values)
+        private IDictionary<string, IList<PortBinding>> DoPortBindings(JObject values)
         {
             // Assume none
-            NamedListClass<IList<PortBinding>> c_Ans = null;
+            Dictionary<string, IList<PortBinding>> c_Ans = null;
 
             // Any?
             if (values != null)
             {
                 // Make
-                c_Ans = new NamedListClass<IList<PortBinding>>();
+                c_Ans = new Dictionary<string, IList<PortBinding>>();
 
                 // Loop thru
                 foreach(string sKey in values.Keys())
@@ -1171,7 +1171,7 @@ namespace NX.Engine.Hive
             {
                 // Assure
                 if (this.Target.NetworkingConfig == null) this.Target.NetworkingConfig = new NetworkingConfig();
-                if (this.Target.NetworkingConfig.EndpointsConfig == null) this.Target.NetworkingConfig.EndpointsConfig = new NamedListClass<EndpointSettings>();
+                if (this.Target.NetworkingConfig.EndpointsConfig == null) this.Target.NetworkingConfig.EndpointsConfig = new Dictionary<string, EndpointSettings>();
 
                 // Setup
                 NamedListClass<EndpointSettings> c_Target = this.Target.NetworkingConfig.EndpointsConfig as NamedListClass<EndpointSettings>;

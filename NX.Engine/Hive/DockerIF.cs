@@ -64,18 +64,18 @@ namespace NX.Engine.Hive
                 if (this.Client != null)
                 {
                     // Tell user
-                    this.Parent.Parent.Parent.LogInfo("URL for field {0} set to {1}", this.Parent.Name, this.URL);
+                    this.Parent.Parent.Parent.LogInfo("URL for field {0} set to {1}".FormatString(this.Parent.Name, this.URL));
                 }
                 else
                 {
                     // Error
-                    this.Parent.Parent.Parent.LogError("Unable to set URL for field {0}", this.Parent.Name);
+                    this.Parent.Parent.Parent.LogError("Unable to set URL for field {0}".FormatString(this.Parent.Name));
                 }
             }
             else
             {
                 // U
-                this.Parent.Parent.Parent.LogError("Unable to ping field {0} at {1}", this.Parent.Name, this.URL);
+                this.Parent.Parent.Parent.LogError("Unable to ping field {0} at {1}".FormatString(this.Parent.Name, this.URL));
             }
         }
         #endregion
@@ -606,12 +606,12 @@ namespace NX.Engine.Hive
             // Protect
             try
             {
-                this.Parent.Parent.Parent.LogInfo("RESTARTING {0}:{1}", task, name);
+                this.Parent.Parent.Parent.LogVerbose("RESTARTING {0}:{1}".FormatString(task, name));
 
                 // Stop it
                 this.Client.Containers.RestartContainerAsync(id,
                     new ContainerRestartParameters()
-                    { 
+                    {
                     }).Wait();
             }
             catch (Exception e)
@@ -619,8 +619,6 @@ namespace NX.Engine.Hive
                 this.HandleException("RestartContainerAsync", e);
             }
         }
-
-        /// <summary>
 
         /// <summary>
         /// 
@@ -705,7 +703,12 @@ namespace NX.Engine.Hive
         /// <param name="e">The exception</param>
         private void HandleException(string fn, Exception e)
         {
-            if (e.GetAllExceptions().IndexOf("NotFound") == -1)
+            // Get the exceptions
+            string sExc = e.GetAllExceptions();
+
+            // Skip unwanted
+            if (sExc.IndexOf("NotFound") == -1 &&
+                sExc.IndexOf("reuse that name") ==-1)
             {
                 this.Parent.Parent.Parent.LogException("DockerIF: " + fn, e);
             }

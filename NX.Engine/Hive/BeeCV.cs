@@ -68,7 +68,7 @@ namespace NX.Engine.Hive
             if (this.IsGhost || this.IsVirtual)
             {
                 // make phony labels
-                this.Labels = new NamedListClass<string>();
+                this.Labels = new Dictionary<string, string>();
                 // Fill
                 this.Labels.Add(this.TheHive.LabelID, id);
                 this.Labels.Add(this.TheHive.LabelUUID, "".GUID());
@@ -87,6 +87,9 @@ namespace NX.Engine.Hive
         {
             // Make the UUID
             this.Values = cv;
+
+            //
+            this.BuildTickleAreas();
         }
         #endregion
 
@@ -305,6 +308,13 @@ namespace NX.Engine.Hive
         {
             get { return this.GetLabel(this.TheHive.LabelProc); }
         }
+
+        /// <summary>
+        /// 
+        /// The tickle areas
+        /// 
+        /// </summary>
+        public List<TickleAreaClass> TickleAreas { get; private set; }
         #endregion
 
         #region Hive
@@ -347,7 +357,7 @@ namespace NX.Engine.Hive
             if (this.Labels == null)
             {
                 // Make them
-                this.Labels = new NamedListClass<string>();
+                this.Labels = new Dictionary<string, string>();
             }
 
             //
@@ -420,6 +430,9 @@ namespace NX.Engine.Hive
                     catch { }
                 }
             }
+
+            //
+            this.BuildTickleAreas();
         }
 
         /// <summary>
@@ -433,6 +446,88 @@ namespace NX.Engine.Hive
         public WaitClass MakeWait(Func<BeeCVClass, WaitClass.TriggerReturns> cb, params string[] states)
         {
             return new WaitClass(this, cb, states);
+        }
+
+        /// <summary>
+        /// 
+        /// Builds the list of tickle areas
+        /// 
+        /// </summary>
+        private void BuildTickleAreas()
+        {
+            // reset
+            this.TickleAreas = new List<TickleAreaClass>();
+
+            TickleAreaClass c_EP = null;
+
+            // Setup by type
+            if (this.IsGhost)
+            {
+                // If ghost, phony the URL
+                //this.IURL = "".GetLocalIP() + ":{0}".FormatString(this.Parent.Parent.Parent.HTTPPort).URLMake();
+
+                // Make the TickleArea
+                c_EP = new TickleAreaClass(this, this.Parent.Parent.Parent.HTTPPort.ToString(),
+                                                                    this.Parent.Parent.Parent.HTTPPort.ToString());
+                // Add
+                this.AddTickleArea(c_EP);
+            }
+            else if (this.IsVirtual)
+            {
+                // Parse 
+                ItemClass c_Info = new ItemClass(this.Values.ID);
+
+                // Must have modifier (port)
+                if (c_Info.ModifierCount > 0)
+                {
+                    // The key portion is the DNA
+                    this.DNA = c_Info.Key;
+
+                    // Make a tickle area with the rest
+                    TickleAreaClass c_Tickle = new TickleAreaClass(this,
+                                                                c_Info.Modifiers[0],
+                                                                c_Info.Modifiers[0],
+                                                                c_Info.Value + ":" + c_Info.Modifiers[0]);
+
+                    // Add
+                    this.AddTickleArea(c_Tickle);
+                }
+            }
+            else
+            {
+                // Loop thru
+                foreach (Port c_Port in this.Ports)
+                {
+                    // Make the TickleArea
+                    c_EP = new TickleAreaClass(this, c_Port.PublicPort.ToString(),
+                                                                        c_Port.PrivatePort.ToString());
+
+                    // Is it reachable?
+                    if (c_EP.IsAvailable)
+                    {
+                        // Add
+                        this.AddTickleArea(c_EP);
+                    }
+                }
+            }
+        }
+
+        private void AddTickleArea(TickleAreaClass ep)
+        {
+            // Assume not there
+            bool bFound = false;
+
+            // Loop thru
+            foreach(TickleAreaClass c_EP in this.TickleAreas)
+            {
+                // Same?
+                bFound = c_EP.ToString().IsSameValue(ep.ToString());
+                // Only one
+                if (bFound) break;
+            }
+
+            // Only if new
+            if (!bFound) this.TickleAreas.Add(ep);
         }
         #endregion
 
@@ -451,16 +546,6 @@ namespace NX.Engine.Hive
                 this.States = new List<string>(states);
                 this.Callback = cb;
             }
-            #endregion
-
-            #region IDisposable
-            /// <summary>
-            /// 
-            /// Housekeeping
-            /// 
-            /// </summary>
-            public void Dispose()
-            { }
             #endregion
 
             #region Enums

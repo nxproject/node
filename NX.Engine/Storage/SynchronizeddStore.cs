@@ -107,7 +107,7 @@ namespace NX.Engine
                     if (isavailable)
                     {
                         //
-                        env.LogVerbose("Synch {0} is available", this.SynchID);
+                        env.LogVerbose("Synch {0} is available".FormatString(this.SynchID));
 
                         // Did we do this dance before?
                         if (!this.HasSynch)
@@ -122,10 +122,10 @@ namespace NX.Engine
                                 this.RedisSet(KeyExists, DateTime.Now.ToString());
 
                                 //
-                                env.LogVerbose("Synch {0} timestamped ", this, this.RedisGet(KeyExists));
+                                env.LogVerbose("Synch {0} timestamped ".FormatString(this, this.RedisGet(KeyExists)));
 
                                 //
-                                env.LogInfo("Synchronizing store to {0}", this.SynchID);
+                                env.LogInfo("Synchronizing store to {0}".FormatString(this.SynchID));
 
                                 // Write what we have
                                 foreach (string sKey in this.SynchObject.Keys())
@@ -140,7 +140,7 @@ namespace NX.Engine
                             else
                             {
                                 //
-                                env.LogInfo("Synchronizing store from {0}", this.SynchID);
+                                env.LogInfo("Synchronizing store from {0}".FormatString(this.SynchID));
 
                                 // Read what we have
                                 foreach (string sKey in this.SynchObject.Keys())
@@ -164,14 +164,14 @@ namespace NX.Engine
                                 }
 
                                 //
-                                env.LogVerbose("Store {0}: {1}", this.SynchID, this.SynchObject.ToSimpleString());
+                                env.LogVerbose("Store {0}: {1}".FormatString(this.SynchID.FormatString(this.SynchObject.ToSimpleString())));
                             }
                         }
                     }
                     else
                     {
                         //
-                        env.LogVerbose("Synch {0} is not available", this.SynchID);
+                        env.LogVerbose("Synch {0} is not available".FormatString(this.SynchID));
                     }
                 };
 

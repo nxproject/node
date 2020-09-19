@@ -66,7 +66,7 @@ namespace Proc.Traefik
                 this.BumbleBee.QueenChanged += delegate (bool isqueen)
                 {
                     // Check
-                    this.MakeHandler(isqueen && this.BumbleBee.IsAvailable && this.IsAvailable);
+                    this.MakeHandler(isqueen && this.IsAvailable);
                 };
 
                 // Bootstap
@@ -76,6 +76,13 @@ namespace Proc.Traefik
         #endregion
 
         #region Properties
+        /// <summary>
+        /// 
+        /// Is the buble bee available?
+        /// 
+        /// </summary>
+        public override bool IsAvailable => this.BumbleBee != null && this.BumbleBee.IsAvailable;
+
         /// <summary>
         /// 
         /// The hive that holds traefik
@@ -89,13 +96,6 @@ namespace Proc.Traefik
         /// 
         /// </summary>
         public BumbleBeeClass BumbleBee { get; private set; }
-
-        /// <summary>
-        /// 
-        /// Mimic availability
-        /// 
-        /// </summary>
-        public override bool IsAvailable { get { return this.BumbleBee != null && this.BumbleBee.IsAvailable; } }
 
         /// <summary>
         /// 

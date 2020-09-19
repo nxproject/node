@@ -60,11 +60,6 @@ namespace Fn.USPS
         }
         #endregion
 
-        #region IDisposable
-        public void Dispose()
-        { }
-        #endregion
-
         #region Properties
         /// <summary>
         /// 

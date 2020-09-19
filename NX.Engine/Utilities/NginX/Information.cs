@@ -39,7 +39,7 @@ namespace NX.Engine.NginX
         {
             //
             this.Location = location;
-            this.Rewrite = rewrite;
+            this.Rewrite = false; // rewrite;
         }
         #endregion
 
@@ -60,10 +60,10 @@ namespace NX.Engine.NginX
 
         /// <summary>
         /// 
-        /// Do we rewite the URL?
+        /// Do we remove the route?
         /// 
         /// </summary>
-        public bool Rewrite { get; set; }
+        public bool Rewrite { get; private set; }
         #endregion
 
         #region Methods

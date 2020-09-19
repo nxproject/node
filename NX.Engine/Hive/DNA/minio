@@ -1,6 +1,10 @@
 ﻿{
+	"@Unique": "y",
+	"@Ports": [
+		"9000"
+	],
 	"@Map": [
-		"{doc_folder}:/data"
+		"{doc_folder}/_minio:/data"
 	],
 	"Cmd": [
 		"server",

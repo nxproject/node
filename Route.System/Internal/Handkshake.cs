@@ -48,7 +48,7 @@ namespace Route.System
             if (sReq.HasValue())
             {
                 //
-                call.Env.LogVerbose("Handshake request of {0}", sReq);
+                call.Env.LogVerbose("Handshake request of {0}".FormatString(sReq));
 
                 // According to request
                 switch(sReq)

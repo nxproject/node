@@ -42,17 +42,20 @@ namespace NX.Engine
 
             try
             {
-                if (value is bool)
+                if (value != null)
                 {
-                    ans = (bool)value ? "1" : "0";
-                }
-                else if (value is DateTime)
-                {
-                    ans = ((DateTime)value).ToDBDate();
-                }
-                else
-                {
-                    ans = value.ToString();
+                    if (value is bool)
+                    {
+                        ans = (bool)value ? "1" : "0";
+                    }
+                    else if (value is DateTime)
+                    {
+                        ans = ((DateTime)value).ToDBDate();
+                    }
+                    else
+                    {
+                        ans = value.ToString();
+                    }
                 }
             }
             catch { }

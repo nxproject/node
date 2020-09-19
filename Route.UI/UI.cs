@@ -55,24 +55,10 @@ namespace Route.UI
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Make the folder path
-            string sPath = "".WorkingDirectory().CombinePath("modulesui").CombinePath(call.Env.UI.Replace("+", ""));
+            string sPath = "".WorkingDirectory().CombinePath("ui." + call.Env.UI.Replace("+", "").ToLower()).AdjustPathToOS();
 
             // Get the full path
             sPath = store.PathFromEntry(sPath, "path");
-
-            if (!"".InContainer() && "".InDebug())
-            {
-                // Get the path
-                sPath = this.GetType().Assembly.Location;
-                // Find where bin is
-                int iPos = sPath.IndexOf(@"\bin\");
-                // Extract
-                sPath = sPath.Substring(0, iPos);
-                // Remove last
-                sPath = sPath.Substring(0, sPath.LastIndexOf(@"\") + 1);
-                // Make new path
-                sPath = store.PathFromEntry(sPath + "UI." + call.Env.UI, "path");
-            }
 
             // Assure folder
             sPath.AssurePath();

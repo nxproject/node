@@ -49,16 +49,6 @@ namespace NX.Engine
         { }
         #endregion
 
-        #region IDisposable
-        /// <summary>
-        /// 
-        /// Housekeeping
-        /// 
-        /// </summary>
-        public void Dispose()
-        { }
-        #endregion
-
         #region Properties
         /// <summary>
         /// 
@@ -96,7 +86,7 @@ namespace NX.Engine
                     string sEntry = nodes[at];
 
                     // New?
-                    if (!this.Routes.Contains(sEntry))
+                    if (!this.Routes.ContainsKey(sEntry))
                     {
                         // Add a layer
                         this.Routes[sEntry] = new RouteLayerClass(this.Parent);
@@ -132,7 +122,7 @@ namespace NX.Engine
                     string sEntry = nodes[at];
 
                     // New?
-                    if (this.Routes.Contains(sEntry))
+                    if (this.Routes.ContainsKey(sEntry))
                     {
                         // Move down the tree
                         at++;
@@ -185,7 +175,7 @@ namespace NX.Engine
                     }
 
                     // Sub-layer exists?
-                    if (this.Routes.Contains(sEntry))
+                    if (this.Routes.ContainsKey(sEntry))
                     {
                         // Process
                         sAns = this.Routes[sEntry].Get(values, nodes, at + 1);
@@ -231,7 +221,7 @@ namespace NX.Engine
         /// <returns>True if it is defined</returns>
         public bool Contains(string route)
         {
-            return this.Routes.Contains(route);
+            return this.Routes.ContainsKey(route);
         }
 
         /// <summary>

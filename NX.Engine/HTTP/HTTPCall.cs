@@ -282,14 +282,14 @@ namespace NX.Engine
                         // JSON Rpc?
                         if (c_Ans.Get("jsonrpc").IsSameValue("2.0"))
                         {
+                            // Make new one
+                            JObject c_New = new JObject();
+
                             // Save
                             this.JSONRpcID = c_Ans.Get("id");
                             // Get the params
                             string sFn = c_Ans.Get("method");
                             JArray c_P = c_Ans.GetJArray("params");
-                            // Delete
-                            c_Ans.Remove("method");
-                            c_Ans.Remove("params");
                             // Fill
                             if (c_P != null)
                             {
@@ -297,10 +297,13 @@ namespace NX.Engine
                                 for (int i = 0; i < c_P.Count; i++)
                                 {
                                     // Merge
-                                    c_Ans.Merge(c_P.GetJObject(i));
+                                    c_New.Merge(c_P.GetJObject(i));
                                 }
                             }
-                            c_Ans.Set("fn", sFn);
+                            c_New.Set("fn", sFn);
+
+                            // replace
+                            c_Ans = c_New;
                         }
                     }
                 }
@@ -461,7 +464,7 @@ namespace NX.Engine
 
                     default:
                         // JSON Rpc?
-                        if(this.JSONRpcID.HasValue())
+                        if (this.JSONRpcID.HasValue())
                         {
                             // Adjust
                             JObject c_JRPC = new JObject();
@@ -728,7 +731,7 @@ namespace NX.Engine
                 string sAns = null;
 
                 // Any?
-                if(this.RespondLastModified != null)
+                if (this.RespondLastModified != null)
                 {
                     // Make tag
                     sAns = ((DateTime)this.RespondLastModified).ToString("R").MD5HashString();

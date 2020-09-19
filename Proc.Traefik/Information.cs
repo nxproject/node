@@ -111,7 +111,7 @@ namespace Proc.Traefik
         }
         public List<string> Keys { get { return this.Values.Keys(); } }
 
-        private Dictionary<string, string> Extras = new Dictionary<string, string>();
+        private NamedListClass<string> Extras = new NamedListClass<string>();
         public List<string> ExtraKeys { get { return new List<string>(this.Extras.Keys); } }
 
         public bool Used { get; set; }

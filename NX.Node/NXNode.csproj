@@ -10,15 +10,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Jint" Version="2.11.58" />
     <PackageReference Include="NUglify" Version="1.6.4" />
+    <PackageReference Include="SocketIOClient" Version="2.0.2.6" />
+    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
     <PackageReference Include="System.Globalization" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Fn.System\Fn.System.csproj" />
+    <ProjectReference Include="..\NX.Engine\NX.Engine.csproj" />
     <ProjectReference Include="..\NX.Shared\NX.Shared.csproj" />
-    <ProjectReference Include="..\Route.System\Route.System.csproj" />
-    <ProjectReference Include="..\Route.UI\Route.UI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

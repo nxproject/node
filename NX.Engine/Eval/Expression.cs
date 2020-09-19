@@ -58,6 +58,9 @@ namespace NX.Engine
         {
             ExpressionReturn c_Ans = new ExpressionReturn();
 
+            // Assure
+            expr = expr.IfEmpty();
+
             // Handle weird quotes
             expr = expr.Replace("’", "'");
             expr = expr.Replace("`", "'");

@@ -99,7 +99,7 @@ namespace NX.Shared
             string sAns = null;
 
             // Name cannot be used
-            if (!SafeThreadManagerClass.ThreadMap.Contains(name))
+            if (!SafeThreadManagerClass.ThreadMap.ContainsKey(name))
             {
                 // See if it launches
                 try
@@ -144,7 +144,7 @@ namespace NX.Shared
         public static void StopThread(string name)
         {
             // Do we have it?
-            if(SafeThreadManagerClass.ThreadMap.Contains(name))
+            if(SafeThreadManagerClass.ThreadMap.ContainsKey(name))
             {
                 // Kill it
                 SafeThreadManagerClass.ThreadMap[name].Stop();

@@ -97,17 +97,17 @@ namespace Proc.MongoDb
         #region Properties
         /// <summary>
         /// 
+        /// Is the manager available?
+        /// 
+        /// </summary>
+        public override bool IsAvailable => this.Client != null;
+
+        /// <summary>
+        /// 
         /// The MongoDb client
         /// 
         /// </summary>
         public MongoClient Client { get; set; }
-
-        /// <summary>
-        /// 
-        /// Is the client available
-        /// 
-        /// </summary>
-        public override bool IsAvailable => this.Client != null;
 
         /// <summary>
         /// 

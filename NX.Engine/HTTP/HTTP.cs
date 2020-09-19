@@ -274,10 +274,14 @@ namespace NX.Engine
                                         // Call the route
                                         c_Route.Call(c_Call, c_Params);
                                     }
+                                    else
+                                    {
+                                        this.Parent.LogError("HTTP: Invalid user");
+                                    }
                                 }
                                 catch (Exception e)
                                 {
-                                    this.Parent.LogException("ProcessRequest", e);
+                                    this.Parent.LogException("HTTP: ProcessRequest", e);
                                 }
                             }
 

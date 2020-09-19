@@ -36,10 +36,12 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Net;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml;
+using System.Runtime.Loader;
 
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
@@ -1399,6 +1401,24 @@ namespace NX.Shared
 
             return value;
         }
+
+        public static string GetLocalIP(this string value)
+        {
+            string sAns = null;
+
+            IPAddress[] aAddrs =  Dns.GetHostAddresses(Dns.GetHostName());
+            foreach(IPAddress c_Addr in aAddrs)
+            {
+                string sIP = c_Addr.ToString();
+                if(!sIP.IsIPV6())
+                {
+                    sAns = sIP;
+                    break;
+                }
+            }
+
+            return sAns.IfEmpty("localhost");
+        }
         #endregion
 
         #region JObject
@@ -1653,9 +1673,9 @@ namespace NX.Shared
             return c_Ans;
         }
 
-        public static NamedListClass<string> ToDictionary(this JObject value)
+        public static IDictionary<string, string> ToDictionary(this JObject value)
         {
-            NamedListClass<string> c_Ans = new NamedListClass<string>();
+            IDictionary<string, string> c_Ans = new Dictionary<string, string>();
 
             foreach (string sKey in value.Keys())
             {
@@ -2044,7 +2064,7 @@ namespace NX.Shared
             return value != null && value.HasValues;
         }
 
-        public static JObject ToJObject(this Dictionary<string, object> dict)
+        public static JObject ToJObject(this NamedListClass<object> dict)
         {
             JObject c_Ans = new JObject();
 
@@ -4475,6 +4495,36 @@ namespace NX.Shared
             {
                 return false;
             }
+        }
+        #endregion
+
+        #region Assembly
+        public static Assembly LoadAssembly(this string filename)
+        {
+            // Assume none
+            Assembly c_Assm = null;
+
+            // Protect
+            try
+            {
+                // Load the assembly
+                c_Assm = AssemblyLoadContext.Default.LoadFromAssemblyPath("".WorkingDirectory().CombinePath(filename).AdjustPathToOS());
+            }
+            catch { }
+
+            // Catch all
+            if (c_Assm == null)
+            {
+                // Protect
+                try
+                {
+                    // Load the assembly
+                    c_Assm = Assembly.LoadFile(filename);
+                }
+                catch { }
+            }
+
+            return c_Assm;
         }
         #endregion
     }

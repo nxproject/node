@@ -29,10 +29,12 @@
 
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 using Docker.DotNet.Models;
 
 using NX.Shared;
+
 namespace NX.Engine.Hive
 {
     /// <summary>
@@ -86,7 +88,7 @@ namespace NX.Engine.Hive
         private void Initialize(string url)
         {
             // The map
-            this.Bees = new TickleAreaMapClass(this);
+            this.Bees = new NamedListClass<BeeClass>();
 
             // Virtual?
             if (url.HasValue())
@@ -155,10 +157,19 @@ namespace NX.Engine.Hive
         /// An internal roster of bees
         /// 
         /// </summary>
-        public TickleAreaMapClass Bees { get; private set; }
+        public NamedListClass<BeeClass> Bees { get; private set; } = new NamedListClass<BeeClass>();
+
+        //public TickleAreaMapClass Bees { get; private set; }
 
         //private DockerIFClass IClient { get; set; }
         public DockerIFClass DockerIF { get; private set; }
+
+        /// <summary>
+        /// 
+        /// A list of just worker bees
+        /// 
+        /// </summary>
+        private List<string> WorkerBeeIDs { get; set; } = new List<string>();
 
         /// <summary>
         /// 
@@ -167,18 +178,107 @@ namespace NX.Engine.Hive
         /// </summary>
         public int BeeCount
         {
-            get { return this.Bees.BeeCount; }
+            get { return this.Bees.Count; }
         }
 
         /// <summary>
         /// 
-        /// Returns the loader bee
+        /// Returns the bee that leads a given bee
         /// 
         /// </summary>
-        public BeeClass LeaderBee
+        /// <param name="bee">The given bee</param>
+        /// <returns></returns>
+        public BeeClass LeaderBee(BeeClass bee = null)
         {
-            get { return this.Bees.LeaderBee(); }
+            // Assume none
+            BeeClass c_Ans = null;
+
+            // The ID of the selected bee
+            string sID = null;
+
+            // Get the list
+            List<string> c_IDs = this.WorkerBeeIDs;
+            // Any?
+            if (c_IDs.Count > 0)
+            {
+                // Do we have a bee to target?
+                if (bee == null)
+                {
+                    // Get the largest ID
+                    sID = c_IDs.Max();
+                }
+                else
+                {
+                    // Get one after
+                    sID = c_IDs.FindLast(x => x.CompareTo(bee.CV.NXID) > 0);
+                }
+            }
+
+            // Do we have an ID?
+            if (sID.HasValue())
+            {
+                // Get the bee
+                c_Ans = this.GetBee(sID);
+            }
+
+            return c_Ans;
         }
+
+        /// <summary>
+        /// 
+        /// Return the bee that follows a given bee
+        /// </summary>
+        /// <param name="bee">The given bee</param>
+        /// <returns></returns>
+        public BeeClass FollowerBee(BeeClass bee)
+        {
+            // Assume none
+            BeeClass c_Ans = null;
+
+            // The ID of the selected bee
+            string sID = null;
+
+            // Get the list
+            List<string> c_IDs = this.WorkerBeeIDs;
+            // Any?
+            if (c_IDs.Count > 0)
+            {
+                // Do we have a bee to target?
+                if (bee == null)
+                {
+                    // Get the smallest ID
+                    sID = c_IDs.Min();
+                }
+                else
+                {
+                    // Get one after
+                    sID = c_IDs.FindLast(x => x.CompareTo(bee.Id) < 0);
+                }
+            }
+
+            // Do we have an ID?
+            if (sID.HasValue())
+            {
+                // Get the bee
+                c_Ans = this.GetBee(sID);
+            }
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Has a refresh taken place?
+        /// 
+        /// </summary>
+        public bool HasSetup { get; private set; }
+
+        /// <summary>
+        /// 
+        /// List used at refresh
+        /// 
+        /// </summary>
+        private List<string> RefreshList { get; set; }
         #endregion
 
         #region Methods
@@ -197,7 +297,7 @@ namespace NX.Engine.Hive
             c_Buffer.AppendLine("Name: {0}".FormatString(this.Name));
             c_Buffer.AppendLine("Bees:");
 
-            foreach (BeeClass c_Bee in this.Bees.Bees.Values)
+            foreach (BeeClass c_Bee in this.Bees.Values)
             {
                 c_Buffer.AppendLine(c_Bee.ToString());
             }
@@ -216,7 +316,17 @@ namespace NX.Engine.Hive
         /// <returns>The bee if any</returns>
         public BeeClass GetBee(string id)
         {
-            return this.Bees.GetBee(id);
+            // Assume none
+            BeeClass c_Ans = null;
+
+            // Do we have it?
+            if (this.Bees.ContainsKey(id))
+            {
+                // Get
+                c_Ans = this.Bees[id];
+            }
+
+            return c_Ans;
         }
 
         /// <summary>
@@ -228,7 +338,23 @@ namespace NX.Engine.Hive
         /// <returns>The bee if any</returns>
         public BeeClass GetByDockerID(string id)
         {
-            return this.Bees.GetBeeByDockerID(id);
+            // Assume none
+            BeeClass c_Ans = null;
+
+            // Loop thru
+            foreach (BeeClass c_Bee in this.Bees.Values)
+            {
+                // Do we have it?
+                if (c_Bee.CV.Id.IsSameValue(id))
+                {
+                    // Get
+                    c_Ans = c_Bee;
+                    // Only one
+                    break;
+                }
+            }
+
+            return c_Ans;
         }
 
         /// <summary>
@@ -238,11 +364,14 @@ namespace NX.Engine.Hive
         /// </summary>
         public void Refresh()
         {
+            //
+            this.HasSetup = true;
+
             // Virtual?
             if (!this.IsVirtual)
             {
                 // Start the cycle
-                this.Bees.StartRefresh();
+                this.StartRefresh();
 
                 // Get the client
                 DockerIFClass c_Client = this.DockerIF;
@@ -253,30 +382,48 @@ namespace NX.Engine.Hive
                     string sSearchKey = "label"; ;
                     string sSearchValue = this.Parent.LabelHive + "_" + this.Parent.Name + "=Y";
 
-                    this.Parent.Parent.LogVerbose("Getting field bees for {0}", sSearchValue);
+                    this.Parent.Parent.LogVerbose("Getting field bees for {0}".FormatString(sSearchValue));
 
                     // Make the filter
                     DockerIFFilterClass c_Filter = new DockerIFFilterClass(sSearchKey, sSearchValue);
                     // Get the list
                     var c_List = c_Client.ListContainers(c_Filter);
 
-                    this.Parent.Parent.LogVerbose("{0} bees seen...", c_List.Count);
+                    this.Parent.Parent.LogVerbose("{0} bees seen...".FormatString(c_List.Count));
 
                     // Loop thru
                     foreach (ContainerListResponse c_Raw in c_List)
                     {
                         // Make into usable
                         BeeCVClass c_CV = new BeeCVClass(this, c_Raw);
-                        // Make the bee
-                        BeeClass c_Bee = new BeeClass(this, c_CV);
+                        // Get the bee by Docker ID
+                        BeeClass c_Bee = this.GetByDockerID(c_Raw.ID);
+                        // New?
+                        if (c_Bee == null)
+                        {
+                            // Make the bee
+                            c_Bee = new BeeClass(this, c_CV);
+                        }
+                        else
+                        {
+                            // Replace the CV
+                            c_Bee.CV.Refresh();
+                        }
                         // Skip ghost
                         if (!c_Bee.IsGhost)
                         {
                             // Did it exit?
                             if (!c_Bee.CV.IsInTrouble)
                             {
-                                // Tell tracker
-                                this.Bees.SawBee(c_Bee);
+                                // Was it there?
+                                if (this.RefreshList.Contains(c_Bee.Id))
+                                {
+                                    //
+                                    this.RefreshList.Remove(c_Bee.Id);
+                                }
+
+                                // Add the bee
+                                this.AddBee(c_Bee);
                             }
                             else
                             {
@@ -288,90 +435,20 @@ namespace NX.Engine.Hive
                 }
                 else
                 {
-                    this.Parent.Parent.LogVerbose("No DockerIF for {0}", this.Name);
+                    this.Parent.Parent.LogVerbose("No DockerIF for {0}".FormatString(this.Name));
                 }
 
                 // Dump
                 this.Parent.Parent.LogVerbose("\r\n" + this.ToString());
 
                 // End the refresh
-                this.Bees.EndRefresh();
+                this.EndRefresh();
             }
             else
             {
                 // Dump
-                this.Parent.Parent.LogVerbose("{0} is virtual!", this.Name);
+                this.Parent.Parent.LogVerbose("{0} is virtual!".FormatString(this.Name));
             }
-        }
-
-        /// <summary>
-        /// 
-        /// Returns a list of DNAs
-        /// 
-        /// </summary>
-        /// <returns>The list of DNAs</returns>
-        public List<string> GetDNAs()
-        {
-            return this.Bees.GetDNAs();
-        }
-
-        /// <summary>
-        /// 
-        /// Returns the URLs for a given DNA
-        /// 
-        /// </summary>
-        /// <param name="DNA">The DNA</param>
-        /// <returns>The list of locations</returns>
-        public List<string> GetLocationsForDNA(string DNA)
-        {
-            return this.Bees.GetLocationsForDNA(DNA);
-        }
-
-        /// <summary>
-        /// 
-        /// Returns the bees for a given DNA
-        /// 
-        /// </summary>
-        /// <param name="DNA">The DNA</param>
-        /// <returns>The list of locations</returns>
-        public List<BeeClass> GetBeesForDNA(string DNA)
-        {
-            return this.Bees.GetBeesForDNA(DNA);
-        }
-
-        /// <summary>
-        /// 
-        /// Returns a list of ports
-        /// 
-        /// </summary>
-        /// <returns>The list of ports</returns>
-        public List<string> GetPorts()
-        {
-            return this.Bees.GetPorts();
-        }
-
-        /// <summary>
-        /// 
-        /// Returns the URLs for a given port
-        /// 
-        /// </summary>
-        /// <param name="port">The port</param>
-        /// <returns>The list of locations</returns>
-        public List<string> GetLocationsForPort(string port)
-        {
-            return this.Bees.GetLocationsForPort(port);
-        }
-
-        /// <summary>
-        /// 
-        /// Returns the bees for a given port
-        /// 
-        /// </summary>
-        /// <param name="port">The port</param>
-        /// <returns>The list of locations</returns>
-        public List<BeeClass> GetBeesForPort(string port)
-        {
-            return this.Bees.GetBeesForPort(port);
         }
 
         /// <summary>
@@ -383,8 +460,132 @@ namespace NX.Engine.Hive
         /// <returns>The bee</returns>
         public BeeClass BeeFromLocation(string location)
         {
-            return this.Bees.GetBeeFromLocation(location);
+            // Assume none
+            BeeClass c_Ans = null;
+
+            // Loop thru
+            foreach (BeeClass c_Bee in this.Bees.Values)
+            {
+                // Loop thru
+                foreach (TickleAreaClass c_EP in c_Bee.GetTickleAreas())
+                {
+                    // Does the location match?
+                    if (c_EP.Location.IsSameValue(location))
+                    {
+                        // Get
+                        c_Ans = c_Bee;
+                        // Only one
+                        break;
+                    }
+                }
+
+                // Only one
+                if (c_Ans != null) break;
+            }
+
+            return c_Ans;
+        }/// <summary>
+
+        /// 
+        /// Adds a bee to the field
+        /// 
+        /// </summary>
+        /// <param name="bee">The bee to be added</param>
+        public void AddBee(BeeClass bee)
+        {
+            // Must have real a bee
+            if (bee != null)
+            {
+                // Already there?
+                if (!this.Bees.ContainsKey(bee.Id))
+                {
+                    // Do
+                    this.Bees.Add(bee.Id, bee);
+
+                    // Worker bee?
+                    if (bee.CV.DNA.StartsWith(HiveClass.ProcessorDNAName))
+                    {
+                        // Add
+                        if (!this.WorkerBeeIDs.Contains(bee.Id)) this.WorkerBeeIDs.Add(bee.Id);
+                    }
+
+                    // If this is us, save
+                    if (bee.CV.NXID.IsSameValue(this.Parent.Parent.ID))
+                    {
+                        // Save
+                        this.Parent.Roster.MeBee = bee;
+                        //
+                        this.Parent.Parent.LogInfo("I am bee {0}".FormatString(bee.Id));
+
+                        // Set the loopback URL
+                        this.Parent.Parent.LoopbackURL = bee.URL;
+                    }
+
+                    // The change lists
+                    List<string> c_DNAsChanged = new List<string>();
+                    // Add the DNA
+                    c_DNAsChanged.Add(bee.CV.DNA);
+
+                    string sMsg = "as " + bee.CV.DNA;
+
+                    // Tell world
+                    this.Parent.Parent.LogInfo("Added bee {0} to field {1} {2}".FormatString(bee.FullID, bee.Field.Name, sMsg));
+
+                    // Handle the DNA changes
+                    this.Parent.Roster.SignalDNAChanged(c_DNAsChanged);
+
+                    // Now the other bees
+                    if (this.Parent.Synch != null)
+                    {
+                        this.Parent.Synch.SendMessage(HiveClass.MessengerMClass,
+                            "field", bee.Field.Name,
+                            "id", bee.DockerID,
+                            "state", "isalive"
+                            );
+                    }
+                }
+            }
         }
+
+        /// <summary>
+        /// 
+        /// Removes a bee
+        /// 
+        /// </summary>
+        /// <param name="bee">The bee to removed</param>
+        public void RemoveBee(BeeClass bee, BeeClass.KillReason reason)
+        {
+            // Must have real a bee
+            if (bee != null && !bee.IsGhost)
+            {
+                // Do we know it?
+                if (this.Bees.ContainsKey(bee.Id))
+                {
+                    // Do
+                    this.Bees.Remove(bee.Id);
+
+                    // Worker bee?
+                    if (bee.CV.DNA.StartsWith(HiveClass.ProcessorDNAName))
+                    {
+                        // Add
+                        if (this.WorkerBeeIDs.Contains(bee.Id)) this.WorkerBeeIDs.Remove(bee.Id);
+                    }
+
+                    // The change lists
+                    List<string> c_DNAsChanged = new List<string>();
+                    // Add the DNA
+                    c_DNAsChanged.Add(bee.CV.DNA);
+
+                    // Tell user
+                    this.Parent.Parent.LogInfo("Removed bee {0} from field {1}, reason".FormatString(bee.FullID, bee.Field.Name, reason));
+
+                    // Handle the DNA changes
+                    this.Parent.Roster.SignalDNAChanged(c_DNAsChanged);
+                }
+            }
+        }
+
+
         #endregion
 
         #region Equal
@@ -405,6 +606,75 @@ namespace NX.Engine.Hive
         public override int GetHashCode()
         {
             return this.Name.GetHashCode();
+        }
+        #endregion
+
+        #region Refresh
+        /// <summary>
+        /// 
+        /// Starts a refresh cycle
+        /// 
+        /// </summary>
+        public void StartRefresh()
+        {
+            // make the list
+            this.RefreshList = new List<string>(this.Bees.Keys);
+        }
+
+        /// <summary>
+        /// 
+        /// Saw a bee during a refresh cycle
+        /// 
+        /// </summary>
+        /// <param name="bee">The bee seen</param>
+        public void SawBee(BeeClass bee)
+        {
+            // Was it there?
+            if (this.RefreshList.Contains(bee.Id))
+            {
+                //
+                this.RefreshList.Remove(bee.Id);
+            }
+
+            // Add the bee
+            this.AddBee(bee);
+        }
+
+        /// <summary>
+        /// 
+        /// Ends the refresh cycle
+        /// 
+        /// </summary>
+        public void EndRefresh()
+        {
+            // Only if any
+            if (this.RefreshList.Count > 0)
+            {
+                // The actual count
+                int iCount = 0;
+
+                // What is left over are zombies
+                foreach (string sZombie in this.RefreshList)
+                {
+                    // Get the bee
+                    BeeClass c_Zombie = this.GetBee(sZombie);
+                    // Any?
+                    if (c_Zombie != null && !c_Zombie.IsGhost)
+                    {
+                        // Kill
+                        c_Zombie.Kill(BeeClass.KillReason.Zombie);
+                        // Add notch
+                        iCount++;
+                    }
+                }
+
+
+                // Tell of any zombies
+                if (iCount > 0)
+                {
+                    this.Parent.Parent.LogInfo("{0} zombie(s) seen".FormatString(iCount));
+                }
+            }
         }
         #endregion
     }

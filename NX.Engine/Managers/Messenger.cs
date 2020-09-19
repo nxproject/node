@@ -99,7 +99,7 @@ namespace NX.Engine
                 this.Signal.Send(msg.ToString());
 
                 //
-                this.Parent.LogVerbose("{0} --> {1}", this.ID, msg.ToString());
+                this.Parent.LogVerbose("{0} --> {1}".FormatString(this.ID, msg.ToString()));
             }
         }
 
@@ -133,7 +133,7 @@ namespace NX.Engine
                 this.Signal = new PSClass(this.Redis, this.ID + "_synch", delegate (string value)
                 {
                     //
-                    this.Parent.LogVerbose("{0} <-- {1}", this.ID, value);
+                    this.Parent.LogVerbose("{0} <-- {1}".FormatString(this.ID, value));
 
                     // Decode packet
                     using (MessageClass c_Payload = new MessageClass(this.Parent, value))

@@ -101,13 +101,13 @@ namespace NX.Engine.BumbleBees.Redis
                 if (this.Parent.DB != null && this.Subscription == null && this.Callback != null)
                 {
                     //
-                    this.Parent.Parent.LogVerbose("Opening subscription {0}", this.SignalName);
+                    this.Parent.Parent.LogVerbose("Opening subscription {0}".FormatString(this.SignalName));
 
                     // Create a subscription
                     this.Subscription = this.Parent.Client.GetSubscriber();
 
                     //
-                    this.Parent.Parent.LogVerbose("Subscribing to channel {0}", this.SignalName);
+                    this.Parent.Parent.LogVerbose("Subscribing to channel {0}".FormatString(this.SignalName));
 
                     // Set the processor
                     this.Subscription.Subscribe(this.SignalName, (channel, msg) =>
@@ -120,7 +120,7 @@ namespace NX.Engine.BumbleBees.Redis
                     });
 
                     //
-                    this.Parent.Parent.LogVerbose("Subscription {0} done", this.SignalName);
+                    this.Parent.Parent.LogVerbose("Subscription {0} done".FormatString(this.SignalName));
                 }
             }
             catch (Exception e)
@@ -141,7 +141,7 @@ namespace NX.Engine.BumbleBees.Redis
             if (this.Subscription != null)
             {
                 //
-                this.Parent.Parent.LogVerbose("Closing subscription {0}", this.SignalName);
+                this.Parent.Parent.LogVerbose("Closing subscription {0}".FormatString(this.SignalName));
 
                 //
                 this.Subscription.UnsubscribeAll();

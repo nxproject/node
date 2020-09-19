@@ -430,7 +430,7 @@ namespace NX.Engine.Files.Vendors
             {
                 PdfReader pdfReader = new PdfReader(doc);
             }
-            catch (iTextSharp.text.exceptions.BadPasswordException e)
+            catch //(iTextSharp.text.exceptions.BadPasswordException e)
             {
                 bAns = true;
             }

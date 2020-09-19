@@ -136,7 +136,7 @@ namespace NX.Engine.Hive
                                 if (msg["state"].IsSameValue("isdead"))
                                 {
                                     // Remove
-                                    this.Roster.Remove(msg["id"]);
+                                    this.Roster.Remove(msg["id"], BeeClass.KillReason.FoundDead);
                                 }
                                 else
                                 {
@@ -152,9 +152,6 @@ namespace NX.Engine.Hive
                             break;
                     }
                 };
-
-                this.Parent.Messenger.CheckAvailability();
-
 
                 // Handle shutdown
                 AppDomain.CurrentDomain.ProcessExit += delegate (object sender, EventArgs e)
@@ -176,6 +173,8 @@ namespace NX.Engine.Hive
 
             // Out
             this.InInitialize = false;
+
+            this.Parent.Messenger.CheckAvailability();
         }
         #endregion
 
@@ -206,7 +205,7 @@ namespace NX.Engine.Hive
         /// Has the hive setup?
         /// 
         /// </summary>
-        public bool HasSetup { get; set; }
+        public bool HasSetup { get { return this.Roster.HasSetup; } }
 
         /// <summary>
         /// 
@@ -278,7 +277,7 @@ namespace NX.Engine.Hive
                     BeeClass c_Bee = new BeeClass(c_Field, c_Loc.ToString(), BeeClass.Types.Virtual);
 
                     // Treat like any other bee
-                    c_Field.Bees.Add(c_Bee);
+                    c_Field.AddBee(c_Bee);
                 }
             }
 
@@ -358,7 +357,7 @@ namespace NX.Engine.Hive
                 if (!c_Present.IsVirtual)
                 {
                     // Kill the bees
-                    foreach (BeeClass c_Bee in c_Present.Bees.Bees.Values)
+                    foreach (BeeClass c_Bee in c_Present.Bees.Values)
                     {
                         c_Bee.Kill(BeeClass.KillReason.FieldDropped);
                     }
@@ -366,7 +365,7 @@ namespace NX.Engine.Hive
             }
 
             //
-            this.Parent.LogVerbose("Field(s) {0} seen", new List<string>(this.Fields.Keys).Join(", "));
+            this.Parent.LogVerbose("Field(s) {0} seen".FormatString(new List<string>(this.Fields.Keys).Join(", ")));
         }
 
         /// <summary>
@@ -513,6 +512,9 @@ namespace NX.Engine.Hive
                 // Every minute
                 c_Status.WaitFor(c_Wait);
 
+                // See if first time
+                bool bFirst = !this.HasSetup;
+
                 // Reload
                 this.Roster.Refresh();
 
@@ -520,11 +522,8 @@ namespace NX.Engine.Hive
                 c_Wait = 5.MinutesAsTimeSpan();
 
                 // If first time, do the setup
-                if (!this.HasSetup)
+                if (bFirst)
                 {
-                    // Only once
-                    this.HasSetup = true;
-
                     // Get the uses list
                     ItemsClass c_Uses = new ItemsClass(this.Parent.GetAsJArray("uses"));
                     // Loop thru
@@ -836,9 +835,8 @@ namespace NX.Engine.Hive
         public void AssureDNACount(string task, int min = 1, int max = int.MaxValue, StoreClass data = null)
         {
             // Must have a task
-            if (task.HasValue())
+            if (task.HasValue() && this.HasSetup)
             {
-                //
                 // Get a list of the containers
                 List<BeeClass> c_Bees = this.Roster.GetBeesForDNA(task);
                 // Get the count
@@ -871,6 +869,7 @@ namespace NX.Engine.Hive
                 {
                     // Get the first
                     BeeClass c_Bee = c_Bees.Last();
+
                     // Remove from list
                     c_Bees.Remove(c_Bee);
                     // And kill it
@@ -885,8 +884,13 @@ namespace NX.Engine.Hive
                 {
                     // Make
                     BeeClass c_Bee = this.MakeBee(task, data);
-                    // And to system
-                    this.Roster.Add(c_Bee);
+                    // Check
+                    if (c_Bee != null)
+                    {
+                        // And to system
+                        this.Roster.Add(c_Bee);
+                    }
+
                     // Update
                     iCount++;
                     iDiff++;
@@ -902,7 +906,7 @@ namespace NX.Engine.Hive
                     // Plural
                     string sS = iDiff != 1 ? "s" : "";
                     // Tell user
-                    this.Parent.LogInfo("{0} {1} {2} bee{3}", sKind, iDiff, task, sS);
+                    this.Parent.LogInfo("{0} {1} {2} bee{3}".FormatString(sKind, iDiff, task, sS));
                 }
             }
         }
@@ -919,15 +923,23 @@ namespace NX.Engine.Hive
             List<BeeClass> c_Bees = this.Roster.GetBeesForDNA(task);
 
             // Loop thru
-            foreach(BeeClass c_Bee in c_Bees)
+            foreach (BeeClass c_Bee in c_Bees)
             {
-                // Get DOckerIF
-                DockerIFClass c_IF = c_Bee.Field.DockerIF;
-                // Any?
-                if(c_IF != null)
+                // Check for DNA
+                if (!task.IsSameValue(c_Bee.CV.DNA))
                 {
-                    // Recycle
-                    c_IF.RestartContainer(c_Bee.DockerID, c_Bee.Id, task);
+                    this.Parent.LogError("Saw {0} while trying to restart {1} - {2}".FormatString(c_Bee.CV.DNA, task, c_Bee.FullID));
+                }
+                else
+                {
+                    // Get DOckerIF
+                    DockerIFClass c_IF = c_Bee.Field.DockerIF;
+                    // Any?
+                    if (c_IF != null)
+                    {
+                        // Recycle
+                        c_IF.RestartContainer(c_Bee.DockerID, c_Bee.Id, task);
+                    }
                 }
             }
         }
