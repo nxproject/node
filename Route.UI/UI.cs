@@ -32,6 +32,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 using HtmlAgilityPack;
 using Jint;
@@ -51,7 +52,7 @@ namespace Route.UI
     /// </summary>
     public class UI : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.ANY, "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Make the folder path
@@ -88,6 +89,24 @@ namespace Route.UI
                     {
                         // Read the page
                         string sPage = c_Reader.ReadToEnd();
+
+                        // Handlebar
+                        MatchCollection c_HB = Regex.Matches(sPage, @"\x7B\x7B[^\x7D]*\x7D\x7D");
+                        // Loop thru
+                        foreach(Match c_HBM in c_HB)
+                        {
+                            // Get code
+                            string sAll = c_HBM.Value;
+                            // Process
+                            HTMLClass c_HTML = c_Engine.Execute(sAll.Substring(2, sAll.Length - 4)).GetValue("html").ToObject() as HTMLClass;
+                            // Any?
+                            if (c_HTML != null)
+                            {
+                                // Replace
+                                sPage = sPage.Replace(sAll, c_HTML.ToString());
+                            }
+                        }
+
                         // Build the parser
                         HtmlDocument c_Page = new HtmlDocument();
                         //Parse

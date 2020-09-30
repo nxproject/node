@@ -301,7 +301,10 @@ namespace NX.Shared
             int xAns = 0;
             try
             {
-                bAns = System.Int32.TryParse(value.ToString(), out xAns);
+                if (value != null)
+                {
+                    bAns = System.Int32.TryParse(value.ToString(), out xAns);
+                }
             }
             catch { }
 
@@ -728,6 +731,28 @@ namespace NX.Shared
             catch { }
 
             return c_Ans;
+        }
+
+        public static string ToDBBoolean(this bool value)
+        {
+            return value ? "y" : "n";
+        }
+
+        public static bool FromDBBoolean(this string value)
+        {
+            return value.FromDBBoolean(false);
+        }
+
+        public static bool FromDBBoolean(this string value, bool defvalue)
+        {
+            bool bAns = defvalue;
+
+            if(value.HasValue())
+            {
+                bAns = value.IsSameValue("y");
+            }
+
+            return bAns;
         }
 
         public static byte[] ToBytes(this string value)

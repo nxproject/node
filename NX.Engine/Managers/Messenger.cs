@@ -246,9 +246,6 @@ namespace NX.Engine
                 this.EnvID = sync.Parent.ID;
                 this.From = this.EnvID;
                 this.MClass = mclass;
-
-                //
-                this.Values = new JObject();
             }
             #endregion
 
@@ -276,7 +273,7 @@ namespace NX.Engine
             /// The message
             /// 
             /// </summary>
-            private JObject Values { get; set; }
+            private JObject Values { get; set; } = new JObject();
 
             /// <summary>
             /// 

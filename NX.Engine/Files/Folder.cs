@@ -52,6 +52,13 @@ namespace NX.Engine.Files
         }
         #endregion
 
+        #region Indexer
+        public DocumentClass this[string name]
+        {
+            get { return new DocumentClass(this.Parent, this.Path.CombinePath(name)); }
+        }
+        #endregion
+
         #region Properties
         /// <summary>
         /// 
@@ -59,6 +66,13 @@ namespace NX.Engine.Files
         /// 
         /// </summary>
         public string Path { get; private set; }
+
+        /// <summary>
+        /// 
+        /// Returns the folder name only
+        /// 
+        /// </summary>
+        public string Name {  get { return this.Path.GetFileNameFromPath(); } }
 
         /// <summary>
         /// 
@@ -181,6 +195,26 @@ namespace NX.Engine.Files
                 // Physical
                 this.Location.AssurePath();
             }
+        }
+
+        /// <summary>
+        /// 
+        /// Returns a sub folder (if any)
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public FolderClass SubFolder(string path)
+        {
+            // Assume same
+            FolderClass c_Ans = this;
+            // Do we have a value?
+            if (path.HasValue())
+            {
+                c_Ans = new FolderClass(this.Parent, this.Path.CombinePath(path));
+            }
+
+            return c_Ans;
         }
         #endregion
 

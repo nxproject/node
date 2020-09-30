@@ -132,8 +132,14 @@ namespace NX.Engine.Hive
 
                 foreach (var c_Entry in c_List)
                 {
+                    string sTagName = "";
+
+                    if(c_Entry.RepoTags.Count > 0)
+                    {
+                        sTagName = c_Entry.RepoTags[0];
+                    }
                     // Does the repo tag match?
-                    bAns = sName.IsSameValue(c_Entry.RepoTags[0]);
+                    bAns = sName.IsSameValue(sTagName);
                     // Only one
                     if (bAns) break;
                 }
@@ -177,19 +183,24 @@ namespace NX.Engine.Hive
                     // Must match 2
                     int iMatched = 2;
 
-                    // Loop thru
-                    foreach (var c_KV in c_Entry.Labels)
+                    // Do we have any?
+                    if (c_Entry.Labels != null)
                     {
-                        if ((c_KV.Value.IsSameValue(sValue1) && c_KV.Key.IsSameValue(sKey1) ||
-                            c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2)))
+                        // Loop thru
+                        foreach (var c_KV in c_Entry.Labels)
                         {
-                            iMatched--;
-                        }
-                        if (iMatched <= 0)
-                        {
-                            break;
+                            if ((c_KV.Value.IsSameValue(sValue1) && c_KV.Key.IsSameValue(sKey1) ||
+                                c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2)))
+                            {
+                                iMatched--;
+                            }
+                            if (iMatched <= 0)
+                            {
+                                break;
+                            }
                         }
                     }
+
                     if (iMatched <= 0) c_Ans.Add(c_Entry.ID);
                 }
             }
@@ -273,7 +284,7 @@ namespace NX.Engine.Hive
 
                 // Using a stream so we can handle bigly
                 using (FileStream c_Stream = new FileStream(sFile, FileMode.Open))
-                {
+                {                    
                     using (Stream c_Result = this.Client.Images.BuildImageFromDockerfileAsync(c_Stream, new ImageBuildParameters()
                     {
                         Dockerfile = "Dockerfile",
@@ -809,7 +820,7 @@ namespace NX.Engine.Hive
             this.Parse(qname);
         }
 
-        private DockerIFNameClass(DockerIFNameClass name, string newname = null)
+        private DockerIFNameClass(DockerIFNameClass name, string newname = null, string version = null)
         {
             //
             this.Repo = name.Repo;
