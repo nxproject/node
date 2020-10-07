@@ -23,72 +23,49 @@
 ///--------------------------------------------------------------------------------
 
 using System;
-using Newtonsoft.Json.Linq;
-using NX.Shared;
+using System.Collections.Generic;
 
-namespace Proc.SocketIO
+namespace NX.Shared
 {
-    /// <summary>
-    /// 
-    /// A SOcket.IO message
-    /// 
-    /// </summary>
-    public class MessageClass : ChildOfClass<EventClass>
+    public class ItemDefinitionClass
     {
         #region Constructor
-        internal MessageClass(EventClass evt)
-            : base(evt)
+        public ItemDefinitionClass()
         {
             //
-            this.Payload = new JObject();
-        }
-
-        internal MessageClass(EventClass evt, string payload)
-            : base(evt)
-        {
-            //
-            this.Payload = payload.ToJObject();
-        }
-        #endregion
-
-        #region Indexer
-        public string this[string key]
-        {
-            get { return this.Payload.Get(key); }
-            set { this.Payload.Set(key, value); }
+            this.OptionDelimiters.Add(":");
         }
         #endregion
 
         #region Properties
         /// <summary>
         /// 
-        /// The data in the message
+        /// Is the value the priority in the item?
         /// 
         /// </summary>
-        public JObject Payload { get; private set; } = new JObject();
-        #endregion
+        public bool ValueIsPriority { get; set; } = false;
 
-        #region Methods
         /// <summary>
         /// 
-        /// Sends message
+        /// The delimiter between items
         /// 
         /// </summary>
-        /// <returns></returns>
-        public bool Send()
-        {
-            // Assume failure
-            bool bAns = false;
+        public string ItemDelimiter { get; set; } = ";";
 
-            // Chec
-            if (this.Parent.Parent.Client != null && this.Parent.Parent.Client.Connected)
-            {
-                // Send
-                this.Parent.Parent.Client.EmitAsync(this.Parent.Name, this.Payload.ToSimpleString());
-            }
+        /// <summary>
+        /// 
+        /// The delimiter between the key and value
+        /// 
+        /// </summary>
+        public string KeyValueDelimiter { get; set; } = "=";
 
-            return bAns;
-        }
+        /// <summary>
+        /// 
+        /// What are the delimiters for the modifiers?
+        /// 
+        /// </summary>
+        public List<string> OptionDelimiters { get; set; } = new List<string>();
         #endregion
+
     }
 }

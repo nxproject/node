@@ -22,73 +22,60 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-using System;
-using Newtonsoft.Json.Linq;
+/// Packet Manager Requirements
+/// 
+/// Install-Package Docker.DotNet -Version 3.125.2
+/// 
+
+using System.Collections.Generic;
+
+using Docker.DotNet.Models;
+
+using NX.Engine;
+using NX.Engine.Files;
+using NX.Engine.Hive;
 using NX.Shared;
 
-namespace Proc.SocketIO
+namespace Route.Docker
 {
     /// <summary>
     /// 
-    /// A SOcket.IO message
+    /// Restarts a container
+    /// 
+    /// Uses from passed store:
+    /// 
+    /// id        - The container ID
     /// 
     /// </summary>
-    public class MessageClass : ChildOfClass<EventClass>
+    public class RecycleContainer : RouteClass
     {
-        #region Constructor
-        internal MessageClass(EventClass evt)
-            : base(evt)
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), "recyclectx" };
+        public override void Call(HTTPCallClass call, StoreClass store)
         {
-            //
-            this.Payload = new JObject();
-        }
+            // Get the container id
+            string sID = store["ID"];
 
-        internal MessageClass(EventClass evt, string payload)
-            : base(evt)
-        {
-            //
-            this.Payload = payload.ToJObject();
-        }
-        #endregion
-
-        #region Indexer
-        public string this[string key]
-        {
-            get { return this.Payload.Get(key); }
-            set { this.Payload.Set(key, value); }
-        }
-        #endregion
-
-        #region Properties
-        /// <summary>
-        /// 
-        /// The data in the message
-        /// 
-        /// </summary>
-        public JObject Payload { get; private set; } = new JObject();
-        #endregion
-
-        #region Methods
-        /// <summary>
-        /// 
-        /// Sends message
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public bool Send()
-        {
-            // Assume failure
-            bool bAns = false;
-
-            // Chec
-            if (this.Parent.Parent.Client != null && this.Parent.Parent.Client.Connected)
+            // Loop thru fields
+            foreach(FieldClass c_Field in call.Env.Hive.Fields.Values)
             {
-                // Send
-                this.Parent.Parent.Client.EmitAsync(this.Parent.Name, this.Payload.ToSimpleString());
+                //
+                DockerIFClass c_Client = c_Field.DockerIF;
+                if(c_Client != null)
+                {
+                    foreach(ContainerListResponse c_Ctx in c_Client.ListContainers())
+                    {
+                        //
+                        if(sID.IsSameValue(c_Ctx.ID))
+                        {
+                            c_Client.RestartContainer(c_Ctx.ID);
+                        }
+                    }
+                }
+                
             }
 
-            return bAns;
+            //
+            call.RespondWithOK();
         }
-        #endregion
     }
 }

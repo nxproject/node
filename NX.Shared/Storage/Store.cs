@@ -339,7 +339,10 @@ namespace NX.Shared
 
                 case ParseTypes.URL:
                     // An URL is & delimited
-                    ItemsClass c_Items = new ItemsClass(value, '&');
+                    ItemsClass c_Items = new ItemsClass(value, new ItemDefinitionClass()
+                    {
+                        ItemDelimiter = "&"
+                    });
                     foreach (ItemClass c_Item in c_Items)
                     {
                         // Store

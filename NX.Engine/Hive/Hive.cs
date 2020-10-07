@@ -259,8 +259,11 @@ namespace NX.Engine.Hive
             JArray c_External = this.Parent.GetAsJArray("external");
 
             // Parse
-            ItemsClass c_Parsed = new ItemsClass(c_External, true);
-            // Anu?
+            ItemsClass c_Parsed = new ItemsClass(c_External, new ItemDefinitionClass()
+            {
+                ValueIsPriority = true
+            });
+            // Any?
             if (c_Parsed.Count > 0)
             {
                 // Make a virtual field
@@ -290,15 +293,19 @@ namespace NX.Engine.Hive
             }
 
             // Parse
-            c_Parsed = new ItemsClass(c_Locs, true);
+            c_Parsed = new ItemsClass(c_Locs, new ItemDefinitionClass()
+            {
+                ValueIsPriority = true
+            });
 
             // And create each one
             foreach (ItemClass c_Loc in c_Parsed)
             {
                 // Do we have an option?
-                if (c_Loc.ModifierCount > 0)
+                string sOption = c_Loc.Option;
+                if (sOption.HasValue())
                 {
-                    c_Loc.Value += ":" + c_Loc.Modifiers[0];
+                    c_Loc.Value += ":" + sOption;
                 }
 
                 // Make room
@@ -1002,9 +1009,15 @@ namespace NX.Engine.Hive
                 }
 
                 // Get the fields available
-                ItemsClass c_Allowed = new ItemsClass(new List<string>(this.Fields.Keys), true);
+                ItemsClass c_Allowed = new ItemsClass(new List<string>(this.Fields.Keys), new ItemDefinitionClass()
+                {
+                    ValueIsPriority = true
+                });
                 // Get the fields wanted
-                ItemsClass c_Wanted = new ItemsClass(this.Parent.GetAsJArray("field_" + c_Def.DNA), true);
+                ItemsClass c_Wanted = new ItemsClass(this.Parent.GetAsJArray("field_" + c_Def.DNA), new ItemDefinitionClass()
+                {
+                    ValueIsPriority = true
+                });
                 // Only keep allowed
                 c_Wanted = c_Wanted.In(c_Allowed);
                 // Any?

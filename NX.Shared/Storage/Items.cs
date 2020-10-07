@@ -38,40 +38,35 @@ namespace NX.Shared
     /// </summary>
     public class ItemsClass : List<ItemClass>, IDisposable
     {
-        #region Constants
-        private const char ItemDelimiter = ';';
-        #endregion
-
         #region Constructor
         public ItemsClass()
         { }
 
-        public ItemsClass(string value, char delim = '\0', bool valuepriority = false)
+        public ItemsClass(string value, ItemDefinitionClass def = null)
         {
             //
-            this.ValueIsPriority = valuepriority;
+            this.Definitions = def;
+            if (this.Definitions == null) this.Definitions = new ItemDefinitionClass();
 
             // Assure
             value = value.IfEmpty().RemoveQuotes();
 
-            if (delim == '\0') delim = ItemDelimiter;
-            this.Delimiter = delim;
-
             // Split
-            string[] asItems = value.Split(this.Delimiter, StringSplitOptions.RemoveEmptyEntries);
+            string[] asItems = value.Split(this.Definitions.ItemDelimiter, StringSplitOptions.RemoveEmptyEntries);
 
             // Loop thru
             foreach (string sItem in asItems)
             {
                 // Add
-                this.Add(new ItemClass(sItem, valuepriority));
+                this.Add(new ItemClass(this.Definitions, sItem));
             }
         }
 
-        public ItemsClass(JArray values, bool valuepriority = false)
+        public ItemsClass(JArray values, ItemDefinitionClass def = null)
         {
             //
-            this.ValueIsPriority = valuepriority;
+            this.Definitions = def;
+            if (this.Definitions == null) this.Definitions = new ItemDefinitionClass();
 
             // Must have value
             if (values != null)
@@ -80,15 +75,16 @@ namespace NX.Shared
                 foreach (string sItem in values.ToList())
                 {
                     // Add
-                    this.Add(new ItemClass(sItem, this.ValueIsPriority));
+                    this.Add(new ItemClass(this.Definitions, sItem));
                 }
             }
         }
 
-        public ItemsClass(List<string> values, bool valuepriority = false)
+        public ItemsClass(List<string> values, ItemDefinitionClass def = null)
         {
             //
-            this.ValueIsPriority = valuepriority;
+            this.Definitions = def;
+            if (this.Definitions == null) this.Definitions = new ItemDefinitionClass();
 
             // Must have value
             if (values != null)
@@ -97,7 +93,7 @@ namespace NX.Shared
                 foreach (string sItem in values)
                 {
                     // Add
-                    this.Add(new ItemClass(sItem, this.ValueIsPriority));
+                    this.Add(new ItemClass(this.Definitions, sItem));
                 }
             }
         }
@@ -116,17 +112,10 @@ namespace NX.Shared
         #region Properties
         /// <summary>
         /// 
-        /// Delimiter between items
+        /// The definitions to be used
         /// 
         /// </summary>
-        public char Delimiter { get; set; }
-
-        /// <summary>
-        /// 
-        /// Are values given priority?
-        /// 
-        /// </summary>
-        internal bool ValueIsPriority { get; set; }
+        public ItemDefinitionClass Definitions { get; private set; }
         #endregion
 
         #region Methods
@@ -319,7 +308,7 @@ namespace NX.Shared
 
             foreach (ItemClass c_Item in this)
             {
-                sAns += this.Delimiter + c_Item.ToString().RemoveQuotes();
+                sAns += this.Definitions.ItemDelimiter + c_Item.ToString().RemoveQuotes();
             }
 
             if (sAns.HasValue())

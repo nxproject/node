@@ -66,6 +66,14 @@ namespace NX.Shared
         #endregion
 
         #region Support
+        public static string Version(this string suffix)
+        {
+            string sAns = "2020.10.07";
+            if (suffix.HasValue()) sAns += "." + suffix;
+
+            return sAns;
+        }
+
         public static bool HasValue(this string value)
         {
             return !string.IsNullOrEmpty(value);
@@ -1652,7 +1660,7 @@ namespace NX.Shared
         public static JObject Clone(this JObject value)
         {
             if (value != null)
-                value = value.ToString().ToJObject();
+                value = value.ToSimpleString().ToJObject();
 
             return value;
         }

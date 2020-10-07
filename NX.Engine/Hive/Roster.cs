@@ -808,16 +808,15 @@ namespace NX.Engine.Hive
                         if (c_Item.Priority.ToInteger(-1) != -1)
                         {
                             // 
-                            if (c_Item.Modifiers == null) c_Item.Modifiers = new List<string>();
-                            c_Item.Modifiers.Add(c_Item.Priority);
+                            c_Item.AddOption(c_Item.Priority);
                             c_Item.Priority = "";
                         }
 
                         // DO we have any options?
-                        if (c_Item.ModifierCount > 0)
+                        if (c_Item.Option.HasValue())
                         {
                             // Use first
-                            iCount = c_Item.Modifiers[0].ToInteger(0);
+                            iCount = c_Item.Option.ToInteger(0);
                         }
 
                         // Add

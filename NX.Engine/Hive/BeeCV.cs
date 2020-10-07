@@ -478,16 +478,17 @@ namespace NX.Engine.Hive
                 ItemClass c_Info = new ItemClass(this.Values.ID);
 
                 // Must have modifier (port)
-                if (c_Info.ModifierCount > 0)
+                string sPort = c_Info.Option;
+                if (sPort.HasValue())
                 {
                     // The key portion is the DNA
                     this.DNA = c_Info.Key;
 
                     // Make a tickle area with the rest
                     TickleAreaClass c_Tickle = new TickleAreaClass(this,
-                                                                c_Info.Modifiers[0],
-                                                                c_Info.Modifiers[0],
-                                                                c_Info.Value + ":" + c_Info.Modifiers[0]);
+                                                                sPort,
+                                                                sPort,
+                                                                c_Info.Value + ":" + sPort);
 
                     // Add
                     this.AddTickleArea(c_Tickle);

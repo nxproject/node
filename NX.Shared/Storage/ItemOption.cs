@@ -23,71 +23,31 @@
 ///--------------------------------------------------------------------------------
 
 using System;
-using Newtonsoft.Json.Linq;
-using NX.Shared;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace Proc.SocketIO
+namespace NX.Shared
 {
-    /// <summary>
-    /// 
-    /// A SOcket.IO message
-    /// 
-    /// </summary>
-    public class MessageClass : ChildOfClass<EventClass>
+    public class ItemOptionClass 
     {
         #region Constructor
-        internal MessageClass(EventClass evt)
-            : base(evt)
+        public ItemOptionClass(string option, string value)
         {
             //
-            this.Payload = new JObject();
-        }
-
-        internal MessageClass(EventClass evt, string payload)
-            : base(evt)
-        {
-            //
-            this.Payload = payload.ToJObject();
-        }
-        #endregion
-
-        #region Indexer
-        public string this[string key]
-        {
-            get { return this.Payload.Get(key); }
-            set { this.Payload.Set(key, value); }
+            this.Option = option;
+            this.Value = value;
         }
         #endregion
 
         #region Properties
-        /// <summary>
-        /// 
-        /// The data in the message
-        /// 
-        /// </summary>
-        public JObject Payload { get; private set; } = new JObject();
+        public string Option { get; set; }
+        public string Value { get; set; }
         #endregion
 
         #region Methods
-        /// <summary>
-        /// 
-        /// Sends message
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public bool Send()
+        public override string ToString()
         {
-            // Assume failure
-            bool bAns = false;
-
-            // Chec
-            if (this.Parent.Parent.Client != null && this.Parent.Parent.Client.Connected)
-            {
-                // Send
-                this.Parent.Parent.Client.EmitAsync(this.Parent.Name, this.Payload.ToSimpleString());
-            }
-
-            return bAns;
+            return this.Option + this.Value;
         }
         #endregion
     }

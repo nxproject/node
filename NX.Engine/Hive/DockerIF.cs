@@ -30,11 +30,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Text;
+
 using Docker.DotNet;
 using Docker.DotNet.Models;
+
 using ICSharpCode.SharpZipLib.Tar;
 
 using NX.Shared;
@@ -414,7 +414,7 @@ namespace NX.Engine.Hive
                 // Assure
                 sOut.AssurePath();
                 // Add file name
-                sOut = sOut.CombinePath("image.tar").AdjustPathToOS();
+                sOut = sOut.CombinePath("I".GUID() + ".tar").AdjustPathToOS();
 
                 // Make the stream
                 FileStream c_Wkg = new FileStream(sOut, FileMode.CreateNew);
@@ -612,12 +612,15 @@ namespace NX.Engine.Hive
         /// 
         /// </summary>
         /// <param name="id">The container id</param>
-        public void RestartContainer(string id, string name, string task)
+        public void RestartContainer(string id, string name = null, string task = null)
         {
             // Protect
             try
             {
-                this.Parent.Parent.Parent.LogVerbose("RESTARTING {0}:{1}".FormatString(task, name));
+                if (name.HasValue())
+                {
+                    this.Parent.Parent.Parent.LogVerbose("RESTARTING {0}:{1}".FormatString(task, name));
+                }
 
                 // Stop it
                 this.Client.Containers.RestartContainerAsync(id,

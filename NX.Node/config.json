@@ -17,7 +17,7 @@
 
   // Profile
 
-  "uses": [ "Proc.SocketIO", "Proc.Office" ], // To give the system some flavor
+  "uses": [ "Proc.SocketIO", "Proc.Office", "Route.Docker" ], // To give the system some flavor
 
   // Use Percona
 
@@ -45,8 +45,8 @@
   "nginx_debug": "n",
 
   "verbose": "n", // Tell me what is going on
-  "make_genome": "n", // Make the genome (reload image) ("y" when ready to release)
-  "make_bee": "n", // Make a bee *"y" when ready to test in a container)
+  "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
+  "make_bee": "y", // Make a bee *"y" when ready to test in a container)
   "code_folder": [ "C:\\Candid Concepts\\NX\\Office" ] // Folders where extra code is located"
 
 }

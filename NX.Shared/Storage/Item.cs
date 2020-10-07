@@ -24,6 +24,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NX.Shared
 {
@@ -33,37 +34,25 @@ namespace NX.Shared
     /// format of:  key[=value][:opt1[:opt2]...]
     /// 
     /// </summary>
-    public class ItemClass : IDisposable
+    public class ItemClass : ChildOfClass<ItemDefinitionClass>
     {
-        #region Constants
-        private const string KVDelimiter = "=";
-        private const string ModifierDelimiter = ":";
-        #endregion
-
         #region Constructor
-        public ItemClass()
+        public ItemClass(string value)
+            : this(new ItemDefinitionClass(), value)
         { }
 
-        public ItemClass(string value, bool valuepriority = false)
-        {
-            //
-            this.ValueIsPriority = valuepriority;
+        public ItemClass(ItemDefinitionClass defs)
+            : base(defs)
+        { }
 
+        public ItemClass(ItemDefinitionClass defs, string value)
+            : this(defs)
+        {
             // Assure
             value = value.IfEmpty().RemoveQuotes();
 
-            // Options?
-            int iPos = value.IndexOf(ModifierDelimiter);
-            if (iPos != -1)
-            {
-                // Split
-                this.Modifiers = new List<string>(value.Substring(iPos + 1).Split(ModifierDelimiter, StringSplitOptions.RemoveEmptyEntries));
-                // Remove
-                value = value.Substring(0, iPos);
-            }
-
             // Value?
-            iPos = value.IndexOf(KVDelimiter);
+            int iPos = value.IndexOf(this.Parent.KeyValueDelimiter);
             if (iPos != -1)
             {
                 // Split
@@ -72,14 +61,64 @@ namespace NX.Shared
                 value = value.Substring(0, iPos);
             }
 
+            // Modifiers?
+            value = this.ParseOptions(value);
+
+            // Set
             this.Key = value;
 
             // Empty value?
-            if(!this.Value.HasValue() && this.ValueIsPriority)
+            if (!this.Value.HasValue() && this.Parent.ValueIsPriority)
             {
                 this.Value = this.Key;
                 this.Key = "";
             }
+        }
+
+        /// <summary>
+        /// 
+        /// Parses for modifiers
+        /// 
+        /// </summary>
+        /// <param name="value">The value to be parsed</param>
+        /// <returns>The value without modifiers</returns>
+        private string ParseOptions(string value)
+        {
+            // Assume none
+            int iIndex = -1;
+            string sDelim = null;
+
+            // Until no more
+            do
+            {
+                // Loop
+                foreach (string sPoss in this.Parent.OptionDelimiters)
+                {
+                    // Do we find?
+                    int iPoss = value.LastIndexOf(sPoss);
+                    // After the one already found?
+                    if (iPoss > iIndex)
+                    {
+                        // Save
+                        iIndex = iPoss;
+                        sDelim = sPoss;
+                    }
+                }
+
+                // Found one?
+                if (iIndex > -1)
+                {
+                    // Add it
+                    this.AddOption(value.Substring(iIndex + sDelim.Length), sDelim);
+                    // Remove
+                    value = value.Substring(0, iIndex);
+                }
+
+            } while (iIndex != -1);
+
+            // 
+
+            return value;
         }
         #endregion
 
@@ -113,14 +152,30 @@ namespace NX.Shared
         /// The values after : and delimited by :
         /// 
         /// </summary>
-        public List<string> Modifiers { get; set; }
+        public List<ItemOptionClass> Options { get; set; } = new List<ItemOptionClass>();
 
         /// <summary>
         /// 
-        /// Are values given priority?
+        /// A shortcut for the times where only one option is allowed
         /// 
         /// </summary>
-        internal bool ValueIsPriority { get; set; }
+        public string Option
+        {
+            get
+            {
+                // Assume none
+                string sAns = null;
+
+                // Any options defined?
+                if (this.Options.Count > 0)
+                {
+                    // Get first
+                    sAns = this.Options.First().Value;
+                }
+
+                return sAns;
+            }
+        }
 
         /// <summary>
         /// 
@@ -129,10 +184,10 @@ namespace NX.Shared
         /// </summary>
         public string Priority
         {
-            get { return this.ValueIsPriority ? this.Value : this.Key; }
+            get { return this.Parent.ValueIsPriority ? this.Value : this.Key; }
             set
             {
-                if(this.ValueIsPriority)
+                if (this.Parent.ValueIsPriority)
                 {
                     this.Value = value;
                 }
@@ -145,52 +200,56 @@ namespace NX.Shared
 
         /// <summary>
         /// 
-        /// Are any options available?
+        /// User defined fields
         /// 
         /// </summary>
-        public int ModifierCount
-        {
-            get
-            {
-                // Assume none
-                int iAns = 0;
-
-                // Any?
-                if (this.Modifiers != null)
-                {
-                    // Get count
-                    iAns = this.Modifiers.Count;
-                }
-
-                return iAns;
-            }
-        }
+        public string UDF1 { get; set; }
+        public string UDF2 { get; set; }
+        public string UDF3 { get; set; }
         #endregion
 
         #region Methods
+        /// <summary>
+        /// 
+        /// Converts item to string
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             // Start with the key
             string sAns = this.Key.IfEmpty();
             // Value?
-            if (this.Value.HasValue()) sAns += KVDelimiter + this.Value;
+            if (this.Value.HasValue()) sAns += this.Parent.KeyValueDelimiter + this.Value;
             // Options?
-            if (this.Modifiers != null && this.Modifiers.Count > 0)
+            foreach (ItemOptionClass c_Option in this.Options)
             {
                 // Add
-                sAns += ModifierDelimiter + this.Modifiers.Join(ModifierDelimiter);
+                sAns += c_Option.ToString();
             }
 
             return sAns.AddQuotes();
         }
-        #endregion
-    }
 
-    public static class ExtensionsItem
-    {
-        public static ItemClass AsItem(this string value)
+        /// <summary>
+        /// 
+        /// Adds an optional value
+        /// 
+        /// </summary>
+        /// <param name="value">The value</param>
+        /// <param name="option">The option</param>
+        public void AddOption(string value, string option = null)
         {
-            return new ItemClass(value);
+            // Do we have a value?
+            if (value.HasValue())
+            {
+                // Assure option
+                option = option.IfEmpty(this.Parent.OptionDelimiters.First());
+
+                // Add
+                this.Options.Add(new ItemOptionClass(option, value));
+            }
         }
+        #endregion
     }
 }
