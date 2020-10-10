@@ -204,6 +204,9 @@ namespace NX.Shared
                 }
                 else
                 {
+                    // Assure
+                    value = value.IfEmpty();
+
                     // Is it a remove?
                     if (value.StartsWith("-"))
                     {

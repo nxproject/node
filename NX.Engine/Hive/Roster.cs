@@ -761,6 +761,11 @@ namespace NX.Engine.Hive
 
                     // Get the list of required items
                     ItemsClass c_Uses = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_uses"));
+                    // Add Traefik
+                    if(this.Parent.Parent.UseTraefik.HasValue())
+                    {
+                        c_Uses.Add(new ItemClass("Proc.Traefik"));
+                    }
                     // Loop thru
                     foreach (ItemClass c_Item in c_Uses)
                     {

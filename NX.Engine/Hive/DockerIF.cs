@@ -271,7 +271,7 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="name">The handy dandy name</param>
         /// <param name="df">The definition (Dockerfile contents)</param>
-        public void BuildImage(DockerIFNameClass name, string dir)
+        public void BuildImage(DockerIFNameClass name, string dir, string config = null)
         {
             // Make room
             string sFile = null;
@@ -280,7 +280,7 @@ namespace NX.Engine.Hive
             try
             {
                 // Make a temp file
-                sFile = this.CreateTarballForDockerfile(name, dir);
+                sFile = this.CreateTarballForDockerfile(name, dir, config);
 
                 // Using a stream so we can handle bigly
                 using (FileStream c_Stream = new FileStream(sFile, FileMode.Open))
@@ -398,7 +398,9 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="dockerfile">The Dockerfile contents</param>
         /// <returns>A byte array of the .tar file</returns>
-        private string CreateTarballForDockerfile(DockerIFNameClass name, string directory)
+        private string CreateTarballForDockerfile(DockerIFNameClass name, 
+                                                    string directory, 
+                                                    string config = null)
         {
             // Make the temp file
             string sOut = "".WorkingDirectory().CombinePath("__temp");
@@ -457,22 +459,43 @@ namespace NX.Engine.Hive
                     }
                     else
                     {
-                        using (FileStream c_Stream = File.OpenRead(sIn))
+                        // Assue normal processing
+                        bool bDo = true;
+
+                        if (sIn.GetFileNameFromPath().IsSameValue("config.json") && config.HasValue())
                         {
+                            // Convert to bytes
+                            byte[] abBuffer = config.ToBytes();
+
                             // Set the size
-                            c_Entry.Size = c_Stream.Length;
+                            c_Entry.Size = abBuffer.Length;
                             // And write entry
                             c_Tarball.PutNextEntry(c_Entry);
 
-                            //Now write the bytes of data
-                            byte[] abBuffer = new byte[32 * 1024];
-                            while (true)
-                            {
-                                int iRead = c_Stream.Read(abBuffer, 0, abBuffer.Length);
-                                if (iRead <= 0)
-                                    break;
+                            //Now write the bytes of data                            
+                            c_Tarball.Write(abBuffer, 0, abBuffer.Length);
+                        }
 
-                                c_Tarball.Write(abBuffer, 0, iRead);
+                        // Process
+                        if (bDo)
+                        {
+                            using (FileStream c_Stream = File.OpenRead(sIn))
+                            {
+                                // Set the size
+                                c_Entry.Size = c_Stream.Length;
+                                // And write entry
+                                c_Tarball.PutNextEntry(c_Entry);
+
+                                //Now write the bytes of data
+                                byte[] abBuffer = new byte[32 * 1024];
+                                while (true)
+                                {
+                                    int iRead = c_Stream.Read(abBuffer, 0, abBuffer.Length);
+                                    if (iRead <= 0)
+                                        break;
+
+                                    c_Tarball.Write(abBuffer, 0, iRead);
+                                }
                             }
                         }
                     }

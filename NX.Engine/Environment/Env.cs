@@ -51,6 +51,7 @@ namespace NX.Engine
 
         private const string KeyThreads = "http_threads";
         private const string KeyPort = "http_port";
+        private const string KeyUseTraefik = "use_traefik";
         private const string KeyConfig = "config";
         private const string KeyVerbose = "verbose";
 
@@ -177,12 +178,19 @@ namespace NX.Engine
             this[KeyDocumentFolder] = this.GetFolderPath(this.SharedFolder, KeyDocumentFolder, "files");
 
             this["wd"] = this["wd"].IfEmpty("".InContainer() ? "/etc/wd" : "".WorkingDirectory());
-            this["nginx_port"] = this["nginx_port"].IfEmpty(this.GetAsJArray("use_traefik").HasValue() ? "80" : "$80");
+            this["nginx_port"] = this["nginx_port"].IfEmpty(this.UseTraefik.HasValue() ? "80" : "$80");
             this["nosql"] = this["nosql"].IfEmpty("mongodb");
             //if (!this.GetAsJArray("field").HasValue()) this.Set("field", "".GetLocalIP() + ":2375");
 
             if (this.Process.IsSameValue("{proc}") || !this.Process.HasValue()) this.Process = "";
             this.Verbose = !!this.Verbose;
+
+            if(this.UseTraefik.HasValue())
+            {
+                this.Remove("hive_traefik");
+                this.Add("hive_traefik", this.UseTraefik);
+                this.Add("hive_traefik", "*");
+            }
 
             // Set my own ID
             if (!this.ID.HasValue()) this.ID = "".GUID();
@@ -498,6 +506,16 @@ namespace NX.Engine
 
         /// <summary>
         /// 
+        /// Resets the hive
+        /// 
+        /// </summary>
+        public void ResetHive()
+        {
+            this.IHive = null;
+        }
+
+        /// <summary>
+        /// 
         /// NginX Information
         /// 
         /// </summary>
@@ -577,6 +595,17 @@ namespace NX.Engine
         public int HTTPPort
         {
             get { return this[KeyPort].ToInteger(8086); }
+        }
+
+        /// <summary>
+        /// 
+        /// Turn traefik support on
+        /// Default: false
+        /// 
+        /// </summary>
+        public string UseTraefik
+        {
+            get { return this[KeyUseTraefik]; }
         }
 
         /// <summary>

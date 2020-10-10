@@ -253,16 +253,26 @@ namespace Proc.NginX
             //
             ItemsClass c_Bees = new ItemsClass(c_Env.GetAsJArray("nginx_bumble"));
             sBody += "Bumble bee sites".NginxComment(1, true);
+            // 
+            List<string> c_Done = new List<string>();
             // Loop thru
             foreach (ItemClass c_Bee in c_Bees)
             {
                 // Get the information
                 InformationClass c_Info = this.Parent.NginXInfo[c_Bee.Key, ServicesClass.Types.BumbleBee];
+
                 // Apply the entry
                 c_Info.Apply(c_Bee);
 
-                // Add the DNA
-                sBody += c_Info.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(c_Bee.Key));
+                // Assure only once
+                if (!c_Done.Contains(c_Info.Name.ToLower()))
+                {
+                    // Save
+                    c_Done.Add(c_Info.Name.ToLower());
+
+                    // Add the DNA
+                    sBody += c_Info.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(c_Bee.Key));
+                }
             }
 
             // 
@@ -311,23 +321,33 @@ namespace Proc.NginX
             // Open the server
             sBody += c_Field.URL.RemoveProtocol().RemovePort().NginxServerStart();
             // Set the port
-            string sPort = this.Parent.GetAsJArray("use_traefik").HasValue() ? this.Location.GetPort() : this.Parent["nginx_port"].NumOnly();
+            string sPort = this.Parent.UseTraefik.HasValue() ? this.Location.GetPort() : this.Parent["nginx_port"].NumOnly();
             sBody += sPort.NginxListen();
 
             // Do the bees
             sBody += "Bumble Bees".NginxComment(2, true);
+            //
+            c_Done = new List<string>();
             // Loop thru
             foreach (ItemClass c_Bee in c_Bees)
             {
                 // Get the information
                 InformationClass c_Info = this.Parent.NginXInfo[c_Bee.Key, ServicesClass.Types.BumbleBee];
-                // Apply the entry
-                c_Info.Apply(c_Bee);
 
-                // Add the DNA
-                sBody += c_Info.NginxLocation("",
-                    c_Info.NginxRemove(),
-                    c_Bee.Key.NginxProxyPass());
+                // Only once
+                if (!c_Done.Contains(c_Info.Name.ToLower()))
+                {
+                    // Flag
+                    c_Done.Add(c_Info.Name.ToLower());
+
+                    // Apply the entry
+                    c_Info.Apply(c_Bee);
+
+                    // Add the DNA
+                    sBody += c_Info.NginxLocation("",
+                        c_Info.NginxRemove(),
+                        c_Bee.Key.NginxProxyPass());
+                }
             }
 
             // Do the procs

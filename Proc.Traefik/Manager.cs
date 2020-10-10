@@ -46,7 +46,7 @@ namespace Proc.Traefik
             if (c_Hives.Count > 0)
             {
                 // Save the name
-                Proc.Traefik.CommandClass.TraefikHive = c_Hives[0].Priority;
+                Proc.Traefik.CommandClass.TraefikHive = c_Hives[0].Value;
             }
 
             // Are we the hive that holds the bumble bee?

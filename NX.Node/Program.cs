@@ -54,18 +54,18 @@ namespace NXNode
                 }
                 // Add parent
                 c_CodeFolders.Add(sBaseFolder.Substring(0, sBaseFolder.LastIndexOf(@"\")));
-                
+
                 // Get the working directory
                 string sWD = "".WorkingDirectory();
 
                 // Loop thru
-                foreach(string sStartFolder in c_CodeFolders)
+                foreach (string sStartFolder in c_CodeFolders)
                 {
                     // Loop thru children
-                    foreach(string sAtDir in sStartFolder.GetDirectoriesInPath())
+                    foreach (string sAtDir in sStartFolder.GetDirectoriesInPath())
                     {
                         // Skip if working directory
-                        if(!sBaseFolder.IsSameValue(sAtDir))
+                        if (!sBaseFolder.IsSameValue(sAtDir))
                         {
                             // Get the folder name
                             string sFolder = sAtDir.GetDirectoryNameFromPath();
@@ -99,7 +99,6 @@ namespace NXNode
                 if (c_Env.MakeGenome)
                 {
                     // Make
-
                     c_Env.Hive.MakeSelfIntoGenome("".WorkingDirectory());
 
                     // Kill all

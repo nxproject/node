@@ -21,7 +21,7 @@
 
   // Use Percona
 
-  "nosql": "mongodb",
+  "nosql": "perconanosql",
 
   // Queens duties
 
@@ -40,13 +40,20 @@
 
   // These are for development
 
-  "nginx_bumble": [ ], // Allow access to SocketIO
+  "nginx_bumble": [], // Allow access to SocketIO
   //"nginx_proc": [ "Chores" ], // Map Chores procs
   "nginx_debug": "n",
 
   "verbose": "n", // Tell me what is going on
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
-  "code_folder": [ "C:\\Candid Concepts\\NX\\Office" ] // Folders where extra code is located"
+  "code_folder": [ "C:\\Candid Concepts\\NX\\Office" ], // Folders where extra code is located"
+
+  // Traefik
+
+  "use_traefik":  "n",
+  "traefik_domain": "",
+  "traefik_email": "",
+  "traefik_provider": "namecheap"
 
 }

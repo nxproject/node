@@ -228,6 +228,23 @@ namespace NX.Engine.Hive
         }
         #endregion
 
+        #region Hive
+        public void Clone(string name, params string[] field)
+        {
+            // Get the config file
+            string sConfig = ("".WorkingDirectory().CombinePath("config.json")).ReadFile();
+            // Convert to JSON object
+            JObject c_Config = sConfig.ToJObject();
+            // Reset
+            c_Config.Set("hive", name);
+            // Fields
+            c_Config.Set("field", field.ToList().ToJArray());
+
+            // Create
+            this.MakeSelfIntoGenome("".WorkingDirectory(), c_Config.ToSimpleString());
+        }
+        #endregion
+
         #region Fields
         /// <summary>
         /// 
@@ -652,7 +669,7 @@ namespace NX.Engine.Hive
         /// <param name="def">The definition (Dockerfile contents)</param>
         /// <param name="Genome">Genome name</param>
         /// <param name="dir">The source directory</param>
-        public void MakeGenome(FieldClass field, string genome, string dir = null)
+        public void MakeGenome(FieldClass field, string genome, string dir = null, string config = null)
         {
             // Get client
             DockerIFClass c_Client = field.DockerIF;
@@ -693,7 +710,7 @@ namespace NX.Engine.Hive
                     if (!c_Client.CheckForImage(c_BName))
                     {
                         // Build it
-                        c_Client.BuildImage(c_BName, sDir);
+                        c_Client.BuildImage(c_BName, sDir, config);
                     }
                 }
 
@@ -710,13 +727,13 @@ namespace NX.Engine.Hive
         /// <param name="dir">The directory where the code is at</param>
         /// <param name="config">Path to config file</param>
         /// <param name="Genome"></param
-        public void MakeSelfIntoGenome(string dir)
+        public void MakeSelfIntoGenome(string dir, string config = null)
         {
             // Adjust the environment
             this.Parent.SynchObject.Set("loc", dir);
 
             // Do
-            this.MakeGenome(this.MeField, ProcessorDNAName, dir);
+            this.MakeGenome(this.MeField, ProcessorDNAName, dir, config);
         }
 
         /// <summary>

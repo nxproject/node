@@ -24,10 +24,8 @@
 
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections;
+using System.Linq;
 using System.Collections.Generic;
-using System.Security;
-using System.Text.Json.Serialization;
 
 namespace NX.Shared
 {
@@ -195,9 +193,9 @@ namespace NX.Shared
             ItemsClass c_Ans = new ItemsClass();
             // Loop thru
             foreach (ItemClass c_Item in this)
-            { 
+            {
                 // Do we have it?
-                if(values.Contains(c_Item))
+                if (values.Contains(c_Item))
                 {
                     // Add
                     c_Ans.Add(c_Item);
@@ -251,7 +249,7 @@ namespace NX.Shared
             foreach (ItemClass c_Item in this)
             {
                 // Already seen it?
-                if(!c_Done.Contains(c_Item.Priority))
+                if (!c_Done.Contains(c_Item.Priority))
                 {
                     // Add
                     c_Ans.Add(c_Item);
@@ -274,22 +272,14 @@ namespace NX.Shared
         {
             // Assume none
             ItemsClass c_Ans = new ItemsClass();
-            // Loop thru
-            foreach (ItemClass c_Item in this)
-            {
-                // Add
-                c_Ans.Add(c_Item);
-            }
+            // Add
+            c_Ans.AddRange(this);
 
             // Loop thru
             foreach (ItemsClass c_Additional in values)
             {
-                // Loop thru
-                foreach (ItemClass c_Item in c_Additional)
-            {
-                    // Add
-                    c_Ans.Add(c_Item);
-                }
+                // Add
+                c_Ans.AddRange(c_Additional);
             }
 
             return c_Ans;
@@ -317,6 +307,59 @@ namespace NX.Shared
             }
 
             return sAns;
+        }
+
+        /// <summary>
+        /// 
+        /// Pops an item from the stack
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ItemClass Pop()
+        {
+            // Assume none
+            ItemClass c_Ans = null;
+
+            // Any?
+            if (this.Count > 0)
+            {
+                // Get first
+                c_Ans = this.First();
+                // remove
+                this.RemoveAt(0);
+            }
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Pushes an item into the stack
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public ItemsClass Push(ItemClass item)
+        {
+            // Append
+            this.Add(item);
+
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// Pushes an item into the stack
+        /// 
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public ItemsClass Push(ItemsClass items)
+        {
+            // Append
+            this.AddRange(items);
+
+            return this;
         }
         #endregion
     }

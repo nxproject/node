@@ -9,17 +9,10 @@ The first hive defined is the one that will host the traefik bumble bee.
 
 You tell the system that you want to use Traefik by using:
 ```
---qd_uses Proc.TraefiK
+--use_traefik hivehname
 ```
 
-## Include all the hives
-
-As the number of hives may be dynamic, there is one more option available:
-```
---hive_traefik hivetohost --hive_traefik *
-```
-The first entry tells the system which hive will host the traefik bumble bee and the 
-second tells the system that all hives that have this entry will be part of the routing.
+where hivename is the name of the hive that will host the Traefik container,
 
 ## SSL
 

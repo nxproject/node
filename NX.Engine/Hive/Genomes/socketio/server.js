@@ -20,21 +20,21 @@ io.sockets.on('connection', (socket) => {
     // Add connection
     connections.push(socket);
     // Tell world
-    // console.log('Connection added: %s connections', connections.length);
+    //console.log('Connection added: %s connections', connections.length);
     // Setup for disconnect
     socket.on('disconnect', () => {
         // Remove connection
         connections.splice(connections.indexOf(socket), 1);
-    // Tell world
-        // console.log('Connection removed: %s connections', connections.length);
+        // Tell world
+        //console.log('Connection removed: %s connections', connections.length);
     });
 
     // Handle our message
     socket.on('nxsio', (message) => {
         // Tell world
-        // console.log('Message : ', message);
+        console.log('Message : ', message);
         // Push out
-        io.sockets.emit('nxsio', message);
+        //io.sockets.emit('nxsio', message);
     });
 });
 

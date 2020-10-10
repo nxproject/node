@@ -51,6 +51,9 @@ namespace NX.Shared
             // Assure
             value = value.IfEmpty().RemoveQuotes();
 
+            // Modifiers?
+            value = this.ParseOptions(value);
+
             // Value?
             int iPos = value.IndexOf(this.Parent.KeyValueDelimiter);
             if (iPos != -1)
@@ -60,9 +63,6 @@ namespace NX.Shared
                 // Remove
                 value = value.Substring(0, iPos);
             }
-
-            // Modifiers?
-            value = this.ParseOptions(value);
 
             // Set
             this.Key = value;
@@ -91,13 +91,17 @@ namespace NX.Shared
             // Until no more
             do
             {
+                // Reset
+                iIndex = -1;
+                sDelim = null;
+
                 // Loop
                 foreach (string sPoss in this.Parent.OptionDelimiters)
                 {
                     // Do we find?
                     int iPoss = value.LastIndexOf(sPoss);
                     // After the one already found?
-                    if (iPoss > iIndex)
+                    if (iPoss != -1 && iPoss > iIndex)
                     {
                         // Save
                         iIndex = iPoss;
@@ -245,9 +249,19 @@ namespace NX.Shared
             {
                 // Assure option
                 option = option.IfEmpty(this.Parent.OptionDelimiters.First());
-
-                // Add
-                this.Options.Add(new ItemOptionClass(option, value));
+                // Create
+                ItemOptionClass c_Option = new ItemOptionClass(option, value);
+                // None?
+                if (this.Options.Count == 0)
+                {
+                    // Add
+                    this.Options.Add(c_Option);
+                }
+                else
+                {
+                    // Insert
+                    this.Options.Insert(0, c_Option);
+                }
             }
         }
         #endregion

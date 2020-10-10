@@ -72,11 +72,11 @@ namespace Proc.SocketIO
                     this.Client.OnDisconnected += delegate (object sender, string e)
                     {
                         // Redo
-                        this.Client.ConnectAsync();
+                        this.Client.ConnectAsync().Wait();
                     };
 
                     // Connect
-                    this.Client.ConnectAsync();
+                    this.Client.ConnectAsync().Wait();
                 }
             };
 
