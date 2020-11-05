@@ -31,23 +31,18 @@ using NX.Shared;
 
 namespace NX.Engine
 {
-    public class ExtManagerClass : ChildOfClass<EnvironmentClass>
+    public class ExtManagerClass<T> : ChildOfClass<EnvironmentClass>
     {
         #region Constructor
-        public ExtManagerClass(EnvironmentClass env, Type type)
+        public ExtManagerClass(EnvironmentClass env)
             : base(env)
         {
             //
-            this.Type = type;
+            this.Type = typeof(T);
         }
         #endregion
 
         #region Properties
-        /// <summary>
-        /// 
-        /// Type of object kept
-        /// 
-        /// </summary>
         private Type Type { get; set; }
 
         /// <summary>
@@ -231,10 +226,10 @@ namespace NX.Engine
         /// </summary>
         /// <param name="name">The name of the module</param>
         /// <returns>The module (if any)</returns>
-        public object Get(string name)
+        public T Get(string name)
         {
             // Assume none
-            object c_Ans = null;
+            T c_Ans = default(T);
 
             // Is it a name we know?
             if (this.Exists(name))
@@ -248,7 +243,7 @@ namespace NX.Engine
                     try
                     {
                         // Create
-                        c_Ans = Activator.CreateInstance(c_Type);
+                        c_Ans = (T)Activator.CreateInstance(c_Type);
                     }
                     catch { }
                 }

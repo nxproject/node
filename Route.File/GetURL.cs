@@ -45,14 +45,14 @@ namespace Route.File
     /// </summary>
     public class GetURL : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, ":id" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "url", ":id" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the path to the reverse pointer file
             string sRevPath = DocumentClass.MetadataFolderRoot(call.Env).CombinePath(store["id"]).CombinePath(DocumentClass.ReversePointerFile);
 
             // Get the manager
-            ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();
+            NX.Engine.Files.ManagerClass c_Mgr = call.Env.Globals.Get<NX.Engine.Files.ManagerClass>();
 
             // Get the document
             using (DocumentClass c_Reverse = new DocumentClass(c_Mgr, sRevPath))

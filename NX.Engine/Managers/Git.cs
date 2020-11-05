@@ -33,7 +33,6 @@ using System.Collections.Generic;
 using Octokit;
 
 using NX.Shared;
-using iTextSharp.text;
 
 namespace NX.Engine
 {

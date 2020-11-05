@@ -30,7 +30,7 @@ namespace NX.Engine
     /// to a pre-defined set of functions.
     /// 
     /// </summary>
-    public class FNSClass : ExtManagerClass
+    public class FNSClass : ExtManagerClass<FNClass>
     {
         #region Constructor
         /// <summary>
@@ -40,7 +40,7 @@ namespace NX.Engine
         /// </summary>
         /// <param name="env">The current environment</param>
         public FNSClass(EnvironmentClass env)
-            : base(env, typeof(FNClass))
+            : base(env)
         { }
         #endregion
 

@@ -229,19 +229,14 @@ namespace NX.Engine.Hive
         #endregion
 
         #region Hive
-        public void Clone(string name, params string[] field)
+        public void CreateHive(string values)
         {
-            // Get the config file
-            string sConfig = ("".WorkingDirectory().CombinePath("config.json")).ReadFile();
-            // Convert to JSON object
-            JObject c_Config = sConfig.ToJObject();
-            // Reset
-            c_Config.Set("hive", name);
-            // Fields
-            c_Config.Set("field", field.ToList().ToJArray());
-
-            // Create
-            this.MakeSelfIntoGenome("".WorkingDirectory(), c_Config.ToSimpleString());
+            // Make environment
+            using (EnvironmentClass c_Env = new EnvironmentClass(values.SplitSpaces().ToArray()))
+            {
+                // Create
+                this.MakeSelfIntoGenome("".WorkingDirectory(), c_Env.ToString());
+            }
         }
         #endregion
 
@@ -306,7 +301,7 @@ namespace NX.Engine.Hive
             // If none, use ourselves
             if (c_Locs.Count == 0)
             {
-                c_Locs.Add("me=localhost");
+                c_Locs.Add("localhost");
             }
 
             // Parse
@@ -314,6 +309,17 @@ namespace NX.Engine.Hive
             {
                 ValueIsPriority = true
             });
+
+            // Counter
+            int iField = 0;
+            // Assure field names
+            foreach (ItemClass c_Loc in c_Parsed)
+            {
+                // Next field
+                iField++;
+                // 
+                c_Loc.Key = c_Loc.Key.IfEmpty(this.Name + iField.ToString());
+            }
 
             // And create each one
             foreach (ItemClass c_Loc in c_Parsed)
@@ -328,8 +334,8 @@ namespace NX.Engine.Hive
                 // Make room
                 FieldClass c_Field = null;
 
-                // Check to see if we already knw
-                foreach (FieldClass c_Present in c_Current)
+                    // Check to see if we already knw
+                    foreach (FieldClass c_Present in c_Current)
                 {
                     // Same?
                     if (c_Present.URL.IsSameValue(c_Loc.Value))
@@ -337,7 +343,7 @@ namespace NX.Engine.Hive
                         // Yes, reuse
                         c_Field = c_Present;
                         // But change the name
-                        c_Field.Name = c_Loc.Key.IfEmpty("me");
+                        c_Field.Name = c_Loc.Key;
                         // Remove from current
                         c_Current.Remove(c_Field);
                         // Only one
@@ -348,7 +354,7 @@ namespace NX.Engine.Hive
                 // Create
                 if (c_Field == null)
                 {
-                    c_Field = new FieldClass(this, c_Loc.Key.IfEmpty("me"), c_Loc.Value);
+                    c_Field = new FieldClass(this, c_Loc.Key, c_Loc.Value);
                 }
 
                 // OK to add
@@ -818,6 +824,27 @@ namespace NX.Engine.Hive
             if (iPos != -1) sAns = value.Substring(0, iPos);
 
             return sAns;
+        }
+
+        /// <summary>
+        /// 
+        /// Kill all bees
+        /// 
+        /// </summary>
+        public void KillAll()
+        {
+            //
+            this.Parent.LogInfo("Killing all bees!");
+
+            // Refresh
+            this.Roster.Refresh();
+
+            // Loop thru
+            foreach (BeeClass c_Bee in this.Bees)
+            {
+                // Kill like a zombie so no log is generated
+                c_Bee.Kill(BeeClass.KillReason.NoLogs);
+            }
         }
         #endregion
 

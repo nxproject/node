@@ -51,7 +51,7 @@ namespace NX.Engine
 
         private const string KeyThreads = "http_threads";
         private const string KeyPort = "http_port";
-        private const string KeyUseTraefik = "use_traefik";
+        private const string KeyTraefikHive = "traefik_hive";
         private const string KeyConfig = "config";
         private const string KeyVerbose = "verbose";
 
@@ -172,23 +172,24 @@ namespace NX.Engine
             this[KeyTier] = this[KeyTier].IfEmpty("latest");
             this[KeyRepoProject] = this[KeyRepoProject].IfEmpty("nxproject");
 
-            this[KeyRootFolder] = this[KeyRootFolder].IfEmpty("".WorkingDirectory());
+            this[KeyRootFolder] = this[KeyRootFolder].IfEmpty("".WorkingDirectory()).CombinePath(this[KeyHive]);
+
             this[KeySharedFolder] = this.GetFolderPath(this.RootFolder, KeySharedFolder, "shared");
             this[KeyDynamicFolder] = this.GetFolderPath(this.SharedFolder, KeyDynamicFolder, "dyn");
             this[KeyDocumentFolder] = this.GetFolderPath(this.SharedFolder, KeyDocumentFolder, "files");
 
             this["wd"] = this["wd"].IfEmpty("".InContainer() ? "/etc/wd" : "".WorkingDirectory());
-            this["nginx_port"] = this["nginx_port"].IfEmpty(this.UseTraefik.HasValue() ? "80" : "$80");
+            this["nginx_port"] = this["nginx_port"].IfEmpty(this.TraefikHive.HasValue() ? "80" : "$80");
             this["nosql"] = this["nosql"].IfEmpty("mongodb");
             //if (!this.GetAsJArray("field").HasValue()) this.Set("field", "".GetLocalIP() + ":2375");
 
             if (this.Process.IsSameValue("{proc}") || !this.Process.HasValue()) this.Process = "";
             this.Verbose = !!this.Verbose;
 
-            if(this.UseTraefik.HasValue())
+            if(this.TraefikHive.IsSameValue(this[EnvironmentClass.KeyHive]))
             {
                 this.Remove("hive_traefik");
-                this.Add("hive_traefik", this.UseTraefik);
+                this.Add("hive_traefik", this.TraefikHive);
                 this.Add("hive_traefik", "*");
             }
 
@@ -202,7 +203,7 @@ namespace NX.Engine
             // Tell user
             this.LogInfo("ID is {0} in hive {1}:{2}".FormatString(this.ID, this[KeyHive], this.Tier));
             this.LogInfo("Root folder is {0}".FormatString(this.RootFolder));
-            this.LogInfo("Documents folder is {0}".FormatString(this.DocumentFolder));
+            this.LogInfo("Documents folder is {0}".FormatString(this.DocFolder));
 
             // To handle the special keys
             this.CallbackBeforeSet = delegate (string key, object value)
@@ -599,13 +600,12 @@ namespace NX.Engine
 
         /// <summary>
         /// 
-        /// Turn traefik support on
-        /// Default: false
+        /// The hive that holds the traefik system
         /// 
         /// </summary>
-        public string UseTraefik
+        public string TraefikHive
         {
-            get { return this[KeyUseTraefik]; }
+            get { return this[KeyTraefikHive]; }
         }
 
         /// <summary>
@@ -683,7 +683,7 @@ namespace NX.Engine
         /// Default: #SharedFolder#/files
         /// 
         /// </summary>
-        public string DocumentFolder
+        public string DocFolder
         {
             get { return this[KeyDocumentFolder]; }
         }

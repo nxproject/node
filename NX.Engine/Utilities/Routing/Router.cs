@@ -41,7 +41,7 @@ namespace NX.Engine
     /// to a pre-defined set of routes.
     /// 
     /// </summary>
-    public class RouterClass : ExtManagerClass
+    public class RouterClass : ExtManagerClass<RouteClass>
     {
         #region Constants
        
@@ -56,7 +56,7 @@ namespace NX.Engine
         /// </summary>
         /// <param name="env">The current environment</param>
         public RouterClass(EnvironmentClass env)
-            : base(env, typeof(RouteClass))
+            : base(env)
         {
             // Make the root layer
             this.Routes = new RouteLayerClass(this);

@@ -56,10 +56,10 @@ namespace Route.File
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path
-            string sPath = store.PathFromEntry(call.Env.DocumentFolder, "path");
+            string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path");
 
             // Get the manager
-            ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();
+            NX.Engine.Files.ManagerClass c_Mgr = call.Env.Globals.Get<NX.Engine.Files.ManagerClass>();
 
             // And make
             using (FolderClass c_Ref = new FolderClass(c_Mgr, sPath))

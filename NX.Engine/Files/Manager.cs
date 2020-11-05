@@ -22,21 +22,12 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-/// Packet Manager Requirements
-/// 
-/// Install-Package Minio -Version 3.1.13
-/// 
-
 using System;
 using System.IO;
 using System.Collections.Generic;
 
-using Minio;
-
 using NX.Engine;
 using NX.Shared;
-using iTextSharp.text.pdf;
-using Minio.DataModel;
 
 namespace NX.Engine.Files
 {
@@ -44,6 +35,7 @@ namespace NX.Engine.Files
     {
         #region Constants
         private const string MinioPrefix = "__";
+        public const string MappedFolder = "/etc/files";
         #endregion
 
         #region Constructor
@@ -54,80 +46,17 @@ namespace NX.Engine.Files
         /// </summary>
         /// <param name="env">The current environment</param>
         public ManagerClass(EnvironmentClass env)
-            : base(env, !env["minio_disk"].ToBoolean() ? "minio" : null)
-        {
-            // Handle the event
-            this.AvailabilityChanged += delegate (bool isavailable)
-            {
-                // Kill current
-                if (this.Client != null)
-                {
-                    this.Client = null;
-                }
-
-                // Accordingly
-                if (isavailable)
-                {
-                    // O ly if non-disk
-                    if (!this.Parent["minio_disk"].ToBoolean())
-                    {
-                        // Get the settings
-                        string sAccessKey = this.Parent["minio_access"].IfEmpty(this.Parent.Hive.Name.MD5HashString());
-                        string sSecret = this.Parent["minio_secret"].IfEmpty(this.Parent.Hive.Name.MD5HashString());
-
-                        // Get the url
-                        string sURL = this.Location;
-
-                        // Must have all three
-                        if (sURL.HasValue() && sAccessKey.HasValue() && sSecret.HasValue())
-                        {
-                            // Make the client
-                            this.Client = new MinioClient(sURL, sAccessKey, sSecret);
-
-                            // Get the root directory
-                            string sRoot = env.DocumentFolder;
-                            // Get all of the files
-                            List<string> c_Files = sRoot.GetTreeInPath();
-                            // Loop thru
-                            foreach (string sFile in c_Files)
-                            {
-                                // Skip our own files
-                                if (sFile.IndexOf("_minio") == -1)
-                                {
-                                    // Make the document
-                                    using (DocumentClass c_Doc = new DocumentClass(this, sFile.Substring(sRoot.Length)))
-                                    {
-                                        // Copy from local to Minio
-                                        c_Doc.ValueAsBytes = sFile.ReadFileAsBytes();
-                                        // Delete local copy
-                                        sFile.DeleteFile();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            // Bootstap
-            this.CheckForAvailability();
-        }
+            : base(env, null)
+        { }
         #endregion
 
         #region Properties
         /// <summary>
         /// 
-        /// The Minio client
-        /// 
-        /// </summary>
-        public MinioClient Client { get; set; }
-
-        /// <summary>
-        /// 
         /// Is the manager available?
         /// 
         /// </summary>
-        public override bool IsAvailable => this.Client != null;
+        public override bool IsAvailable => true;
         #endregion
 
         #region Methods
@@ -141,6 +70,8 @@ namespace NX.Engine.Files
         {
             try
             {
+                doc.Location.GetDirectoryFromPath().AssurePath();
+
                 var input = call.Request.InputStream;
                 Byte[] boundaryBytes = call.Request.ContentEncoding.GetBytes(this.GetBoundary(call.Request.ContentType));
                 Int32 boundaryLen = boundaryBytes.Length;
@@ -218,16 +149,14 @@ namespace NX.Engine.Files
                     }
                 }
 
-                // Do we need to move to Minio?
-                if (this.IsAvailable)
-                {
-                    // Copy from local to Minio
-                    doc.ValueAsBytes = doc.Location.ReadFileAsBytes();
-                    // Delete local copy
-                    doc.Location.DeleteFile();
-                }
-
-                call.RespondWithOK();
+                //// Do we need to move to Minio?
+                //if (this.IsAvailable)
+                //{
+                //    // Copy from local to Minio
+                //    doc.ValueAsBytes = doc.Location.ReadFileAsBytes();
+                //    // Delete local copy
+                //    doc.Location.DeleteFile();
+                //}
             }
             catch (Exception e)
             {
@@ -235,6 +164,18 @@ namespace NX.Engine.Files
             }
             finally
             {
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Write, doc);
+
+                // Write to cloud
+                this.SignalChange(c_P);
+
+                // Was it handled?
+                if (c_P.Handled)
+                {
+                    // Delete so not to call cloud
+                    doc.Location.DeleteFile();
+                }
                 call.RespondWithOK();
             }
         }
@@ -261,9 +202,9 @@ namespace NX.Engine.Files
         public string Collapse(string path)
         {
             // Does it start with the base?
-            if (path.StartsWith(this.Parent.DocumentFolder))
+            if (path.StartsWith(MappedFolder))
             {
-                path = path.Substring(this.Parent.DocumentFolder.Length);
+                path = path.Substring(MappedFolder.Length);
             }
 
             return path;
@@ -278,7 +219,9 @@ namespace NX.Engine.Files
         /// <returns></returns>
         public string Expand(string path)
         {
-            return this.Parent.DocumentFolder.CombinePath(path);
+            string sAns = MappedFolder.CombinePath(path);
+
+            return sAns;
         }
         #endregion
 
@@ -297,499 +240,128 @@ namespace NX.Engine.Files
         }
         #endregion
 
-        #region MinIO
-        /// <summary>
-        /// 
-        /// The bucket that we use
-        /// 
-        /// </summary>
-        private string MinioBucket
+        #region Events
+        public void SignalChange(FileSystemParamClass param)
         {
-            get { return this.Parent["minio_bucket"].IfEmpty("nxproject"); }
+            //
+            this.FileSystemChanged?.Invoke(param);
         }
 
         /// <summary>
         /// 
-        /// Have we checked it?
+        /// The delegate for the AvailabilityChanged event
         /// 
         /// </summary>
-        private bool BucketAssured { get; set; }
+        /// <param name="isavailable">Is the bee available</param>
+        public delegate void OnFileSystemChanged(FileSystemParamClass param);
 
         /// <summary>
         /// 
-        /// Make sure that the Minio bucket exists
+        /// Defines the event to be raised when a DNA is added/deleted
         /// 
         /// </summary>
-        private void AssureBucket()
-        {
-            // Done already?
-            if (!this.BucketAssured)
-            {
-                // Do we have Minio
-                if (this.IsAvailable)
-                {
-                    // Does it exist?
-                    if (!this.Client.BucketExistsAsync(this.MinioBucket).Result)
-                    {
-                        // Create
-                        this.Client.MakeBucketAsync(this.MinioBucket).Wait();
-                    }
+        public event OnFileSystemChanged FileSystemChanged;
+        #endregion
+    }
 
-                    // And done
-                    this.BucketAssured = true;
-                }
-            }
+    public class FileSystemParamClass
+    {
+        #region Constructor
+        public FileSystemParamClass(Actions action, DocumentClass doc)
+        {
+            // 
+            this.Action = action;
+            this.Document = doc;
+            this.Path = doc.Path;
         }
+
+        public FileSystemParamClass(Actions action, FolderClass folder)
+        {
+            // 
+            this.Action = action;
+            this.Folder = folder;
+            this.Path = this.Folder.Path;
+        }
+        #endregion
+
+        #region Enums
+        public enum Actions
+        {
+            CreatePath,
+            Delete,
+            Read,
+            Write,
+            GetLastWrite,
+            GetStream,
+            SetStream,
+            ListFolders,
+            ListFiles
+        }
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// 
+        /// The action to perform
+        /// 
+        /// </summary>
+        public Actions Action { get; set; }
 
         /// <summary>
         /// 
-        /// Makes an object name
+        /// Has the call been handled?
         /// 
         /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public string MakeObjectName(string name)
-        {
-            // Assume plain
-            string sAns = name.IfEmpty();
-
-            // Not an attribute?
-            if (!sAns.StartsWith(MinioPrefix))
-            {
-                // Convert
-                sAns = name.IfEmpty().ToLower().MD5HashString();
-            }
-
-            return sAns;
-        }
+        public bool Handled { get; set; }
 
         /// <summary>
         /// 
-        /// Gets an object from Minio
+        /// The path
         /// 
         /// </summary>
-        /// <param name="name">The name of the object</param>
-        /// <returns>The object value</returns>
-        public string GetObject(string name, DocumentClass doc = null)
-        {
-            // Assume none
-            string sAns = null;
-
-            // Do we have Minio
-            if (this.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket();
-
-                // Read
-                this.Client.GetObjectAsync(this.MinioBucket, this.MakeObjectName(name), delegate (Stream stream)
-                {
-                    // Assume in-memory
-                    FileStream c_Local = null;
-                    // Do we have a file?
-                    if (doc != null)
-                    {
-                        // Open it
-                        c_Local = new FileStream(doc.Location, FileMode.Create);
-                    }
-
-                    // Make a buffer
-                    byte[] abBuffer = new byte[32 * 1024];
-
-                    // Read a chunk
-                    int iSize = stream.Read(abBuffer, 0, abBuffer.Length);
-                    // Until no more
-                    while (iSize > 0)
-                    {
-                        // In-memory
-                        if (c_Local == null)
-                        {
-                            // Append
-                            sAns += abBuffer.SubArray(0, iSize).FromBytes();
-                        }
-                        else
-                        {
-                            // Copy
-                            c_Local.Write(abBuffer, 0, iSize);
-                        }
-
-                        // Read again
-                        iSize = stream.Read(abBuffer, 0, abBuffer.Length);
-                    }
-
-                    // Close
-                    stream.Close();
-                    if (c_Local != null) c_Local.Close();
-
-                }).Wait();
-            }
-
-            return sAns;
-        }
+        public string Path { get; set; }
 
         /// <summary>
         /// 
-        /// Reads an object via a stream
+        /// The folder
         /// 
         /// </summary>
-        /// <param name="name">The name of the object</param>
-        /// <param name="cb">The callback</param>
-        public void GetStream(string name, Action<Stream> cb)
-        {
-            // Do we have Minio
-            if (this.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket();
-
-                // Read
-                this.Client.GetObjectAsync(this.MinioBucket, this.MakeObjectName(name), delegate (Stream stream)
-                {
-                    // Do the callback
-                    if (cb != null) cb(stream);
-
-                    // Close
-                    try
-                    {
-                        stream.Close();
-                    }
-                    catch { }
-
-                }).Wait();
-            }
-        }
+        public FolderClass Folder { get; set; }
 
         /// <summary>
         /// 
-        /// Writes an object to Minio
+        /// The document
         /// 
         /// </summary>
-        /// <param name="name">The name of the object</param>
-        /// <param name="value">The object value</param>
-        /// <param name="isprivate">Trues is what is being written is part of the info block</param>
-        public void SetObject(string name, string value, DocumentClass doc = null)
-        {
-            // Do we have Minio
-            if (this.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket();
-
-                // Placeholder
-                Stream c_Stream = null;
-                long lSize = 0;
-
-                // In-memory?
-                if (doc == null)
-                {
-                    //
-                    c_Stream = new MemoryStream(value.ToBytes());
-                    lSize = value.Length;
-                }
-                else
-                {
-                    // Open
-                    c_Stream = new FileStream(doc.Location, FileMode.Open);
-                    lSize = c_Stream.Length;
-                }
-
-                // Write
-                this.Client.PutObjectAsync(this.MinioBucket, this.MakeObjectName(name), c_Stream, lSize).Wait();
-
-                // to disk?
-                if (doc == null)
-                {
-                    // Dispose
-                    c_Stream.Dispose();
-                }
-                else
-                {
-                    // Close the stream
-                    c_Stream.Flush();
-                    c_Stream.Close();
-                }
-
-                // Private?
-                if (!name.StartsWith(MinioPrefix))
-                {
-                    // Now is the time that we wrote
-                    this.SetAttribute(Types.LastWrite, name, DateTime.Now.ToDBDate());
-
-                    // And make child
-                    this.SetAttribute(Types.Child, name.GetDirectoryFromPath(), name);
-                }
-            }
-        }
+        public DocumentClass Document { get; set; }
 
         /// <summary>
         /// 
-        /// Writes an object via a stream
+        /// Any datetime
         /// 
         /// </summary>
-        /// <param name="name">The name of the object</param>
-        /// <param name="stream">The stream</param>
-        public void SetStream(string name, Stream stream)
-        {
-            // Do we have Minio
-            if (this.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket();
-
-                // Write
-                this.Client.PutObjectAsync(this.MinioBucket, this.MakeObjectName(name), stream, stream.Length).Wait();
-
-                // Private?
-                if (!name.StartsWith(MinioPrefix))
-                {
-                    // Now is the time that we wrote
-                    this.SetAttribute(Types.LastWrite, name, DateTime.Now.ToDBDate());
-
-                    // And make child
-                    this.SetAttribute(Types.Child, name.GetDirectoryFromPath(), name);
-                }
-            }
-        }
+        public DateTime? On { get; set; }
 
         /// <summary>
         /// 
-        /// Deletes an object
+        /// Data stream
         /// 
         /// </summary>
-        /// <param name="name">The name of the object</param>
-        /// <param name="isprivate">Trues is what is being written is part of the info block</param>
-        public void DeleteObject(string name, bool isfolder = false)
-        {
-            // Do we have Minio
-            if (this.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket();
-
-                // Do
-                this.Client.RemoveObjectAsync(this.MinioBucket, this.MakeObjectName(name)).Wait();
-
-
-                // Get parent name
-                string sPath = name.GetParentDirectoryFromPath();
-
-                // Folder?
-                if (isfolder)
-                {
-                    // Delete link
-                    this.DeleteAttribute(Types.ChildFolder, sPath, name);
-                }
-
-                // Remove child link
-                this.DeleteAttribute(Types.Child, sPath, name);
-
-                // Get all attributes
-                List<string> c_Attr = this.ListAttributes(name);
-
-                // Loop thru
-                foreach (string sAttr in c_Attr)
-                {
-                    // Delete
-                    this.DeleteAttribute(Types.Name, sAttr);
-                }
-            }
-        }
+        public Stream Stream { get; set; }
 
         /// <summary>
         /// 
-        /// Returns true if the object exists
+        /// Data stream
         /// 
         /// </summary>
-        /// <param name="name">The name of the object</param>
-        /// <returns>True if it exists</returns>
-        public bool ObjectExists(string name)
-        {
-            // Assume not
-            bool bAns = false;
-
-            // Do we have Minio
-            if (this.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket();
-
-                // Get
-                bAns = this.Client.BucketExistsAsync(this.MakeObjectName(name)).Result;
-            }
-
-            return bAns;
-        }
+        public Action<Stream> StreamCallback { get; set; }
 
         /// <summary>
         /// 
-        /// List all object names with the given prefix
+        /// List of files or folders
         /// 
         /// </summary>
-        /// <param name="prefix">The prefix to match</param>
-        /// <returns>The list of keys</returns>
-        public List<string> ListObjects(string prefix)
-        {
-            // Assume none
-            List<string> c_Ans = new List<string>();
-
-            // Do we have Minio
-            if (this.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket();
-
-                // Do
-                var c_Result = this.Client.ListObjectsAsync(this.MinioBucket, this.MakeObjectName(prefix));
-                c_Result.Subscribe(delegate (Item item)
-                {
-                    // Add
-                    c_Ans.Add(item.Key);
-                }, delegate ()
-                {
-                });
-            }
-
-            return c_Ans;
-        }
-
-        /// <summary>
-        /// 
-        /// List all object values with the given prefix
-        /// 
-        /// </summary>
-        /// <param name="prefix">The prefix to match</param>
-        /// <returns>The list of keys</returns>
-        public List<string> ListObjectvalues(string prefix)
-        {
-            // Assume none
-            List<string> c_Ans = new List<string>();
-
-            // Do we have Minio
-            if (this.IsAvailable)
-            {
-                // Make sure bucket exixts
-                this.AssureBucket();
-
-                // Do
-                var c_Result = this.Client.ListObjectsAsync(this.MinioBucket, this.MakeObjectName(prefix));
-                c_Result.Subscribe(delegate (Item item)
-                {
-                    // Add
-                    c_Ans.Add(this.GetObject(item.Key));
-                }, delegate ()
-                {
-                });
-            }
-
-            return c_Ans;
-        }
-
-        /// <summary>
-        /// 
-        /// Creates the name for the attribute
-        /// 
-        /// </summary>
-        /// <param name="type">The type</param>
-        /// <param name="name">The name</param>
-        /// <param name="extra">The second name</param>
-        /// <returns>The FQ value</returns>
-        public string MakeAttributeName(Types type, string name, string extra = null)
-        {
-            // Assume plain
-            string sAns = name;
-
-            // Non-data
-            if (type != Types.Name)
-            {
-                // Do extra if there
-                if (extra.HasValue())
-                {
-                    extra = "_" + extra.ToLower().MD5HashString();
-                }
-
-                sAns = MinioPrefix + name.IfEmpty().ToLower().MD5HashString() + "_" + type + extra.IfEmpty();
-            }
-            else if (type == Types.All)
-            {
-                sAns = MinioPrefix + name.MD5HashString() + "_";
-            }
-
-            return sAns;
-        }
-
-        /// <summary>
-        /// 
-        /// Gets an attribute
-        /// 
-        /// </summary>
-        /// <param name="type">The type</param>
-        /// <param name="name">The name</param>
-        /// <param name="extra">The second name</param>
-        /// <returns>The value</returns>
-        public string GetAttribute(Types type, string name, string extra = null)
-        {
-            // Get
-            return this.GetObject(this.MakeAttributeName(type, name, extra));
-        }
-
-        /// <summary>
-        /// 
-        /// Sets a attribute
-        /// 
-        /// </summary>
-        /// <param name="type">The type</param>
-        /// <param name="name">The name</param>
-        /// <param name="extra">The second name</param>
-        /// <param name="value">The value to store</param>
-        public void SetAttribute(Types type, string name, string value, string extra = null)
-        {
-            // Set
-            this.SetObject(this.MakeAttributeName(type, name, extra), value);
-        }
-
-        /// <summary>
-        /// 
-        /// Deletes an attribute
-        /// 
-        /// </summary>
-        /// <param name="type">The type</param>
-        /// <param name="name">The name</param>
-        /// <param name="extra">The second name</param>
-        public void DeleteAttribute(Types type, string name, string extra = null)
-        {
-            // Delete
-            this.DeleteObject(this.MakeAttributeName(type, name, extra));
-        }
-
-        /// <summary>
-        ///  
-        /// Lists all attributes
-        ///  
-        /// </summary>
-        /// <param name="type">The type</param>
-        /// <param name="name">The name</param>
-        /// <returns>The list of keys</returns>
-        public List<string> ListAttributes(string name, bool removeprefix = true)
-        {
-            // Make the pattern
-            string sPatt = this.MakeAttributeName(Types.All, name);
-
-            // Get the list
-            List<string> c_Ans = this.ListObjects(sPatt);
-
-            // remove prefix
-            if (removeprefix)
-            {
-                // Loop thru
-                for (int i = 0; i < c_Ans.Count; i++)
-                {
-                    // Remove prefix
-                    c_Ans[i] = c_Ans[i].Substring(sPatt.Length);
-                }
-            }
-
-            return c_Ans;
-        }
+        public List<string> List { get; set; }
         #endregion
     }
 }

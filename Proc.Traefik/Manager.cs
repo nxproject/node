@@ -40,17 +40,8 @@ namespace Proc.Traefik
         public ManagerClass(EnvironmentClass env)
             : base(env, "redis")
         {
-            // Get the hives
-            ItemsClass c_Hives = new ItemsClass(this.Parent.GetAsJArray("hive_traefik"));
-            // Any?
-            if (c_Hives.Count > 0)
-            {
-                // Save the name
-                Proc.Traefik.CommandClass.TraefikHive = c_Hives[0].Value;
-            }
-
             // Are we the hive that holds the bumble bee?
-            if (this.Hive.IsSameValue(this.Parent.Hive.Name))
+            if (this.Hive.IsSameValue(this.Parent.TraefikHive))
             {
                 // Make it
                 this.BumbleBee = new BumbleBeeClass(this.Parent, "traefik");
@@ -88,7 +79,7 @@ namespace Proc.Traefik
         /// The hive that holds traefik
         /// 
         /// </summary>
-        public string Hive { get { return Proc.Traefik.CommandClass.TraefikHive; } }
+        public string Hive { get { return this.Parent.TraefikHive; } }
 
         /// <summary>
         /// 

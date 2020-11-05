@@ -9,7 +9,7 @@ The first hive defined is the one that will host the traefik bumble bee.
 
 You tell the system that you want to use Traefik by using:
 ```
---use_traefik hivehname
+--traefik_hive hivename
 ```
 
 where hivename is the name of the hive that will host the Traefik container,

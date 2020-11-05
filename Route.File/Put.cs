@@ -34,20 +34,6 @@ namespace Route.File
     /// 
     /// Uploads a file
     /// 
-    /// Uses from passed store:
-    /// 
-    /// path        - The JSON array of the part sections
-    /// 
-    /// Returns:
-    /// 
-    /// #json#      - OK/Fail.
-    ///               The object has the format of:
-    ///               {
-    ///                 "ok": "0/1"
-    ///               }
-    /// 
-    /// NOTE: The body is treated as a byte array and is the value to be stored
-    /// 
     /// </summary>
     public class Put : RouteClass
     {
@@ -55,10 +41,10 @@ namespace Route.File
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path
-            string sPath = store.PathFromEntry(call.Env.DocumentFolder, "path");
+            string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path").URLDecode();
 
             // Get the manager
-            ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();
+            NX.Engine.Files.ManagerClass c_Mgr = call.Env.Globals.Get<NX.Engine.Files.ManagerClass>();
 
             // And upload
             using (DocumentClass c_Doc = new DocumentClass(c_Mgr, sPath))

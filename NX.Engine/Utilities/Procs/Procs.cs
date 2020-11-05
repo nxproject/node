@@ -30,7 +30,7 @@ namespace NX.Engine
     /// to a pre-defined set of functions.
     /// 
     /// </summary>
-    public class ProcsClass : ExtManagerClass
+    public class ProcsClass : ExtManagerClass<ProcClass>
     {
         #region Constructor
         /// <summary>
@@ -40,7 +40,7 @@ namespace NX.Engine
         /// </summary>
         /// <param name="env">The current environment</param>
         public ProcsClass(EnvironmentClass env)
-            : base(env, typeof(ProcClass))
+            : base(env)
         { }
         #endregion
 

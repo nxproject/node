@@ -321,7 +321,7 @@ namespace Proc.NginX
             // Open the server
             sBody += c_Field.URL.RemoveProtocol().RemovePort().NginxServerStart();
             // Set the port
-            string sPort = this.Parent.UseTraefik.HasValue() ? this.Location.GetPort() : this.Parent["nginx_port"].NumOnly();
+            string sPort = this.Parent.TraefikHive.HasValue() ? this.Location.GetPort() : this.Parent["nginx_port"].NumOnly();
             sBody += sPort.NginxListen();
 
             // Do the bees

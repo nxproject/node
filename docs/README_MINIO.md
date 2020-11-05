@@ -1,6 +1,6 @@
 # NX.Node - Minio
 
-Minio is the document storage system in the NXProject.  Its use is automatic when you use
+Minio is the document cloud storage system in the NXProject.  Its use is automatic when you use
 either the **Proc.File** or **Route.File** modules.  As all AWS S3-compliant system use
 a bucket structure and not a folder structure, the NX Project file manager maps a pseudo-file
 tree into buckets.  Each folder is a bucket which holds all files in the folder as well
@@ -8,18 +8,10 @@ as pointers to sub-folders.
 
 ## Document manager
 
-You can instatiate a document manager, which is the interface to Minio by calling:
+You can instatiate a Minio bumble bee, which is the interface to Minio by calling:
 ```JavaScript
-var mgr = env.Env.Globals.Get<Proc.File.ManagerClass>();
+uses Proc.Minio
 ```
-
-## Folders
-
-The **Proc.File.FolderClass** is the equivalent of a folder.  It requires a dcument manager,
-
-## Documents
-
-The **Proc.File.DocumentClass** is the equivalent of a file.  It requires a dcument manager,
 
 ## At startup
 
@@ -52,14 +44,5 @@ The default name is **nxproject**.
 
 Note that the object names used in the bucket are encoded to support the naming conventions
 used in a disk based directory structure.
-
-## Making the system disk based
-
-By calling:
-```
---minio_disk y
-```
-you disable minio but allow the file and folders operation to continue using the **doc_folder**
-as the root folder.
 
 [Back to top](../README.md)

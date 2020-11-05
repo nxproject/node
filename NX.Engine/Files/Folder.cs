@@ -22,6 +22,13 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+/// Packet Manager Requirements
+/// 
+/// Install-Package Newtonsoft.Json -Version 12.0.3
+/// 
+
+using Newtonsoft.Json.Linq;
+
 using System;
 using System.Collections.Generic;
 
@@ -72,7 +79,7 @@ namespace NX.Engine.Files
         /// Returns the folder name only
         /// 
         /// </summary>
-        public string Name {  get { return this.Path.GetFileNameFromPath(); } }
+        public string Name { get { return this.Path.GetFileNameFromPath(); } }
 
         /// <summary>
         /// 
@@ -95,13 +102,17 @@ namespace NX.Engine.Files
             {
                 List<DocumentClass> c_Ans = new List<DocumentClass>();
 
-                // Is MinIO there?
-                if (this.Parent.IsAvailable)
-                {
-                    // Get list of children
-                    List<string> c_Files = this.Parent.ListObjectvalues(this.Parent.MakeAttributeName(ManagerClass.Types.Child, this.Path));
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.ListFiles, this);
+
+                // Get from cloud
+                this.Parent.SignalChange(c_P);
+
+                // DOne?
+                if(c_P.Handled)
+{
                     // Loop thru
-                    foreach(string sEntry in c_Files)
+                    foreach (string sEntry in c_P.List)
                     {
                         // Add
                         c_Ans.Add(new DocumentClass(this.Parent, sEntry));
@@ -131,13 +142,17 @@ namespace NX.Engine.Files
                 // Assume none
                 List<FolderClass> c_Ans = new List<FolderClass>();
 
-                // Using MinIO?
-                if (this.Parent.IsAvailable)
-                {
-                    // Get list of children
-                    List<string> c_Dirs = this.Parent.ListObjectvalues(this.Parent.MakeAttributeName(ManagerClass.Types.ChildFolder, this.Path));
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.ListFolders, this);
+
+                // Get from cloud
+                this.Parent.SignalChange(c_P);
+
+                // DOne?
+                if (c_P.Handled)
+                {                    
                     // Loop thru
-                    foreach (string sEntry in c_Dirs)
+                    foreach (string sEntry in c_P.List)
                     {
                         // Add
                         c_Ans.Add(new FolderClass(this.Parent, sEntry));
@@ -155,6 +170,49 @@ namespace NX.Engine.Files
                 return c_Ans;
             }
         }
+
+        /// <summary>
+        /// 
+        /// Get the tree of folders and files
+        /// 
+        /// </summary>
+        public JArray Tree
+        {
+            get
+            {
+                // Assume none
+                JArray c_Ans = new JArray();
+
+                // Loop thru
+                foreach (FolderClass c_Folder in this.Folders)
+                {
+                    // Make entry
+                    JObject c_Entry = new JObject();
+
+                    c_Entry.Set("name", c_Folder.Path.GetDirectoryNameFromPath());
+                    c_Entry.Set("path", c_Folder.Path);
+                    c_Entry.Set("items", c_Folder.Tree);
+
+                    // Save
+                    c_Ans.Add(c_Entry);
+                }
+
+                // Loop thru
+                foreach (DocumentClass c_File in this.Files)
+                {
+                    // Make entry
+                    JObject c_Entry = new JObject();
+
+                    c_Entry.Set("name", c_File.Path.GetFileNameFromPath());
+                    c_Entry.Set("path", c_File.Path);
+
+                    // Save
+                    c_Ans.Add(c_Entry);
+                }
+
+                return c_Ans;
+            }
+        }
         #endregion
 
         #region Methods
@@ -165,17 +223,14 @@ namespace NX.Engine.Files
         /// </summary>
         public void Delete()
         {
-            // Is MinIO there?
-            if (this.Parent.IsAvailable)
-            {
-                // Delete
-                this.Parent.DeleteObject(this.Path, true);
-            }
-            else
-            {
-                // Physical
-                this.Location.DeletePath();
-            }
+            // Make the parameter
+            FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Delete, this);
+
+            // Get from cloud
+            this.Parent.SignalChange(c_P);
+
+            // Physical
+            this.Location.DeletePath();
         }
 
         /// <summary>
@@ -184,16 +239,21 @@ namespace NX.Engine.Files
         /// </summary>
         public void AssurePath()
         {
+            // Make the parameter
+            FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.CreatePath, this);
+
+            // Get from cloud
+            this.Parent.SignalChange(c_P);
+
             // Is MinIO there?
-            if (this.Parent.IsAvailable)
+            if (!c_P.Handled)
             {
                 //
-                this.AssureFolder();
+                this.Location.AssurePath();
             }
             else
             {
-                // Physical
-                this.Location.AssurePath();
+                
             }
         }
 
@@ -215,47 +275,6 @@ namespace NX.Engine.Files
             }
 
             return c_Ans;
-        }
-        #endregion
-
-        #region MinIO
-
-        /// <summary>
-        /// 
-        /// Make sure that the folder entry
-        /// 
-        /// </summary>
-        private void AssureFolder()
-        {
-            // Do we have Minio
-            if (this.Parent.IsAvailable)
-            {
-                // Asssure
-                // Does it exist?
-                if (!this.Parent.GetAttribute(ManagerClass.Types.Path, this.Path).HasValue())
-                {
-                    // Create
-                    this.Parent.SetAttribute(ManagerClass.Types.Path, this.Path, this.Path);
-                    // And set the creation time
-                    this.Parent.SetAttribute(ManagerClass.Types.LastWrite, this.Path, DateTime.Now.ToUniversalTime().ToDBDate());
-
-                    // Get the  parent path
-                    string sPath = this.Path.GetParentDirectoryFromPath();
-                    // Anything left?
-                    if (sPath.HasValue())
-                    {
-                        // Assure
-                        using (FolderClass c_Parent = new FolderClass(this.Parent, sPath))
-                        {
-                            // make if needed
-                            c_Parent.AssureFolder();
-
-                            // Set us as a child folder
-                            this.Parent.SetAttribute(ManagerClass.Types.ChildFolder, c_Parent.Path, this.Path);
-                        }
-                    }
-                }
-            }
         }
         #endregion
     }

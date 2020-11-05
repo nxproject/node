@@ -55,7 +55,7 @@ namespace Proc.Traefik
             : base(itf)
         {
             // Cheap way to "secure" the call
-            this.Values = value.DecodeFromBase64(TraefikHive).ToJObject();
+            this.Values = value.DecodeFromBase64(this.Parent.Parent.Parent.TraefikHive).ToJObject();
         }
         #endregion
 
@@ -112,13 +112,13 @@ namespace Proc.Traefik
             // Assume no call
             JObject c_Ans = null;
 
-            if(TraefikHive.HasValue())
+            if(this.Parent.Parent.Parent.TraefikHive.HasValue())
             {
                 // Encode
-                string sMsg = this.Values.ToSimpleString().EncodeToBase64(TraefikHive);
+                string sMsg = this.Values.ToSimpleString().EncodeToBase64(this.Parent.Parent.Parent.TraefikHive);
 
                 // Mke URL
-                string sURL = (TraefikHive + "." + this.Parent.ENVDomain).URLMake().CombinePath(Do.Route);
+                string sURL = (this.Parent.Parent.Parent.TraefikHive + "." + this.Parent.ENVDomain).URLMake().CombinePath(Do.Route);
                 // Call
                 c_Ans = sURL.URLPost(sMsg.ToBytes()).FromBytes().ToJObject();
             }
@@ -128,12 +128,12 @@ namespace Proc.Traefik
         #endregion
 
         #region Statics
-        /// <summary>
-        /// 
-        /// The name of ythe hive that runs Traefik
-        /// 
-        /// </summary>
-        public static string TraefikHive { get; set; }
+        ///// <summary>
+        ///// 
+        ///// The name of ythe hive that runs Traefik
+        ///// 
+        ///// </summary>
+        //public static string TraefikHive { get; set; }
         #endregion
     }
 }

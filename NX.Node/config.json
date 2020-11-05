@@ -1,7 +1,7 @@
 {
-  "hive": "test", // The name of the hive
+  "hive": "demo", // The name of the hive
   "tier": "dev", // The tier that the hive runs in, change to latest for production
-  "xfield": [ "one=10.192.180.160:2375" ], // The list of fields
+  "field": [ "10.192.180.160:2375" ], // The list of fields
 
   "repo_project": "nxproject", // The Docker repository name
   "root_folder": "/etc/nxproject", // folder where data is kept
@@ -17,11 +17,11 @@
 
   // Profile
 
-  "uses": [ "Proc.SocketIO", "Proc.Office", "Route.Docker" ], // To give the system some flavor
+  "uses": [ "Proc.SocketIO", "Proc.Office", "Route.Docker", "Route.File" ], // To give the system some flavor
 
-  // Use Percona
+  // Use MongoDb
 
-  "nosql": "perconanosql",
+  "nosql": "mongodb",
 
   // Queens duties
 
@@ -36,7 +36,6 @@
 
   "minio_access": "myaccesskey",
   "minio_secret": "mysecretkey",
-  "minio_disk": "y", // Testing
 
   // These are for development
 
@@ -48,10 +47,11 @@
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
   "code_folder": [ "C:\\Candid Concepts\\NX\\Office" ], // Folders where extra code is located"
+  "recycle_containers": "n",  // If you change root_folder or genome, set to y
 
   // Traefik
 
-  "use_traefik":  "n",
+  "traefik_ip": "",
   "traefik_domain": "",
   "traefik_email": "",
   "traefik_provider": "namecheap"

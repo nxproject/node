@@ -34,14 +34,6 @@ namespace Route.File
     /// 
     /// Retrieves a file
     /// 
-    /// Uses from passed store:
-    /// 
-    /// path        - The JSON array of the part sections
-    /// 
-    /// Returns:
-    /// 
-    /// #file#      - The file as an attachment, if the file exists
-    /// 
     /// </summary>
     public class Get : RouteClass
     {
@@ -49,7 +41,7 @@ namespace Route.File
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path
-            string sPath = store.PathFromEntry(call.Env.DocumentFolder, "path");
+            string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path");
 
             // Get the manager
             ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();

@@ -39,11 +39,6 @@ using System.Drawing.Imaging;
 using System.Linq;
 
 using Newtonsoft.Json.Linq;
-using OpenXmlPowerTools;
-using DocumentFormat.OpenXml.Packaging;
-using iTextSharp.text;
-using iTextSharp.text.pdf;
-using iTextSharp.tool.xml;
 
 using NX.Engine;
 using NX.Shared;
@@ -64,8 +59,6 @@ namespace NX.Engine.Files
         /// 
         /// </summary>
         public const string ReversePointerFile = "orig.path";
-
-        public const string MergeMapFile = "merge.map";
         #endregion
 
         #region Constructor
@@ -79,24 +72,6 @@ namespace NX.Engine.Files
         public DocumentClass(ManagerClass mgr, FolderClass folder, string name)
             : this(mgr, folder.Path.CombinePath(name))
         { }
-        #endregion
-
-        #region IDisposable
-        /// <summary>
-        /// 
-        /// Housekeeping
-        /// 
-        /// </summary>
-        public override void Dispose()
-        {
-            if (this.IMergeMap != null)
-            {
-                this.IMergeMap.Dispose();
-                this.IMergeMap = null;
-            }
-
-            base.Dispose();
-        }
         #endregion
 
         #region Properties
@@ -159,6 +134,16 @@ namespace NX.Engine.Files
 
         /// <summary>
         /// 
+        /// Does the file exist?
+        /// 
+        /// </summary>
+        public bool Exists
+        {
+            get { return this.Location.FileExists(); }
+        }
+
+        /// <summary>
+        /// 
         /// Gets/sets the value of the file as a string
         /// 
         /// </summary>
@@ -166,35 +151,40 @@ namespace NX.Engine.Files
         {
             get
             {
-                // Assume noting
-                string sAns = null;
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Read, this);
 
-                // Is MinIO there?
-                if (this.Parent.IsAvailable)
+                // Read from cloud
+                this.Parent.SignalChange(c_P);
+
+                // Read physical
+                string sAns = this.Location.ReadFile();
+
+                // Was it handled?
+                if (c_P.Handled)
                 {
-                    // Get
-                    sAns = this.Parent.GetObject(this.Path);
-                }
-                else
-                {
-                    // Read physical
-                    sAns = this.Location.ReadFile();
+                    // Delete so not to call cloud
+                    this.Location.DeleteFile();
                 }
 
                 return sAns;
             }
             set
             {
-                // Is MinIO there?
-                if (this.Parent.IsAvailable)
+                // Write physical
+                this.Location.WriteFile(value);
+
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Write, this);
+
+                // Write to cloud
+                this.Parent.SignalChange(c_P);
+
+                // Was it handled?
+                if (c_P.Handled)
                 {
-                    // Set
-                    this.Parent.SetObject(this.Path, value);
-                }
-                else
-                {
-                    // Write physical
-                    this.Location.WriteFile(value);
+                    // Delete so not to call cloud
+                    this.Location.DeleteFile();
                 }
             }
         }
@@ -208,95 +198,40 @@ namespace NX.Engine.Files
         {
             get
             {
-                // Assume noting
-                byte[] abAns = null;
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Read, this);
 
-                // Is MinIO there?
-                if (this.Parent.IsAvailable)
+                // Read from cloud
+                this.Parent.SignalChange(c_P);
+
+                // Read physical
+                byte[] abAns = this.Location.ReadFileAsBytes();
+
+                // Was it handled?
+                if (c_P.Handled)
                 {
-                    abAns = this.Value.ToBytes();
-                }
-                else
-                {
-                    // Read physical
-                    abAns = this.Location.ReadFileAsBytes();
-                }
-
-                return abAns;
-            }
-            set
-            {
-                // Is MinIO there?
-                if (this.Parent.IsAvailable)
-                {
-                    this.Value = value.FromBytes();
-                }
-                else
-                {
-                    // Write physical
-                    this.Location.WriteFileAsBytes(value);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// Gets/sets the value of the file as a PDF string
-        /// 
-        /// </summary>
-        public byte[] ValueAsPDF
-        {
-            get
-            {
-                // Assume noting
-                byte[] abAns = null;
-
-                // According to type
-                switch (this.Extension.ToLower())
-                {
-                    case "pdf":
-                        abAns = this.ValueAsBytes;
-                        break;
-
-                    case "docx":
-                        abAns = ConversionClass.DOCX2PDF(this.ValueAsBytes, this.Name);
-                        break;
-                }
-
-                return abAns;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// Gets/sets the value of the file as an HTML string
-        /// 
-        /// </summary>
-        public byte[] ValueAsHTML
-        {
-            get
-            {
-                // Assume noting
-                byte[] abAns = null;
-
-                // According to type
-                switch (this.Extension.ToLower())
-                {
-                   case "docx":
-                        abAns = ConversionClass.DOCX2HTML(this.ValueAsBytes, this.Name);
-                        break;
+                    // Delete so not to call cloud
+                    this.Location.DeleteFile();
                 }
 
                 return abAns;
             }
             set
             {
-                // According to type
-                switch (this.Extension.ToLower())
+                // Write physical
+                this.Location.WriteFileAsBytes(value);
+
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Write, this);
+
+                // Write to cloud
+                this.Parent.SignalChange(c_P);
+
+                // Was it handled?
+                if (c_P.Handled)
                 {
-                    case "docx":
-                        this.ValueAsBytes = ConversionClass.HTML2DOCX(value, this.Name);
-                        break;
+                    // Delete so not to call cloud
+                    this.Location.DeleteFile();
                 }
             }
         }
@@ -314,15 +249,17 @@ namespace NX.Engine.Files
                 // Assume never
                 DateTime c_Ans = DateTime.MaxValue;
 
-                // Is MinIO there?
-                if (this.Parent.IsAvailable)
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.GetLastWrite, this);
+
+                // Get from cloud
+                this.Parent.SignalChange(c_P);
+
+                // Handled?
+                if (c_P.Handled)
                 {
-                    // Via folder
-                    using (FolderClass c_Folder = this.Folder)
-                    {
-                        // Get
-                        c_Ans = this.Parent.GetAttribute(ManagerClass.Types.LastWrite, this.Path).FromDBDate();
-                    }
+                    // Get
+                    c_Ans = (DateTime)c_P.On;
                 }
                 else
                 {
@@ -386,6 +323,13 @@ namespace NX.Engine.Files
                 return this.IMetadataFolder;
             }
         }
+
+        /// <summary>
+        /// 
+        /// Holder for the merge map
+        /// 
+        /// </summary>
+        public object MergeMap { get; set; }
         #endregion
 
         #region Methods
@@ -396,16 +340,14 @@ namespace NX.Engine.Files
         /// </summary>
         public void Delete()
         {
-            // Delete the file itself
-            if (this.Parent.IsAvailable)
-            {
-                // Delete
-                this.Parent.DeleteObject(this.Path);
-            }
-            else
-            {
-                this.Location.DeleteFile();
-            }
+            // Make the parameter
+            FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Delete, this);
+
+            // Get from cloud
+            this.Parent.SignalChange(c_P);
+
+            // Delete local
+            this.Location.DeleteFile();
             // And any metadata
             this.MetadataFolder.Delete();
         }
@@ -425,6 +367,19 @@ namespace NX.Engine.Files
             // And return the file
             return new DocumentClass(this.Parent, sPath);
         }
+
+        /// <summary>
+        /// 
+        /// Returns dcument in the metadata folder
+        /// 
+        /// </summary>
+        /// <param name="ext"></param>
+        /// <returns></returns>
+        public DocumentClass MetadataDocument(string ext)
+        {
+            // Get from metadata folder
+            return this.MetadataFolder[this.Name.SetExtensionFromPath(ext)];
+        }
         #endregion
 
         #region Streams
@@ -436,13 +391,15 @@ namespace NX.Engine.Files
         /// <param name="cb">The callback using a stream</param>
         public void AsReadStream(Action<Stream> cb)
         {
+            // Make the parameter
+            FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.GetStream, this);
+            c_P.StreamCallback = cb;
+
+            // Get from cloud
+            this.Parent.SignalChange(c_P);
+
             // Is MinIO there?
-            if (this.Parent.IsAvailable)
-            {
-                // Get
-                this.Parent.GetStream(this.Path, cb);
-            }
-            else
+            if (!c_P.Handled)
             {
                 // Open
                 using (FileStream c_Stream = new FileStream(this.Path, FileMode.Open, FileAccess.Read))
@@ -468,13 +425,15 @@ namespace NX.Engine.Files
         /// <param name="stream">The stream</param>
         public void AsWriteStream(Stream stream)
         {
+            // Make the parameter
+            FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.SetStream, this);
+            c_P.Stream = stream;
+
+            // Get from cloud
+            this.Parent.SignalChange(c_P);
+
             // Is MinIO there?
-            if (this.Parent.IsAvailable)
-            {
-                // Get
-                this.Parent.SetStream(this.Path, stream);
-            }
-            else
+            if (!c_P.Handled)
             {
                 // Open
                 using (FileStream c_Stream = new FileStream(this.Path, FileMode.Create, FileAccess.Write))
@@ -493,90 +452,7 @@ namespace NX.Engine.Files
         }
         #endregion
 
-        #region Merge
-        /// <summary>
-        /// 
-        /// The path to the merge map
-        /// 
-        /// </summary>
-        public DocumentClass MergeMapDocument
-        {
-            get { return new DocumentClass(this.Parent, this.MetadataFolder, MergeMapFile); }
-        }
-
-        /// <summary>
-        /// 
-        /// The merge map
-        /// 
-        /// </summary>
-        private MergeMapClass IMergeMap { get; set; }
-        private MergeMapClass MergeMap
-        {
-            get
-            {
-                // Is it cached?
-                if (this.IMergeMap == null)
-                {
-                    // No, create it
-                    using (DocumentClass c_Map = this.MergeMapDocument)
-                    {
-                        // New?
-                        bool bNew = c_Map.WrittenOn < this.WrittenOn;
-
-                        // Load
-                        this.IMergeMap = new MergeMapClass(c_Map);
-
-                        // New?
-                        if (bNew)
-                        {
-                            this.IMergeMap.MakeFields(this);
-                        }
-                    }
-                }
-                return this.IMergeMap;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// Merges the document with a given store of data
-        /// 
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="data"></param>
-        public void Merge(DocumentClass result, StoreClass data)
-        {
-            // According to type
-            switch (this.Extension)
-            {
-                case "docx":
-                    // Create support object for MS Word
-                    using (Vendors.DocXClass c_Filler = new Vendors.DocXClass())
-                    {
-                        // And merge
-                        result.ValueAsBytes = c_Filler.Merge(DocumentClass.MiniMerge(this.Parent, this, data), data);
-                    }
-                    break;
-
-                case "pdf":
-                case "fdf":
-                    // Create support object for Adobe
-                    using (Vendors.PDFClass c_Filler = new Vendors.PDFClass())
-                    {
-                        // And merge
-                        result.ValueAsBytes = c_Filler.Merge(this.ValueAsBytes, data);
-                    }
-                    break;
-
-                default:
-                    // Otherwise an empty file
-                    result.Value = "";
-                    break;
-            }
-        }
-        #endregion
-
-       #region Statics
+        #region Statics
         /// <summary>
         /// 
         /// Returns the folder that holds the metadata
@@ -586,75 +462,7 @@ namespace NX.Engine.Files
         /// <returns></returns>
         public static string MetadataFolderRoot(EnvironmentClass env)
         {
-            return env.DocumentFolder.CombinePath("_metadata");
-        }
-
-        /// <summary>
-        /// 
-        /// Does the work of merging a document.  Note that 
-        /// this is a recursive operation
-        /// 
-        /// </summary>
-        /// <param name="stg">The current storage manager</param>
-        /// <param name="source">The source document</param>
-        /// <param name="data">The merge data</param>
-        /// <returns></returns>
-        private static byte[] MiniMerge(ManagerClass mgr, DocumentClass source, StoreClass data)
-        {
-            byte[] abAns = source.ValueAsBytes; ;
-
-            using (Vendors.DocXClass c_Merge = new Vendors.DocXClass())
-            {
-                for (int iIndex = 10; iIndex > 0; iIndex--)
-                {
-                    JArray c_Docs = source.MergeMap.GetDocs(MergeMapClass.PPDocTypes.PreDoc, iIndex);
-                    if (c_Docs != null)
-                    {
-                        for (int iDoc = 0; iDoc < c_Docs.Count; iDoc++)
-                        {
-                            string sMDoc = c_Docs.Get(iDoc);
-                            if (sMDoc.HasValue())
-                            {
-                                DocumentClass c_Wkg = new DocumentClass(mgr, sMDoc);
-                                byte[] abExtra = DocumentClass.MiniMerge(mgr, c_Wkg, data);
-
-                                using (Vendors.DocXClass c_Filler = new Vendors.DocXClass())
-                                {
-                                    abExtra = c_Filler.Merge(abExtra, c_Wkg.MergeMap.Eval(data, mgr.Parent));
-                                }
-
-                                abAns = c_Merge.Append(abAns, abExtra, false);
-                            }
-                        }
-                    }
-                }
-
-                for (int iIndex = 1; iIndex <= 10; iIndex++)
-                {
-                    JArray c_Docs = source.MergeMap.GetDocs(MergeMapClass.PPDocTypes.PostDoc, iIndex);
-                    if (c_Docs != null)
-                    {
-                        for (int iDoc = 0; iDoc < c_Docs.Count; iDoc++)
-                        {
-                            string sMDoc = c_Docs.Get(iDoc);
-                            if (sMDoc.HasValue())
-                            {
-                                DocumentClass c_Wkg = new DocumentClass(mgr, sMDoc);
-                                byte[] abExtra = DocumentClass.MiniMerge(mgr, c_Wkg, data);
-
-                                using (Vendors.DocXClass c_Filler = new Vendors.DocXClass())
-                                {
-                                    abExtra = c_Filler.Merge(abExtra, c_Wkg.MergeMap.Eval(data, mgr.Parent)); ;
-                                }
-
-                                abAns = c_Merge.Append(abAns, abExtra, true);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return abAns;
+            return ManagerClass.MappedFolder.CombinePath("_metadata");
         }
         #endregion
     }

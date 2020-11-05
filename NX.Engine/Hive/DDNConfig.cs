@@ -35,7 +35,6 @@ using Docker.DotNet.Models;
 using Newtonsoft.Json.Linq;
 
 using NX.Shared;
-using Xceed.Document.NET;
 
 namespace NX.Engine.Hive
 {

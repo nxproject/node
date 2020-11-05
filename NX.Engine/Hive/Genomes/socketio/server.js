@@ -32,9 +32,9 @@ io.sockets.on('connection', (socket) => {
     // Handle our message
     socket.on('nxsio', (message) => {
         // Tell world
-        console.log('Message : ', message);
+        //console.log('Message : ', message);
         // Push out
-        //io.sockets.emit('nxsio', message);
+        io.sockets.emit('nxsio', message);
     });
 });
 

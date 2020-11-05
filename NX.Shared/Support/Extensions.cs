@@ -755,7 +755,7 @@ namespace NX.Shared
         {
             bool bAns = defvalue;
 
-            if(value.HasValue())
+            if (value.HasValue())
             {
                 bAns = value.IsSameValue("y");
             }
@@ -1439,11 +1439,11 @@ namespace NX.Shared
         {
             string sAns = null;
 
-            IPAddress[] aAddrs =  Dns.GetHostAddresses(Dns.GetHostName());
-            foreach(IPAddress c_Addr in aAddrs)
+            IPAddress[] aAddrs = Dns.GetHostAddresses(Dns.GetHostName());
+            foreach (IPAddress c_Addr in aAddrs)
             {
                 string sIP = c_Addr.ToString();
-                if(!sIP.IsIPV6())
+                if (!sIP.IsIPV6())
                 {
                     sAns = sIP;
                     break;
@@ -2107,6 +2107,36 @@ namespace NX.Shared
             }
 
             return c_Ans;
+        }
+
+        public static bool IsSameAs(this JArray v1, JArray v2)
+        {
+            //
+            bool bAns = false;
+
+            // Both null?
+            if (v1 == null && v2 == null)
+            {
+                bAns = true;
+            }
+            else if (v1 == null || v2 == null)
+            { }
+            else if (v1.Count != v2.Count)
+            { }
+            else
+            {
+                bAns = true;
+                for (int i = 0; i < v1.Count; i++)
+                {
+                    if (v1.Get(i) != v2.Get(i))
+                    {
+                        bAns = false;
+                        break;
+                    }
+                }
+            }
+
+            return bAns;
         }
         #endregion
 
@@ -2974,7 +3004,7 @@ namespace NX.Shared
         /// but you will get int serious issues!
         /// 
         /// </summary>
-        private static string PathSeparator = "/";
+        private static string PathSeparator = @"/";
 
         public static string RemoveTrailingSeparator(this string value)
         {
@@ -2985,7 +3015,7 @@ namespace NX.Shared
 
         public static string AssurePath(this string path)
         {
-            string[] asValues = path.Split(new char[] { PathSeparator[0] }, StringSplitOptions.RemoveEmptyEntries);
+            string[] asValues = path.Replace(@"\", PathSeparator).Split(new char[] { PathSeparator[0] }, StringSplitOptions.RemoveEmptyEntries);
             string sWkg = "";
             foreach (string sSub in asValues)
             {
@@ -3262,11 +3292,18 @@ namespace NX.Shared
                     eAns = ExtensionTypes.PNG;
                     break;
 
+                case "svg":
+                    eAns = ExtensionTypes.SVG;
+                    break;
+
+                case "js":
+                case "java":
+                    eAns = ExtensionTypes.Javascript;
+                    break;
+
                 case "json":
                 case "txt":
                 case "cs":
-                case "js":
-                case "java":
                 case "bat":
                 case "cmd":
                     eAns = ExtensionTypes.Text;
@@ -3608,6 +3645,14 @@ namespace NX.Shared
                     sContent = "image/" + type;
                     break;
 
+                case ExtensionTypes.SVG:
+                    sContent = "image/svg+xml";
+                    break;
+
+                case ExtensionTypes.Javascript:
+                    sContent = "text/javascript";
+                    break;
+
                 case ExtensionTypes.Text:
                 case ExtensionTypes.CSV:
                     sContent = "text/plain";
@@ -3730,7 +3775,9 @@ namespace NX.Shared
             HTML,
             MHTML,
             ODT,
-            CSS
+            CSS,
+            Javascript,
+            SVG
         }
         #endregion
 

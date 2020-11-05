@@ -859,6 +859,18 @@ namespace NX.Shared
             // Do
             path.WriteFile(this.SynchObject.ToSimpleString());
         }
+
+        /// <summary>
+        /// 
+        /// Loads th store from a JObject
+        /// 
+        /// </summary>
+        /// <param name="values"></param>
+        public void Load(JObject values)
+        {
+            this.SynchObject = values;
+            if (this.SynchObject == null) this.SynchObject = new JObject();
+        }
         #endregion
 
         #region Statics
