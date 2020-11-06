@@ -17,7 +17,7 @@
 
   // Profile
 
-  "uses": [ "Proc.SocketIO", "Proc.Office", "Route.Docker", "Route.File" ], // To give the system some flavor
+  "uses": [ "Proc.SocketIO", "Route.File", "Proc.Office", "Proc.Docs" ], // To give the system some flavor
 
   // Use MongoDb
 

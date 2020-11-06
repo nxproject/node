@@ -170,7 +170,7 @@ namespace NX.Engine
                     // Default
                     Assembly c_Assm = file.LoadAssembly();
 
-                    // Did we get an assemble?
+                    // Did we get an assembly?
                     if (c_Assm != null)
                     {
                         // Get the types in the assembly
@@ -215,7 +215,11 @@ namespace NX.Engine
                         }
                     }
                 }
-                catch { }
+                catch (Exception e)
+                {
+                    // Tell user
+                    this.Parent.LogException("while loading {0}".FormatString(file), e);
+                }
             }
         }
 

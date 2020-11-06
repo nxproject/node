@@ -53,7 +53,7 @@ namespace Route.File
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path
-            string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path");
+            string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path").URLDecode(); ;
 
             // Get the manager
             ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();

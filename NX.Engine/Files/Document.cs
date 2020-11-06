@@ -66,7 +66,7 @@ namespace NX.Engine.Files
             : base(mgr)
         {
             // Save
-            this.Path = this.Parent.Collapse(path);
+            this.Path = this.Parent.Collapse(path).StandarizePath();
         }
 
         public DocumentClass(ManagerClass mgr, FolderClass folder, string name)

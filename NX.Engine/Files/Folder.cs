@@ -48,7 +48,7 @@ namespace NX.Engine.Files
             : base(mgr)
         {
             // Save
-            this.Path = this.Parent.Collapse(path);
+            this.Path = this.Parent.Collapse(path).StandarizePath();
 
             // And make sure that it exists
             if (!this.Parent.IsAvailable)
@@ -89,6 +89,16 @@ namespace NX.Engine.Files
         public string Location
         {
             get { return this.Parent.Expand(this.Path); }
+        }
+
+        /// <summary>
+        /// 
+        /// Does the file exist?
+        /// 
+        /// </summary>
+        public bool Exists
+        {
+            get { return this.Location.FileExists(); }
         }
 
         /// <summary>
@@ -186,28 +196,36 @@ namespace NX.Engine.Files
                 // Loop thru
                 foreach (FolderClass c_Folder in this.Folders)
                 {
-                    // Make entry
-                    JObject c_Entry = new JObject();
+                    // Must be valid
+                    if (c_Folder.Exists)
+                    {
+                        // Make entry
+                        JObject c_Entry = new JObject();
 
-                    c_Entry.Set("name", c_Folder.Path.GetDirectoryNameFromPath());
-                    c_Entry.Set("path", c_Folder.Path);
-                    c_Entry.Set("items", c_Folder.Tree);
+                        c_Entry.Set("name", c_Folder.Path.GetDirectoryNameFromPath());
+                        c_Entry.Set("path", c_Folder.Path);
+                        c_Entry.Set("items", c_Folder.Tree);
 
-                    // Save
-                    c_Ans.Add(c_Entry);
+                        // Save
+                        c_Ans.Add(c_Entry);
+                    }
                 }
 
                 // Loop thru
                 foreach (DocumentClass c_File in this.Files)
                 {
-                    // Make entry
-                    JObject c_Entry = new JObject();
+                    // Must be valid
+                    if (c_File.Exists)
+                    {
+                        // Make entry
+                        JObject c_Entry = new JObject();
 
-                    c_Entry.Set("name", c_File.Path.GetFileNameFromPath());
-                    c_Entry.Set("path", c_File.Path);
+                        c_Entry.Set("name", c_File.Path.GetFileNameFromPath());
+                        c_Entry.Set("path", c_File.Path);
 
-                    // Save
-                    c_Ans.Add(c_Entry);
+                        // Save
+                        c_Ans.Add(c_Entry);
+                    }
                 }
 
                 return c_Ans;

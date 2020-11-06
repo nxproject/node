@@ -31,6 +31,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 using Docker.DotNet;
 using Docker.DotNet.Models;
@@ -687,7 +688,6 @@ namespace NX.Engine.Hive
         /// 
         /// </summary>
         /// <param name="id"></param>
-
         public void GetLogs(string id)
         {
             // Protect
@@ -727,6 +727,59 @@ namespace NX.Engine.Hive
             {
                 this.HandleException("GetContainerLogsAsync;StdErr", e);
             }
+        }
+
+
+        /// <summary>
+        /// 
+        /// Gets the Stdout and StdErr logs
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        public string GetLogsAsString(string id)
+        {
+            //
+            string sAns = "";
+
+            // Protect
+            try
+            {
+                // Stop it
+                using (Stream c_Result = this.Client.Containers.GetContainerLogsAsync(id,
+                    new ContainerLogsParameters()
+                    {
+                        ShowStdout = true,
+                        ShowStderr = false
+                    }).Result)
+                {
+                    sAns += this.DumpStreamAsString(c_Result, "--> STDOUT ".RPad(80, "-"), "".RPad(80, "-"));
+                }
+            }
+            catch (Exception e)
+            {
+                this.HandleException("GetContainerLogsAsync;StdOut", e);
+            }
+
+            // Protect
+            try
+            {
+                // Stop it
+                using (Stream c_Result = this.Client.Containers.GetContainerLogsAsync(id,
+                    new ContainerLogsParameters()
+                    {
+                        ShowStdout = false,
+                        ShowStderr = true
+                    }).Result)
+                {
+                    sAns += this.DumpStreamAsString(c_Result, "--> STDERR ".RPad(80, "-"), "".RPad(80, "-"));
+                }
+            }
+            catch (Exception e)
+            {
+                this.HandleException("GetContainerLogsAsync;StdErr", e);
+            }
+
+            return sAns;
         }
         #endregion
 
@@ -828,6 +881,64 @@ namespace NX.Engine.Hive
             }
             //
             if (footer.HasValue()) this.Parent.Parent.Parent.LogVerbose(footer);
+        }
+
+        /// <summary>
+        /// 
+        /// Copies a stream to the logs
+        /// 
+        /// </summary>
+        /// <param name="stream">The source stream</param>
+        /// <param name="header">The header</param>
+        private string DumpStreamAsString(Stream stream, string header = null, string footer = null)
+        {
+            StringBuilder c_Buffer = new StringBuilder();
+
+            //
+            if (header.HasValue()) c_Buffer.AppendLine(header);
+
+            //
+            string sLine = "";
+
+            // The buffer
+            byte[] abBuffer = new byte[32 * 1024];
+            // Read line
+            int iSize = stream.Read(abBuffer, 0, abBuffer.Length);
+
+            // Loop thru
+            while (iSize > 0)
+            {
+                // Append
+                sLine += abBuffer.SubArray(0, iSize).FromBytes();
+                // Dump any lines
+                int iEOL = sLine.IndexOf("\x0A");
+                // Till no more
+                while (iEOL != -1)
+                {
+                    // Log
+                    c_Buffer.AppendLine(sLine.Substring(0, iEOL).ASCIIOnly());
+                    // Remove
+                    sLine = sLine.Substring(iEOL + 1);
+                    // And  repeat
+                    iEOL = sLine.IndexOf("\x0A");
+                }
+
+                // From stream
+                iSize = stream.Read(abBuffer, 0, abBuffer.Length);
+            }
+
+            // Turn what is left into ASCII
+            sLine = sLine.ASCIIOnly();
+            // Any
+            if (sLine.HasValue())
+            {
+                // Log
+                c_Buffer.AppendLine(sLine);
+            }
+            //
+            if (footer.HasValue()) c_Buffer.AppendLine(footer);
+
+            return c_Buffer.ToString();
         }
         #endregion
     }

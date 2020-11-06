@@ -41,7 +41,10 @@ namespace Route.File
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path
-            string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path");
+            string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path").URLDecode();
+
+            // Log
+            call.Env.LogInfo("GET: {0}".FormatString(sPath));
 
             // Get the manager
             ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();
@@ -49,6 +52,9 @@ namespace Route.File
             // And make
             using (DocumentClass c_Doc = new DocumentClass(c_Mgr, sPath))
             {
+                // Log
+                call.Env.LogInfo("LOC: {0}".FormatString(c_Doc.Location));
+
                 // And deliver
                 call.RespondWithFile(c_Doc.Location);
             }

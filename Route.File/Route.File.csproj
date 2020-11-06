@@ -11,7 +11,6 @@
   <ItemGroup>
     <ProjectReference Include="..\NX.Engine\NX.Engine.csproj" />
     <ProjectReference Include="..\NX.Shared\NX.Shared.csproj" />
-    <ProjectReference Include="..\TP\OpenXmlPowerTools\OpenXmlPowerTools.csproj" />
   </ItemGroup>
 
 </Project>

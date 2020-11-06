@@ -42,6 +42,7 @@ using System.Diagnostics;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml;
 using System.Runtime.Loader;
+using System.Text.RegularExpressions;
 
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
@@ -3753,6 +3754,19 @@ namespace NX.Shared
             return sAns;
         }
 
+        public static string StandarizePath(this string path)
+        {
+            List<string> c_Pieces = new List<string>(path.IfEmpty().Split('/'));
+
+            // Loop thru
+            for (int i = 0; i < c_Pieces.Count; i++)
+            {
+                c_Pieces[i] = Regex.Replace(c_Pieces[i], @"[^a-zA-Z0-9\s\x2C\x2E\x2D]", "_");
+            }
+
+            return c_Pieces.Join("/");
+        }
+
         public enum ExtensionTypes
         {
             Unknown,
@@ -4584,24 +4598,59 @@ namespace NX.Shared
             // Assume none
             Assembly c_Assm = null;
 
-            // Protect
-            try
-            {
-                // Load the assembly
-                c_Assm = AssemblyLoadContext.Default.LoadFromAssemblyPath("".WorkingDirectory().CombinePath(filename).AdjustPathToOS());
-            }
-            catch { }
+            // Flag
+            bool bDo = true;
 
-            // Catch all
-            if (c_Assm == null)
+            // Loop
+            while (bDo)
             {
+
                 // Protect
                 try
                 {
                     // Load the assembly
-                    c_Assm = Assembly.LoadFile(filename);
+                    c_Assm = AssemblyLoadContext.Default.LoadFromAssemblyPath("".WorkingDirectory().CombinePath(filename).AdjustPathToOS());
                 }
                 catch { }
+
+                //// Catch all
+                //if (c_Assm == null)
+                //{
+                //    // Protect
+                //    try
+                //    {
+                //        // Load the assembly
+                //        c_Assm = Assembly.LoadFile(filename);
+                //    }
+                //    catch { }
+                //}
+
+                // Get the types
+                try
+                {
+                    System.Type[] sc_Types = c_Assm.GetTypes();
+                    // If OK, we are done
+                    bDo = false;
+                }
+                catch (Exception e)
+                {
+                    // Get the error
+                    string sError = e.Message;
+                    // Missing DLL?
+                    Match c_Poss = Regex.Match(sError, @"Could not load file or assembly '(?<file>[^,]+),");
+                    if (c_Poss.Success)
+                    {
+                        // Make name
+                        string sDLL = c_Poss.Groups["file"].Value + ".dll";
+                        // Load
+                        sDLL.LoadAssembly();
+                    }
+                    else
+                    {
+                        // End loop
+                        bDo = false;
+                    }
+                }
             }
 
             return c_Assm;
