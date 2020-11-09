@@ -706,9 +706,24 @@ namespace NX.Engine.Hive
                 }
 
                 // Do we need a base?
+                if (!c_Name.Name.IsSameValue("dotnet"))
+                {
+                    // Make the base name
+                    DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, "dotnet");
+                    // The directory
+                    string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);
+                    // Check to see if already made
+                    if (!c_Client.CheckForImage(c_BName))
+                    {
+                        // Build it
+                        c_Client.BuildImage(c_BName, sDir, config);
+                    }
+                }
+
+                // Do we need a base?
                 if (!c_Name.Name.IsSameValue("base"))
                 {
-                   // Make the base name
+                    // Make the base name
                     DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, "base");
                     // The directory
                     string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);

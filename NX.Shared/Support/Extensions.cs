@@ -4593,7 +4593,7 @@ namespace NX.Shared
         #endregion
 
         #region Assembly
-        public static Assembly LoadAssembly(this string filename)
+        public static Assembly LoadAssembly(this string filename, ILogger log)
         {
             // Assume none
             Assembly c_Assm = null;
@@ -4604,7 +4604,6 @@ namespace NX.Shared
             // Loop
             while (bDo)
             {
-
                 // Protect
                 try
                 {
@@ -4613,42 +4612,50 @@ namespace NX.Shared
                 }
                 catch { }
 
-                //// Catch all
-                //if (c_Assm == null)
-                //{
-                //    // Protect
-                //    try
-                //    {
-                //        // Load the assembly
-                //        c_Assm = Assembly.LoadFile(filename);
-                //    }
-                //    catch { }
-                //}
-
-                // Get the types
-                try
+                // Catch all
+                if (c_Assm == null)
                 {
-                    System.Type[] sc_Types = c_Assm.GetTypes();
-                    // If OK, we are done
-                    bDo = false;
-                }
-                catch (Exception e)
-                {
-                    // Get the error
-                    string sError = e.Message;
-                    // Missing DLL?
-                    Match c_Poss = Regex.Match(sError, @"Could not load file or assembly '(?<file>[^,]+),");
-                    if (c_Poss.Success)
+                    // Protect
+                    try
                     {
-                        // Make name
-                        string sDLL = c_Poss.Groups["file"].Value + ".dll";
-                        // Load
-                        sDLL.LoadAssembly();
+                        // Load the assembly
+                        c_Assm = Assembly.LoadFile(filename);
                     }
-                    else
+                    catch { }
+                }
+
+                // Try to load
+                if (c_Assm != null)
+                {
+                    // Get the types
+                    try
                     {
-                        // End loop
+                        System.Type[] sc_Types = c_Assm.GetTypes();
+                        // If OK, we are done
                         bDo = false;
+                    }
+                    catch (Exception e)
+                    {
+                        // Get the error
+                        string sError = e.Message;
+                        // Missing DLL?
+                        Match c_Poss = Regex.Match(sError, @"Could not load file or assembly '(?<file>[^,]+),");
+                        if (c_Poss.Success)
+                        {
+                            // Get the module name
+                            string sMissing = c_Poss.Groups["file"].Value;
+                            // Tell world
+                            log.LogError("Dependent assenbly {0} is missing, loading...".FormatString(sMissing));
+                            // Make name
+                            string sDLL = sMissing + ".dll";
+                            // Load
+                            sDLL.LoadAssembly(log);
+                        }
+                        else
+                        {
+                            // End loop
+                            bDo = false;
+                        }
                     }
                 }
             }

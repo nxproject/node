@@ -277,6 +277,8 @@ namespace NX.Engine.Hive
             // Make room
             string sFile = null;
 
+            this.Parent.Parent.Parent.LogInfo("Building image {0}".FormatString(name.LocalNameWithTag));
+
             // Protect
             try
             {
@@ -957,7 +959,7 @@ namespace NX.Engine.Hive
             this.Parse(qname);
         }
 
-        private DockerIFNameClass(DockerIFNameClass name, string newname = null, string version = null)
+        private DockerIFNameClass(DockerIFNameClass name, string newname = null)
         {
             //
             this.Repo = name.Repo;

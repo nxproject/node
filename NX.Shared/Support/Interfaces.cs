@@ -22,36 +22,13 @@
 /// 
 ///--------------------------------------------------------------------------------
 
-using System.Collections.Generic;
-
-using NX.Engine;
-using NX.Engine.Files;
-using NX.Shared;
-
-namespace Route.File
+namespace NX.Shared
 {
-    /// <summary>
-    /// 
-    /// Retrieves a file
-    /// 
-    /// </summary>
-    public class Get : RouteClass
+    public interface ILogger
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "?path?" };
-        public override void Call(HTTPCallClass call, StoreClass store)
-        {
-            // Get the full path
-            string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path").URLDecode();
-
-            // Get the manager
-            ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();
-
-            // And make
-            using (DocumentClass c_Doc = new DocumentClass(c_Mgr, sPath))
-            {
-                // And deliver
-                call.RespondWithFile(c_Doc.Location);
-            }
-        }
+        void LogInfo(string msg);
+        void LogError(string msg);
+        void LogException(System.Exception e);
+        void LogException(string source, System.Exception e);
     }
 }

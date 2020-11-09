@@ -47,7 +47,7 @@
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
   "code_folder": [ "C:\\Candid Concepts\\NX\\Office" ], // Folders where extra code is located"
-  "recycle_containers": "n",  // If you change root_folder or genome, set to y
+  "recycle_containers": "n", // If you change root_folder or genome, set to y
 
   // Traefik
 

@@ -63,13 +63,6 @@ namespace NX.Engine
 
         /// <summary>
         /// 
-        /// List of files loaded
-        /// 
-        /// </summary>
-        private List<string> Loaded { get; set; } = new List<string>();
-
-        /// <summary>
-        /// 
         /// The context
         /// 
         /// </summary>
@@ -145,10 +138,12 @@ namespace NX.Engine
                     }
 
                     // And load it
-                    this.LoadFile(sAssm);
+                    this.LoadFile(sAssm, this.Parent);
                 }
             }
         }
+
+        private List<string> LoadedFiles { get; set; } = new List<string>();
 
         /// <summary>
         /// 
@@ -156,19 +151,19 @@ namespace NX.Engine
         /// 
         /// </summary>
         /// <param name="assm">The assembly to load from</param>
-        public void LoadFile(string file)
+        public void LoadFile(string file, ILogger log)
         {
             // Must have an assembly
-            if (file.HasValue() && !this.Loaded.Contains(file))
+            if (file.HasValue() && !this.LoadedFiles.Contains(file))
             {
                 // Sometimes assemblies do not behave well
                 try
                 {
                     // Add to done
-                    this.Loaded.Add(file);
+                    this.LoadedFiles.Add(file);
 
                     // Default
-                    Assembly c_Assm = file.LoadAssembly();
+                    Assembly c_Assm = file.LoadAssembly(log);
 
                     // Did we get an assembly?
                     if (c_Assm != null)

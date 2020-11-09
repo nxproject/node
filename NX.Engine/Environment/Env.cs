@@ -44,7 +44,7 @@ namespace NX.Engine
     /// The global environment.  
     /// 
     /// </summary>
-    public class EnvironmentClass : SynchronizedStoreClass
+    public class EnvironmentClass : SynchronizedStoreClass, ILogger
     {
         #region Constants
         private const string KeyID = "id";
@@ -804,11 +804,11 @@ namespace NX.Engine
                 //if (!path.GetDirectoryFromPath().HasValue()) path = "".WorkingDirectory().CombinePath(path);
 
                 // Load any functions
-                if (profile.Contains(Profiles.Fns)) this.FNS.LoadFile(path);
+                if (profile.Contains(Profiles.Fns)) this.FNS.LoadFile(path, this);
                 // Load any routes
-                if (profile.Contains(Profiles.Routes)) this.Router.LoadFile(path);
+                if (profile.Contains(Profiles.Routes)) this.Router.LoadFile(path, this);
                 // Load any processors
-                if (profile.Contains(Profiles.Procs)) this.Procs.LoadFile(path);
+                if (profile.Contains(Profiles.Procs)) this.Procs.LoadFile(path, this);
 
                 this.LogInfo("Loaded {0}".FormatString(path));
             }
@@ -828,6 +828,8 @@ namespace NX.Engine
         //    }
         //}
 
+        private List<string> UsedModules { get; set; } = new List<string>();
+
         /// <summary>
         /// 
         /// Loads a DLL into the routing or function
@@ -843,66 +845,73 @@ namespace NX.Engine
         /// <param name="module">The module name</param>
         public void Use(string module, Profiles profile = Profiles.Fns | Profiles.Procs | Profiles.Routes)
         {
-            //
-            this.LogInfo("Using {0}".FormatString(module));
-
-            // Remove the .dll if any
-            if (module.EndsWith(".dll")) module = module.Substring(0, module.Length - 1);
-
-            // And a possible Git call
-            string sGPath = "";
-            // Find the delimiter
-            int iPos = module.LastIndexOf("/");
-            // Any?
-            if (iPos != -1)
+            // Only once
+            if (!this.UsedModules.Contains(module))
             {
-                // Parse
-                sGPath = module.Substring(0, iPos);
-                module = module.Substring(iPos + 1);
-            }
+                // Add
+                this.UsedModules.Add(module);
 
-            // NX module?
-            if (module.Contains("."))
-            {
-                // Load
-                this.LoadModule(module + ".dll", profile);
-            }
-            else if (sGPath.HasValue())
-            {
-                // Load from Git repository
-                using (GitClass c_Git = new GitClass(this))
+                //
+                this.LogInfo("Using {0}".FormatString(module));
+
+                // Remove the .dll if any
+                if (module.EndsWith(".dll")) module = module.Substring(0, module.Length - 1);
+
+                // And a possible Git call
+                string sGPath = "";
+                // Find the delimiter
+                int iPos = module.LastIndexOf("/");
+                // Any?
+                if (iPos != -1)
                 {
-                    // Split the Git path
-                    List<string> c_Path = new List<string>(sGPath.Split("/"));
-                    // Split the git_repo
-                    List<string> c_FromEnv = new List<string>(this.GitRepo.IfEmpty().Split("/"));
+                    // Parse
+                    sGPath = module.Substring(0, iPos);
+                    module = module.Substring(iPos + 1);
+                }
 
-                    // Did the caller use a leading /?
-                    if (!sGPath.HasValue())
-                    {
-                        // Use environment
-                        c_Path = c_FromEnv;
-                    }
-
-                    if (c_Path.Count == 1)
-                    {
-                        // Use the user name from environment
-                        c_Path.Insert(0, c_FromEnv[0]);
-                    }
-                    else
-                    {
-                        // Fill any empty
-                        if (!c_Path[0].HasValue()) c_Path[0] = c_FromEnv[0];
-                        if (!c_Path[1].HasValue()) c_Path[1] = c_FromEnv[1];
-                    }
-
-                    // Make the repo name
-                    string sRepo = c_Path[0] + "/" + c_Path[1];
-
+                // NX module?
+                if (module.Contains("."))
+                {
                     // Load
-                    string sFile = c_Git.FetchFile(sRepo, module);
-                    // Add to system
-                    this.LoadModule(sFile, profile);
+                    this.LoadModule(module + ".dll", profile);
+                }
+                else if (sGPath.HasValue())
+                {
+                    // Load from Git repository
+                    using (GitClass c_Git = new GitClass(this))
+                    {
+                        // Split the Git path
+                        List<string> c_Path = new List<string>(sGPath.Split("/"));
+                        // Split the git_repo
+                        List<string> c_FromEnv = new List<string>(this.GitRepo.IfEmpty().Split("/"));
+
+                        // Did the caller use a leading /?
+                        if (!sGPath.HasValue())
+                        {
+                            // Use environment
+                            c_Path = c_FromEnv;
+                        }
+
+                        if (c_Path.Count == 1)
+                        {
+                            // Use the user name from environment
+                            c_Path.Insert(0, c_FromEnv[0]);
+                        }
+                        else
+                        {
+                            // Fill any empty
+                            if (!c_Path[0].HasValue()) c_Path[0] = c_FromEnv[0];
+                            if (!c_Path[1].HasValue()) c_Path[1] = c_FromEnv[1];
+                        }
+
+                        // Make the repo name
+                        string sRepo = c_Path[0] + "/" + c_Path[1];
+
+                        // Load
+                        string sFile = c_Git.FetchFile(sRepo, module);
+                        // Add to system
+                        this.LoadModule(sFile, profile);
+                    }
                 }
             }
         }
@@ -971,7 +980,7 @@ namespace NX.Engine
             // Must have an exception
             if (e != null)
             {
-                EnvironmentClass.ILogError("@ " + msg.IfEmpty("An error has occurred") + "\r\n" + e.GetAllExceptions() + "\r\n" + e.StackTrace);
+                EnvironmentClass.ILogError("@ " + msg.IfEmpty("An error has occurred") + "\r\n\r\n" + e.GetAllExceptions() + "\r\n\r\n" + e.StackTrace);
             }
         }
 
