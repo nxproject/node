@@ -74,75 +74,9 @@ namespace NX.Engine
         #region Methods
         /// <summary>
         /// 
-        /// Loads all the plug-ins
+        /// List of files loaded
         /// 
         /// </summary>
-        /// <param name="folders">A  list of extra folders to look at</param>
-        public void Load(params string[] folders)
-        {
-            // Get the dynamic folder
-            string sDynamic = this.Parent.DynamicFolder;
-
-            // Make the list of directories that will be looked at
-            List<string> c_Folders = new List<string>();
-            c_Folders.Add("".WorkingDirectory());
-            c_Folders.AddRange(folders);
-            if (sDynamic.HasValue()) c_Folders.Add(sDynamic);
-
-            // Do each folder
-            foreach (string sFolder in c_Folders)
-            {
-                // Get the plug-ins in the folder
-                this.LoadFolder(sFolder);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// Loads the pugins in a folder
-        /// 
-        /// </summary>
-        /// <param name="folder">FThe folder path</param>
-        public void LoadFolder(string folder)
-        {
-            // Get all of the extension modules
-            List<string> c_Modules = folder.GetMatchingFilesInPath("*.*.dll");
-
-            // And do one at a time
-            foreach (string sModule in c_Modules)
-            {
-                // Make a copy
-                string sAssm = sModule;
-
-                // Getthe file name
-                string sName = sModule.GetFileNameFromPath();
-                // Valid?
-                if (sName.StartsWith("Fn.") ||
-                    sName.StartsWith("Route.") ||
-                    sName.StartsWith("Proc."))
-                {
-                    // Are we in MS Windows
-                    if (!"".IsLinux())
-                    {
-                        // Sometimes MS Windows returns the assembly name in relative format
-                        if (sModule.StartsWith("."))
-                        {
-                            // Must prefix with folder 
-                            sAssm = folder.CombinePath(sModule.Substring(1));
-                            // And adjust delimiters
-                            if (this.Type.Module.FullyQualifiedName.IndexOf("/") == -1)
-                            {
-                                sAssm = sAssm.Replace("/", @"\");
-                            }
-                        }
-                    }
-
-                    // And load it
-                    this.LoadFile(sAssm, this.Parent);
-                }
-            }
-        }
-
         private List<string> LoadedFiles { get; set; } = new List<string>();
 
         /// <summary>

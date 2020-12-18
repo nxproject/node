@@ -314,22 +314,13 @@ namespace NX.Engine.Files
             {
                 if (this.IMetadataFolder == null)
                 {
-                    // Make the path
-                    string sPath = DocumentClass.MetadataFolderRoot(this.Parent.Parent).CombinePath(this.Path.SHA1HashString());
                     // Create
-                    this.IMetadataFolder = new FolderClass(this.Parent, sPath);
+                    this.IMetadataFolder = this.Folder.SubFolder("_metadata");
                 }
 
                 return this.IMetadataFolder;
             }
         }
-
-        /// <summary>
-        /// 
-        /// Holder for the merge map
-        /// 
-        /// </summary>
-        public object MergeMap { get; set; }
         #endregion
 
         #region Methods
@@ -340,16 +331,16 @@ namespace NX.Engine.Files
         /// </summary>
         public void Delete()
         {
+            // Delete local
+            this.Location.DeleteFile();
+            // And any metadata
+            this.MetadataFolder.Delete();
+            
             // Make the parameter
             FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Delete, this);
 
             // Get from cloud
             this.Parent.SignalChange(c_P);
-
-            // Delete local
-            this.Location.DeleteFile();
-            // And any metadata
-            this.MetadataFolder.Delete();
         }
 
         /// <summary>
@@ -379,6 +370,41 @@ namespace NX.Engine.Files
         {
             // Get from metadata folder
             return this.MetadataFolder[this.Name.SetExtensionFromPath(ext)];
+        }
+
+        /// <summary>
+        ///   
+        /// Copies document to another document
+        /// 
+        /// </summary>
+        /// <param name="doc"></param>
+        public void CopyTo(DocumentClass doc)
+        {
+            // Copy
+            doc.ValueAsBytes = this.ValueAsBytes;
+            // Copy metadata
+            foreach(DocumentClass c_Child in this.MetadataFolder.Files)
+            {
+                // Copy
+                using (DocumentClass c_Target = new DocumentClass(this.Parent, doc.MetadataFolder, c_Child.Name))
+                {
+                    c_Target.ValueAsBytes = c_Child.ValueAsBytes;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Move a document
+        /// 
+        /// </summary>
+        /// <param name="doc"></param>
+        public void MoveTo(DocumentClass doc)
+        {
+            // Copy
+            this.CopyTo(doc);
+            // Delete
+            this.Delete();
         }
         #endregion
 
@@ -460,10 +486,10 @@ namespace NX.Engine.Files
         /// </summary>
         /// <param name="env">The current environment</param>
         /// <returns></returns>
-        public static string MetadataFolderRoot(EnvironmentClass env)
-        {
-            return ManagerClass.MappedFolder.CombinePath("_metadata");
-        }
+        //public static string MetadataFolderRoot(EnvironmentClass env)
+        //{
+        //    return ManagerClass.MappedFolder.CombinePath("_metadata");
+        //}
         #endregion
     }
 }

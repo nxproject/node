@@ -182,6 +182,58 @@ namespace NX.Engine.Files
 
         /// <summary>
         /// 
+        /// Uploads a file
+        /// 
+        /// The following code modified from https://stackoverflow.com/questions/8466703/httplistener-and-file-upload
+        /// </summary>
+        public void UploadText(HTTPCallClass call, DocumentClass doc)
+        {
+            try
+            {
+                doc.Location.GetDirectoryFromPath().AssurePath();
+
+                var input = call.Request.InputStream;
+                using (FileStream output = new FileStream(doc.Location, FileMode.Create, FileAccess.Write))
+                {
+                    Byte[] buffer = new Byte[1024];
+                    Int32 len = input.Read(buffer, 0, 1024);
+
+                    // Loop thru
+                    while (len > 0)
+                    {
+                        // Write
+                        output.Write(buffer, 0, len);
+                        // Again
+                        len = input.Read(buffer, 0, 1024);
+                    }
+
+                    output.Flush();
+                }
+            }
+            catch (Exception e)
+            {
+                call.RespondWithError(e.Message);
+            }
+            finally
+            {
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Write, doc);
+
+                // Write to cloud
+                this.SignalChange(c_P);
+
+                // Was it handled?
+                if (c_P.Handled)
+                {
+                    // Delete so not to call cloud
+                    doc.Location.DeleteFile();
+                }
+                call.RespondWithOK();
+            }
+        }
+
+        /// <summary>
+        /// 
         /// Returns the file boundary string for a MIM upload
         /// 
         /// </summary>
@@ -219,9 +271,31 @@ namespace NX.Engine.Files
         /// <returns></returns>
         public string Expand(string path)
         {
-            string sAns = MappedFolder.CombinePath(path);
+            return MappedFolder.CombinePath(path);
+        }
 
-            return sAns;
+        /// <summary>
+        /// 
+        /// Is the path an existent file?
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public bool IsFile(string path)
+        {
+            return this.Expand(this.Collapse(path)).FileExists();
+        }
+
+        /// <summary>
+        /// 
+        /// Is the path an existent folder?
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public bool IsFolder(string path)
+        {
+            return this.Expand(this.Collapse(path)).DirectoryExists();
         }
         #endregion
 

@@ -58,7 +58,7 @@ namespace Route.File
             using (FolderClass c_Folder = new FolderClass(c_Mgr, sPath))
             {
                 // And deliver
-                call.RespondWithJSON(c_Folder.Tree);
+                call.RespondWithJSON(c_Folder.Tree(true));
             }
         }
     }

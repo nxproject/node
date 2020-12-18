@@ -98,7 +98,7 @@ namespace NX.Engine.Files
         /// </summary>
         public bool Exists
         {
-            get { return this.Location.FileExists(); }
+            get { return this.Location.DirectoryExists(); }
         }
 
         /// <summary>
@@ -119,10 +119,14 @@ namespace NX.Engine.Files
                 this.Parent.SignalChange(c_P);
 
                 // DOne?
-                if(c_P.Handled)
-{
+                if (c_P.Handled)
+                {
+                    // Get list
+                    List<string> c_List = c_P.List;
+                    // Sort
+                    c_List.Sort();
                     // Loop thru
-                    foreach (string sEntry in c_P.List)
+                    foreach (string sEntry in c_List)
                     {
                         // Add
                         c_Ans.Add(new DocumentClass(this.Parent, sEntry));
@@ -130,7 +134,13 @@ namespace NX.Engine.Files
                 }
                 else
                 {
-                    foreach (string sEntry in this.Location.GetFilesInPath())
+                    // Get list
+                    List<string> c_List = this.Location.GetFilesInPath();
+                    // Sort
+                    c_List.Sort();
+                    c_List = c_List.Unique();
+                    // Loop thru
+                    foreach (string sEntry in c_List)
                     {
                         c_Ans.Add(new DocumentClass(this.Parent, sEntry));
                     }
@@ -160,9 +170,13 @@ namespace NX.Engine.Files
 
                 // DOne?
                 if (c_P.Handled)
-                {                    
+                {
+                    // Get list
+                    List<string> c_List = c_P.List;
+                    // Sort
+                    c_List.Sort();
                     // Loop thru
-                    foreach (string sEntry in c_P.List)
+                    foreach (string sEntry in c_List)
                     {
                         // Add
                         c_Ans.Add(new FolderClass(this.Parent, sEntry));
@@ -170,61 +184,14 @@ namespace NX.Engine.Files
                 }
                 else
                 {
+                    // Get list
+                    List<string> c_List = this.Location.GetDirectoriesInPath();
+                    // Sort
+                    c_List.Sort();
                     // Loop thru
-                    foreach (string sEntry in this.Location.GetDirectoriesInPath())
+                    foreach (string sEntry in c_List)
                     {
                         c_Ans.Add(new FolderClass(this.Parent, sEntry));
-                    }
-                }
-
-                return c_Ans;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// Get the tree of folders and files
-        /// 
-        /// </summary>
-        public JArray Tree
-        {
-            get
-            {
-                // Assume none
-                JArray c_Ans = new JArray();
-
-                // Loop thru
-                foreach (FolderClass c_Folder in this.Folders)
-                {
-                    // Must be valid
-                    if (c_Folder.Exists)
-                    {
-                        // Make entry
-                        JObject c_Entry = new JObject();
-
-                        c_Entry.Set("name", c_Folder.Path.GetDirectoryNameFromPath());
-                        c_Entry.Set("path", c_Folder.Path);
-                        c_Entry.Set("items", c_Folder.Tree);
-
-                        // Save
-                        c_Ans.Add(c_Entry);
-                    }
-                }
-
-                // Loop thru
-                foreach (DocumentClass c_File in this.Files)
-                {
-                    // Must be valid
-                    if (c_File.Exists)
-                    {
-                        // Make entry
-                        JObject c_Entry = new JObject();
-
-                        c_Entry.Set("name", c_File.Path.GetFileNameFromPath());
-                        c_Entry.Set("path", c_File.Path);
-
-                        // Save
-                        c_Ans.Add(c_Entry);
                     }
                 }
 
@@ -241,14 +208,14 @@ namespace NX.Engine.Files
         /// </summary>
         public void Delete()
         {
+            // Physical
+            this.Location.DeletePath();
+
             // Make the parameter
             FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Delete, this);
 
             // Get from cloud
             this.Parent.SignalChange(c_P);
-
-            // Physical
-            this.Location.DeletePath();
         }
 
         /// <summary>
@@ -271,7 +238,7 @@ namespace NX.Engine.Files
             }
             else
             {
-                
+
             }
         }
 
@@ -290,6 +257,75 @@ namespace NX.Engine.Files
             if (path.HasValue())
             {
                 c_Ans = new FolderClass(this.Parent, this.Path.CombinePath(path));
+
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.CreatePath, this);
+
+                // Get from cloud
+                this.Parent.SignalChange(c_P);
+            }
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Get the tree of folders and files
+        /// 
+        /// </summary>
+        public JArray Tree(bool showhidden = false, bool filesonly = false)
+        {
+            // Assume none
+            JArray c_Ans = new JArray();
+
+            // Loop thru
+            foreach (FolderClass c_Folder in this.Folders)
+            {
+                // Must be valid
+                if (c_Folder.Exists)
+                {
+                    // Get the name
+                    string sName = c_Folder.Path.GetDirectoryNameFromPath();
+
+                    if (showhidden || !sName.StartsWith("_"))
+                    {
+                        // 
+                        if (filesonly)
+                        {
+                            JArray c_Files = c_Folder.Tree(showhidden, filesonly);
+                            c_Ans.AddElements(c_Files);
+                        }
+                        else
+                        {
+                            // Make entry
+                            JObject c_Entry = new JObject();
+
+                            c_Entry.Set("name", sName);
+                            c_Entry.Set("path", c_Folder.Path);
+                            c_Entry.Set("items", c_Folder.Tree(showhidden, filesonly));
+
+                            // Save
+                            c_Ans.Add(c_Entry);
+                        }
+                    }
+                }
+            }
+
+            // Loop thru
+            foreach (DocumentClass c_File in this.Files)
+            {
+                // Must be valid
+                if (c_File.Exists)
+                {
+                    // Make entry
+                    JObject c_Entry = new JObject();
+
+                    c_Entry.Set("name", c_File.Path.GetFileNameFromPath());
+                    c_Entry.Set("path", c_File.Path);
+
+                    // Save
+                    c_Ans.Add(c_Entry);
+                }
             }
 
             return c_Ans;

@@ -63,13 +63,13 @@ namespace NX.Engine
                 {
                     this.Type = Types.Store;
                     this.Field = this.Field.Substring(2, this.Field.Length - 3);
-                    this.ParsePrefix(this.Parent.UseStore);
+                    this.ParsePrefix(this.Parent.Stores.Default);
                 }
                 else if (this.Field.StartsWith(@"[$") && this.Field.EndsWith("]"))
                 {
                     this.Type = Types.Document;
                     this.Field = this.Field.Substring(2, this.Field.Length - 3);
-                    this.ParsePrefix(this.Parent.UseDocument);
+                    this.ParsePrefix(this.Parent.Documents.Default);
                 }
                 else if (this.Field.StartsWith(@"[") && this.Field.EndsWith("]"))
                 {
@@ -212,6 +212,20 @@ namespace NX.Engine
 
             // Use default
             this.Prefix = this.Prefix.IfEmpty(defaultvalue);
+        }
+
+        /// <summary>
+        /// 
+        /// Dumps contents
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return "DATUM: Type: {0}, Prefix: {1}, Field: {2}, Value: {3}".FormatString(this.Type   ,
+                this.Prefix,
+                this.Field,
+                this.Value);
         }
         #endregion
 

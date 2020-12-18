@@ -30,9 +30,8 @@ RUN apt-get install -y libgdiplus
 
 ```
 
-This dotnet genome file includes support for ```libgdiplus```, which is required by calls to  
-```System.Drawing.Common``` in Linux. If you do not need this support, you can change the processor 
-genome file to look like this:
+This dotnet genome file includes support for ```libgdiplus```, which is required by calls to ```System.Drawing.Common``` in Linux. 
+If you do not need this support, you can change the processor genome file to look like this:
 
 ```
 # NXProject Processor 3.1.0 Image

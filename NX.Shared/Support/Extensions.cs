@@ -2141,6 +2141,127 @@ namespace NX.Shared
         }
         #endregion
 
+        #region JSON
+        public static JObject JWrap(this string field, object value)
+        {
+            JObject c_Ans = new JObject();
+
+            c_Ans.Set(field, value);
+
+            return c_Ans;
+        }
+
+        public static void JSort(this JArray values, string field)
+        {
+            values.JSort(field, false);
+        }
+
+        public static void JSort(this JArray values, string field, bool desc)
+        {
+            if (values != null)
+            {
+                List<string> c_Keys = new List<string>();
+                for (int iLoop = 0; iLoop < values.Count; iLoop++)
+                {
+                    c_Keys.Add(values.GetJObject(iLoop).Get(field));
+                }
+
+                c_Keys.Sort();
+
+                JArray c_Ans = new JArray();
+                if (desc)
+                {
+                    for (int iKey = c_Keys.Count - 1; iKey >= 0; iKey--)
+                    {
+                        string sKey = c_Keys[iKey];
+                        for (int iLoop = 0; iLoop < values.Count; iLoop++)
+                        {
+                            if (sKey.IsSameValue(values.GetJObject(iLoop).Get(field)))
+                            {
+                                c_Ans.Add(values.GetJObject(iLoop));
+                                values.RemoveAt(iLoop);
+                                break;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    for (int iKey = 0; iKey < c_Keys.Count; iKey++)
+                    {
+                        string sKey = c_Keys[iKey];
+                        for (int iLoop = 0; iLoop < values.Count; iLoop++)
+                        {
+                            if (sKey.IsSameValue(values.GetJObject(iLoop).Get(field)))
+                            {
+                                c_Ans.Add(values.GetJObject(iLoop));
+                                values.RemoveAt(iLoop);
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                values.Clear();
+
+                for (int iLoop = 0; iLoop < c_Ans.Count; iLoop++)
+                {
+                    values.Add(c_Ans.GetJObject(iLoop));
+                }
+            }
+        }
+
+        public static void JSort(this JArray values, Func<JObject, string> compare)
+        {
+            if (values != null)
+            {
+                List<string> c_Keys = new List<string>();
+                for (int iLoop = 0; iLoop < values.Count; iLoop++)
+                {
+                    c_Keys.Add(compare(values.GetJObject(iLoop)));
+                }
+
+                c_Keys.Sort();
+
+                JArray c_Ans = new JArray();
+
+                for (int iKey = 0; iKey < c_Keys.Count; iKey++)
+                {
+                    string sKey = c_Keys[iKey];
+                    for (int iLoop = 0; iLoop < values.Count; iLoop++)
+                    {
+                        if (sKey.IsSameValue(compare(values.GetJObject(iLoop))))
+                        {
+                            c_Ans.Add(values.GetJObject(iLoop));
+                            values.RemoveAt(iLoop);
+                            break;
+                        }
+                    }
+                }
+
+                values.Clear();
+
+                for (int iLoop = 0; iLoop < c_Ans.Count; iLoop++)
+                {
+                    values.Add(c_Ans.GetJObject(iLoop));
+                }
+            }
+        }
+
+        public static bool IsValid(this JObject values, JObject query)
+        {
+            bool bAns = true;
+
+            foreach (string sKey in query.Keys())
+            {
+                bAns = query.Get(sKey).IsSameValue(values.Get(sKey));
+                if (!bAns) break;
+            }
+
+            return bAns;
+        }
+        #endregion
+
         #region XML
         public static string ToXMLString(this XmlDocument doc)
         {
@@ -3117,7 +3238,9 @@ namespace NX.Shared
 
         public static List<string> GetTreeInPath(this string path, string patt = "*")
         {
-            return new List<string>(Directory.GetFiles(path.AdjustPathToOS(), patt, SearchOption.AllDirectories));
+            List<string> c_Ans =  new List<string>(Directory.GetFiles(path.AdjustPathToOS(), patt, SearchOption.AllDirectories));
+
+            return c_Ans;
         }
 
         public static List<string> GetFilesNamesOnlyInPath(this string path)
@@ -3141,7 +3264,10 @@ namespace NX.Shared
             if (path.DirectoryExists())
             {
                 string[] asFiles = System.IO.Directory.GetFiles(path, patt);
-                if (asFiles != null) c_Ans = new List<string>(asFiles);
+                if (asFiles != null)
+                {
+                    c_Ans = new List<string>(asFiles);
+                }
             }
             if (c_Ans == null) c_Ans = new List<string>();
 
@@ -3756,12 +3882,13 @@ namespace NX.Shared
 
         public static string StandarizePath(this string path)
         {
-            List<string> c_Pieces = new List<string>(path.IfEmpty().Split('/'));
+            List<string> c_Pieces = new List<string>(path.IfEmpty().Split('/', StringSplitOptions.RemoveEmptyEntries));
 
             // Loop thru
             for (int i = 0; i < c_Pieces.Count; i++)
             {
-                c_Pieces[i] = Regex.Replace(c_Pieces[i], @"[^a-zA-Z0-9\s\x2C\x2E\x2D]", "_");
+                //c_Pieces[i] = Regex.Replace(c_Pieces[i], @"[^a-zA-Z0-9\s\x2C\x2E\x2D]", "_");
+                c_Pieces[i] = Regex.Replace(c_Pieces[i], @"[^a-zA-Z0-9\s\x2E]", "_");
             }
 
             return c_Pieces.Join("/");
@@ -4610,7 +4737,11 @@ namespace NX.Shared
                     // Load the assembly
                     c_Assm = AssemblyLoadContext.Default.LoadFromAssemblyPath("".WorkingDirectory().CombinePath(filename).AdjustPathToOS());
                 }
-                catch { }
+                catch (Exception e0)
+                {
+                    // Log
+                    log.LogException("Error while loading {0} at default load".FormatString(filename), e0);
+                }
 
                 // Catch all
                 if (c_Assm == null)
@@ -4621,7 +4752,11 @@ namespace NX.Shared
                         // Load the assembly
                         c_Assm = Assembly.LoadFile(filename);
                     }
-                    catch { }
+                    catch (Exception e0)
+                    {
+                        // Log
+                        log.LogException("Error while loading {0} at generic load".FormatString(filename), e0);
+                    }
                 }
 
                 // Try to load
@@ -4653,10 +4788,16 @@ namespace NX.Shared
                         }
                         else
                         {
+                            // Log
+                            log.LogException("Error while loading {0}".FormatString(filename), e);
                             // End loop
                             bDo = false;
                         }
                     }
+                }
+                else
+                {
+                    //log.LogError("Unable to load {0}".FormatString(filename));
                 }
             }
 

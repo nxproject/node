@@ -137,6 +137,13 @@ namespace NX.Shared
         /// 
         /// </summary>
         public T Parent { get { return (T)this.Root; } }
+
+        /// <summary>
+        /// 
+        /// Storage for other items
+        /// 
+        /// </summary>
+        public object Storage { get; set; }
         #endregion
     }
 }

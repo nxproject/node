@@ -54,12 +54,15 @@ namespace NX.Engine
             this.Callback = cb;
 
             // Save the passed store
-            if (store != null) this.Stores["passed"] = store;
+            if (store != null)
+            {
+                this.Stores.Use("passed");
+                this.Stores[this.Stores.Default] = store;
+            }
         }
         #endregion
 
-        #region Properties
-        
+        #region Properties        
         /// <summary>
         /// 
         /// Extra callback
@@ -72,63 +75,42 @@ namespace NX.Engine
         /// The stores
         /// 
         /// </summary>
-        public NamedListClass<StoreClass> Stores = new NamedListClass<StoreClass>();
+        public virtual ContextStoreClass<StoreClass> Stores { get; set; } = new ContextStoreClass<StoreClass>();
 
-        /// <summary>
-        /// 
-        /// The store to use as default
-        /// 
-        /// </summary>
-        public string UseStore { get; set; }
-
-        /// <summary>
+       /// <summary>
         /// 
         /// The documents
         /// 
         /// </summary>
-        public NamedListClass<Files.DocumentClass> Documents = new NamedListClass<Files.DocumentClass>();
-
-        /// <summary>
-        /// 
-        /// The document to use as default
-        /// 
-        /// </summary>
-        public string UseDocument { get; set; }
+        public virtual ContextStoreClass<Files.DocumentClass> Documents { get; set; } = new ContextStoreClass<Files.DocumentClass>();
 
         /// <summary>
         /// 
         /// Variables
         /// 
         /// </summary>
-        public NamedListClass<string> Vars = new NamedListClass<string>();
+        public virtual ContextStoreClass<string> Vars { get; set; } = new ContextStoreClass<string>();
 
         /// <summary>
         /// 
         /// To be used by callback
         /// 
         /// </summary>
-        public NamedListClass<object> Locals = new NamedListClass<object>();
-
-        /// <summary>
-        /// 
-        /// The local to use as default
-        /// 
-        /// </summary>
-        public string UseLocal { get; set; }
+        public ContextStoreClass<object> Locals = new ContextStoreClass<object>();
 
         /// <summary>
         /// 
         /// List of things
         /// 
         /// </summary>
-        public NamedListClass<NamedListClass<string>> Lists = new NamedListClass<NamedListClass<string>>();
+        public virtual ContextStoreClass<NamedListClass<string>> Lists { get; set; } = new ContextStoreClass<NamedListClass<string>>();
 
         /// <summary>
         /// 
         /// A global storage area
         /// 
         /// </summary>
-        public Variables Globals { get; private set; }
+        public virtual Variables Globals { get; private set; }
 
         /// <summary>
         /// 

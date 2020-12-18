@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="GetURL.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Globalization" Version="4.3.0" />
   </ItemGroup>
 
