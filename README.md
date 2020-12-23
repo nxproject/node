@@ -164,3 +164,4 @@ That is what my goal is, and has been since 1983.
 * To **Herre Kuijpers** for his [a Tiny Parser Generator v1.2](https://www.codeproject.com/Articles/28294/a-Tiny-Parser-Generator-v1-2) which has been hacked to death in so many incarnations.  It is the only non-package in the system.
 * To the people at **Atom** https://atom.io/ which created the nifty editor, the results of which you just read
 * To [Gary Larson](https://www.thefarside.com/2020/08/05/2), always kept me smiling
+* To [Tom Toles](https://en.wikipedia.org/wiki/Tom_Toles), will miss your witty work!

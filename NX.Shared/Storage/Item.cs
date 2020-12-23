@@ -63,6 +63,10 @@ namespace NX.Shared
                 // Remove
                 value = value.Substring(0, iPos);
             }
+            else
+            {
+                this.Value = "";
+            }
 
             // Set
             this.Key = value;
@@ -84,16 +88,12 @@ namespace NX.Shared
         /// <returns>The value without modifiers</returns>
         private string ParseOptions(string value)
         {
-            // Assume none
-            int iIndex = -1;
-            string sDelim = null;
-
             // Until no more
-            do
+            while (true)
             {
-                // Reset
-                iIndex = -1;
-                sDelim = null;
+                // Assume none
+                int iIndex = -1;
+                string sDelim = null;
 
                 // Loop
                 foreach (string sPoss in this.Parent.OptionDelimiters)
@@ -117,10 +117,12 @@ namespace NX.Shared
                     // Remove
                     value = value.Substring(0, iIndex);
                 }
+                else
+                {
+                    break;
+                }
 
-            } while (iIndex != -1);
-
-            // 
+            }
 
             return value;
         }

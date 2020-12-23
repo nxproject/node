@@ -870,7 +870,7 @@ namespace NX.Engine
                 }
 
                 // NX module?
-                if (module.Contains("."))
+                if (module.Contains(".") || !sGPath.HasValue())
                 {
                     // Load
                     this.LoadModule(module + ".dll", profile);
