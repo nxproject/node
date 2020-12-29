@@ -51,7 +51,7 @@ And best explained in this sequence:
 * [Genome](docs/README_B_GENOME.md)
 * [DNA](docs/README_B_DNA.md)
 * [Hive](docs/README_B_HIVE.md)
-* [Fields](docs/README_B_FIELDS.md)
+* [Fields](docs/README_B_FIELD.md)
 * [Roster](docs/README_B_ROSTER.md)
 * Bees
 	* [Worker Bee](docs/README_B_BEE.md)
