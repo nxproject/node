@@ -331,5 +331,53 @@ namespace NX.Engine.Files
             return c_Ans;
         }
         #endregion
+
+        #region Backups
+        /// <summary>
+        /// 
+        /// Make sure that a backup exists
+        /// 
+        /// </summary>
+        public int AssureBackup()
+        {
+            int iAns = 0;
+
+            // Open
+            foreach (DocumentClass c_File in this.Files)
+            {
+                iAns += c_File.AssureBackup();
+            }
+
+            foreach(FolderClass c_Folder in this.Folders)
+            {
+                iAns += c_Folder.AssureBackup();
+            }
+
+            return iAns;
+        }
+
+        /// <summary>
+        /// 
+        /// Restores from backup, if any
+        /// 
+        /// </summary>
+        public int RestoreBackup()
+        {
+            int iAns = 0;
+
+            // Open
+            foreach (DocumentClass c_File in this.Files)
+            {
+                iAns += c_File.RestoreBackup();
+            }
+
+            foreach (FolderClass c_Folder in this.Folders)
+            {
+                iAns += c_Folder.RestoreBackup();
+            }
+
+            return iAns;
+        }
+        #endregion
     }
 }

@@ -454,8 +454,12 @@ namespace NX.Engine.Files
         /// Make sure that a backup exists
         /// 
         /// </summary>
-        public void AssureBackup()
+        public int AssureBackup()
         {
+            // Assume not
+            int iAns = 0;
+
+
             // Open
             using (DocumentClass c_Bkp = this.MetadataDocument("backup"))
             {
@@ -464,8 +468,12 @@ namespace NX.Engine.Files
                 {
                     // Copy
                     this.CopyTo(c_Bkp, false);
+
+                    iAns = 1;
                 }
             }
+
+            return iAns;
         }
 
         /// <summary>
@@ -473,10 +481,10 @@ namespace NX.Engine.Files
         /// Restores from backup, if any
         /// 
         /// </summary>
-        public bool RestoreBackup()
+        public int RestoreBackup()
         {
             // Assume not
-            bool bAns = false;
+            int iAns = 0;
 
             // Open
             using (DocumentClass c_Bkp = this.MetadataDocument("backup"))
@@ -487,11 +495,11 @@ namespace NX.Engine.Files
                     // Copy
                     c_Bkp.CopyTo(this, false);
 
-                    bAns = true;
+                    iAns = 1;
                 }
             }
 
-            return bAns;
+            return iAns;
         }
         #endregion
 
