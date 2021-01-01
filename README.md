@@ -97,7 +97,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 * [Docker.DotNet](https://github.com/dotnet/Docker.DotNet) 3.125.2
 * [DocumentFormat.OpenXML](https://github.com/OfficeDev/Open-Xml-Sdk) 2.11.3
-* [DocX](https://github.com/xceedsoftware/DocX) 1.7.0
 * [HtmlAgilityPack](https://github.com/zzzprojects/html-agility-pack) 1.11.24
 * [ICSharpCode.SharpZipLib](https://github.com/icsharpcode/SharpZipLib) 0.85.4.369
 * [iTextSharp](https://github.com/itext/itextsharp) 5.5.13.1

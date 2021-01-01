@@ -473,8 +473,11 @@ namespace NX.Engine.Files
         /// Restores from backup, if any
         /// 
         /// </summary>
-        public void RestoreBackup()
+        public bool RestoreBackup()
         {
+            // Assume not
+            bool bAns = false;
+
             // Open
             using (DocumentClass c_Bkp = this.MetadataDocument("backup"))
             {
@@ -483,8 +486,12 @@ namespace NX.Engine.Files
                 {
                     // Copy
                     c_Bkp.CopyTo(this, false);
+
+                    bAns = true;
                 }
             }
+
+            return bAns;
         }
         #endregion
 
