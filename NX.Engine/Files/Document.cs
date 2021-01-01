@@ -301,26 +301,6 @@ namespace NX.Engine.Files
                 return this.Parent.Parent.SiteInfo.URL.CombineURL("f", sAns);
             }
         }
-
-        /// <summary>
-        /// 
-        /// The metadata folder for the document
-        /// 
-        /// </summary>
-        private FolderClass IMetadataFolder { get; set; }
-        public FolderClass MetadataFolder
-        {
-            get
-            {
-                if (this.IMetadataFolder == null)
-                {
-                    // Create
-                    this.IMetadataFolder = this.Folder.SubFolder("_metadata");
-                }
-
-                return this.IMetadataFolder;
-            }
-        }
         #endregion
 
         #region Methods
@@ -335,7 +315,7 @@ namespace NX.Engine.Files
             this.Location.DeleteFile();
             // And any metadata
             this.MetadataFolder.Delete();
-            
+
             // Make the parameter
             FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Delete, this);
 
@@ -360,35 +340,25 @@ namespace NX.Engine.Files
         }
 
         /// <summary>
-        /// 
-        /// Returns dcument in the metadata folder
-        /// 
-        /// </summary>
-        /// <param name="ext"></param>
-        /// <returns></returns>
-        public DocumentClass MetadataDocument(string ext)
-        {
-            // Get from metadata folder
-            return this.MetadataFolder[this.Name.SetExtensionFromPath(ext)];
-        }
-
-        /// <summary>
         ///   
         /// Copies document to another document
         /// 
         /// </summary>
         /// <param name="doc"></param>
-        public void CopyTo(DocumentClass doc)
+        public void CopyTo(DocumentClass doc, bool includemetadata = true)
         {
             // Copy
             doc.ValueAsBytes = this.ValueAsBytes;
             // Copy metadata
-            foreach(DocumentClass c_Child in this.MetadataFolder.Files)
+            if (includemetadata)
             {
-                // Copy
-                using (DocumentClass c_Target = new DocumentClass(this.Parent, doc.MetadataFolder, c_Child.Name))
+                foreach (DocumentClass c_Child in this.MetadataFolder.Files)
                 {
-                    c_Target.ValueAsBytes = c_Child.ValueAsBytes;
+                    // Copy
+                    using (DocumentClass c_Target = new DocumentClass(this.Parent, doc.MetadataFolder, c_Child.Name))
+                    {
+                        c_Target.ValueAsBytes = c_Child.ValueAsBytes;
+                    }
                 }
             }
         }
@@ -399,10 +369,10 @@ namespace NX.Engine.Files
         /// 
         /// </summary>
         /// <param name="doc"></param>
-        public void MoveTo(DocumentClass doc)
+        public void MoveTo(DocumentClass doc, bool includemetadata = true)
         {
             // Copy
-            this.CopyTo(doc);
+            this.CopyTo(doc, includemetadata);
             // Delete
             this.Delete();
         }
@@ -475,6 +445,85 @@ namespace NX.Engine.Files
                     catch { }
                 }
             }
+        }
+        #endregion
+
+        #region Backups
+        /// <summary>
+        /// 
+        /// Make sure that a backup exists
+        /// 
+        /// </summary>
+        public void AssureBackup()
+        {
+            // Open
+            using (DocumentClass c_Bkp = this.MetadataDocument("backup"))
+            {
+                // Newer?
+                if (!c_Bkp.Exists || this.WrittenOn > c_Bkp.WrittenOn)
+                {
+                    // Copy
+                    this.CopyTo(c_Bkp, false);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Restores from backup, if any
+        /// 
+        /// </summary>
+        public void RestoreBackup()
+        {
+            // Open
+            using (DocumentClass c_Bkp = this.MetadataDocument("backup"))
+            {
+                // Newer?
+                if (c_Bkp.Exists)
+                {
+                    // Copy
+                    c_Bkp.CopyTo(this, false);
+                }
+            }
+        }
+        #endregion
+
+        #region Metadata
+        /// <summary>
+        /// 
+        /// The metadata folder for the document
+        /// 
+        /// </summary>
+        private FolderClass IMetadataFolder { get; set; }
+        private FolderClass MetadataFolder
+        {
+            get
+            {
+                if (this.IMetadataFolder == null)
+                {
+                    // Create
+                    this.IMetadataFolder = this.Folder.SubFolder("_metadata").SubFolder(this.Name.MD5HashString());
+                }
+
+                return this.IMetadataFolder;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Returns document in the metadata folder
+        /// 
+        /// </summary>
+        /// <param name="ext"></param>
+        /// <returns></returns>
+        public DocumentClass MetadataDocument(string bucket, string ext = null)
+        {
+            // Get the name
+            string sName = bucket.IfEmpty(this.NameOnly);
+            // And set the extension
+            if (ext.HasValue()) sName += "." + ext;
+            // Get from metadata folder
+            return this.MetadataFolder[sName];
         }
         #endregion
 
