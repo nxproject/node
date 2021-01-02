@@ -394,7 +394,7 @@ namespace NX.Engine
 
             try
             {
-                var c_Ret = Expression.Eval(this.Parent, this.Field);
+                var c_Ret = Expression.Evaluate(this.Parent, this.Field);
 
                 if (!DatumClass.HideErrors && c_Ret.Error.HasValue())
                 {

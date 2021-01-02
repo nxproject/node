@@ -55,7 +55,7 @@ namespace NX.Engine
             // Eval
             this.AddFn(new StaticFunction("eval", delegate (Context ctx, object[] ps)
             {
-                ExpressionReturn c_Ret = ctx.Eval(XCVT.ToString(ps[0]));
+                ExpressionReturn c_Ret = ctx.Evaluate(XCVT.ToString(ps[0]));
 
                 return c_Ret.Value.IfEmpty();
             }, 1, 1));

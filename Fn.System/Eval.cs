@@ -51,7 +51,7 @@ namespace Fn.System
             if (XCVT.ToBoolean(values["new"])) c_Ans = new StoreClass();
 
             // Eval
-            c_Ans["value"] = call.Env.Eval(values["expr"], values).Value;
+            c_Ans["value"] = call.Env.Evaluate(values["expr"], values).Value;
 
             // ANd return the store
             return c_Ans;

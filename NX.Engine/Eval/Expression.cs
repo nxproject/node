@@ -28,6 +28,7 @@
 
 using System;
 using System.Text;
+using System.Collections.Generic;
 
 using NX.Shared;
 
@@ -41,15 +42,40 @@ namespace NX.Engine
     public static class Expression
     {
         #region Methods
-        public static ExpressionReturn Eval(this EnvironmentClass call, string expr, StoreClass store, Func<ExprCBParams, string> cb = null)
+        public static ExpressionReturn Evaluate(this EnvironmentClass call, 
+            string expr, 
+            StoreClass store, 
+            Func<ExprCBParams, string> cb = null)
         {
             ExpressionReturn c_Ans = new ExpressionReturn();
 
             using (Context c_Ctx = new Context(call, store, cb))
             {
                 //
-                c_Ans = c_Ctx.Eval(expr);
+                c_Ans = c_Ctx.Evaluate(expr);
             }
+
+            return c_Ans;
+        }
+
+        public static ExpressionReturn Evaluate(this Context ctx, string eprx)
+        {
+            ExpressionReturn c_Ans = new ExpressionReturn();
+
+            // Break up
+            List<string> c_Pieces = eprx.IfEmpty().SplitSpaces();
+
+            // Loop thru
+            for (int i = 0; i < c_Pieces.Count; i++)
+            {
+                //
+                using(DatumClass c_Datum = new DatumClass(ctx, c_Pieces[i]))
+                {
+                    c_Pieces[i] = c_Datum.Value;
+                }
+            }
+
+            c_Ans.Value = c_Pieces.Join(" ");
 
             return c_Ans;
         }
