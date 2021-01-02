@@ -188,6 +188,8 @@ namespace NX.Engine
 
             if(this.TraefikHive.IsSameValue(this[EnvironmentClass.KeyHive]))
             {
+                this.LogInfo("Hive will host Traefik");
+
                 this.Remove("hive_traefik");
                 this.Add("hive_traefik", this.TraefikHive);
                 this.Add("hive_traefik", "*");

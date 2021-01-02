@@ -72,7 +72,7 @@ namespace NX.Shared
             this.Key = value;
 
             // Empty value?
-            if (!this.Value.HasValue() && this.Parent.ValueIsPriority)
+            if (!this.Value.HasValue() && this.ValueIsPriority)
             {
                 this.Value = this.Key;
                 this.Key = "";
@@ -190,10 +190,10 @@ namespace NX.Shared
         /// </summary>
         public string Priority
         {
-            get { return this.Parent.ValueIsPriority ? this.Value : this.Key; }
+            get { return this.ValueIsPriority ? this.Value : this.Key; }
             set
             {
-                if (this.Parent.ValueIsPriority)
+                if (this.ValueIsPriority)
                 {
                     this.Value = value;
                 }
@@ -201,6 +201,23 @@ namespace NX.Shared
                 {
                     this.Key = value;
                 }
+            }
+        }
+
+        private bool ValueIsPriority
+        {
+            get
+            {
+                // Assume not
+                bool bAns = false;
+
+                // Do we have a parent?
+                if(this.Parent != null)
+                {
+                    bAns = this.Parent.ValueIsPriority;
+                }
+
+                return bAns;
             }
         }
 

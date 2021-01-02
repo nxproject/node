@@ -51,9 +51,9 @@
   "recycle_containers": "n", // If you change root_folder or genome, set to y
   // Traefik
 
-  "traefik_ip": "",
-  "traefik_domain": "",
-  "traefik_email": "",
+  "traefik_hive": "demo",
+  "traefik_domain": "nx9.us",
+  "traefik_email": "jegbhe@gmail.com",
   "traefik_provider": "namecheap"
 
 }
