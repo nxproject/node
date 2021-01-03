@@ -179,7 +179,11 @@ namespace NX.Engine
             this[KeyDocumentFolder] = this.GetFolderPath(this.SharedFolder, KeyDocumentFolder, "files");
 
             this["wd"] = this["wd"].IfEmpty("".InContainer() ? "/etc/wd" : "".WorkingDirectory());
-            this["nginx_port"] = this["nginx_port"].IfEmpty(this.TraefikHive.HasValue() ? "80" : "$80");
+
+            string sPort = this["routing_port"].IfEmpty("80");
+            if (!this.TraefikHive.HasValue()) sPort = "$" + sPort;
+            this["routing_port"] = sPort;
+
             this["nosql"] = this["nosql"].IfEmpty("mongodb");
             //if (!this.GetAsJArray("field").HasValue()) this.Set("field", "".GetLocalIP() + ":2375");
 

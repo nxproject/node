@@ -107,8 +107,10 @@ namespace NXNode
                     // Make
                     c_Env.Hive.MakeSelfIntoGenome("".WorkingDirectory());
 
-                    // Kill all
+                    // Kill processors
                     c_Env.Hive.KillProcessorBees();
+                    // And Nginx
+                    c_Env.Hive.KillDNA("nginx");
 
                     //
                     c_Env.LogInfo("Container has been created");

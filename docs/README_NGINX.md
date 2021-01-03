@@ -7,11 +7,11 @@ The bumble bee keeps track of changes and will regenerate the nginx
 
 Setting|Meaning
 -------|-------
-nginx_port|The port to use.  The default depens whether [Traefik](README_TRAEFIK.md) is used
-nginx_debug|Set to y if you want a debug log
-nginx_wb|The site for the worker bees, defaults to "workerbees"
-nginx_proc|Allows for routing to specific worker bees
-nginx_bumble|Allow for access to the bumbe bee
+routing_port|The port to use.  The default depens whether [Traefik](README_TRAEFIK.md) is used
+routing_debug|Set to y if you want a debug log
+routing_wb|The site for the worker bees, defaults to "workerbees"
+routing_proc|Allows for routing to specific worker bees
+routing_bumble|Allow for access to the bumbe bee
 
 ## Procs
 
@@ -24,7 +24,7 @@ where xxx is the proc value.  In order for this to work properly, you need to:
 * Setup the proc routes to be RouteClass.GET(Types.Routed) or RouteClass.GET(Types.Routed  | Types.Secured)
 * Create an enviroment setting of:
 ```
---nginx_proc xxx
+--routing_proc xxx
 ```
 where xxx is the proc of the worker bee.  You can then call:
 ```
@@ -32,7 +32,7 @@ GET /chores/get/....
 ```
 and NginX will properly route the call to a Chores route.
 
-If you do not use **nginx_proc**, the call will go to the first available worker bee.
+If you do not use **routing_proc**, the call will go to the first available worker bee.
 
 ## Bumble bee access
 
@@ -41,11 +41,11 @@ If you wish to give remote access to the bumble bee you need to:
 * Setup the bumble bee routes to be RouteClass.GET(Types.Routed) or RouteClass.GET(Types.Routed  | Types.Secured)
 * Create an enviroment setting of:
 ```
---nginx_bumble genome
+--routing_bumble genome
 ```
 where genome is the genome of the bumble bee.  For example you can call:
 ```
---nginx_bumble mongodb
+--routing_bumble mongodb
 ```
 Which allows for call like:
 ```
@@ -55,17 +55,17 @@ and NginX will properly route the call to a MongoDB, or other genome, route.
 
 To change the location you can use:
 ```
---nginx_bumble genome=newlocation
+--routing_bumble genome=newlocation
 ```
 If in the example above we used:
 ```
---nginx_bumble mongodb=calcutta
+--routing_bumble mongodb=calcutta
 ```
 The call would then be:
 ```
 GET /calcutta/get/....
 ```
 
-If you do not use **nginx_bumble**, the call will go to the first available worker bee.
+If you do not use **routing_bumble**, the call will go to the first available worker bee.
 
 [Back to top](../README.md)

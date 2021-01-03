@@ -40,20 +40,14 @@
 
   // These are for development
 
-  "nginx_bumble": [], // Allow access to SocketIO
-  //"nginx_proc": [ "Chores" ], // Map Chores procs
-  "nginx_debug": "n",
+  "routing_bumble": [], // Allow access to SocketIO
+  //"routing_proc": [ "Chores" ], // Map Chores procs
+  "routing_debug": "n",
 
   "verbose": "n", // Tell me what is going on
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
   "code_folder": [ "C:\\Candid Concepts\\NX\\Office" ], // Folders where extra code is located"
   "recycle_containers": "n", // If you change root_folder or genome, set to y
-  // Traefik
-
-  "traefik_hive": "demo",
-  "traefik_domain": "nx9.us",
-  "traefik_email": "jegbhe@gmail.com",
-  "traefik_provider": "namecheap"
 
 }

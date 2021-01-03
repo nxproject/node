@@ -334,8 +334,8 @@ namespace NX.Engine.Hive
                 // Make room
                 FieldClass c_Field = null;
 
-                    // Check to see if we already knw
-                    foreach (FieldClass c_Present in c_Current)
+                // Check to see if we already knw
+                foreach (FieldClass c_Present in c_Current)
                 {
                     // Same?
                     if (c_Present.URL.IsSameValue(c_Loc.Value))
@@ -1023,6 +1023,31 @@ namespace NX.Engine.Hive
                 }
             }
         }
+
+        /// <summary>
+        /// 
+        /// Removes all the bees of a certain DNA
+        /// 
+        /// </summary>
+        public void KillDNA(string task)
+        {
+            //
+            this.Parent.LogInfo("Killing all {0} bees!".FormatString(task));
+
+            // Refresh
+            this.Roster.Refresh();
+
+            // Loop thru
+            foreach (BeeClass c_Bee in this.Bees)
+            {
+                // Processor?
+                if (c_Bee.CV.DNA.IsSameValue(task))
+                {
+                    // Kill like a zombie so no log is generated
+                    c_Bee.Kill(BeeClass.KillReason.NoLogs);
+                }
+            }
+        }
         #endregion
 
         #region Bees
@@ -1033,9 +1058,9 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="name">The name of the definition</param>
         public BeeClass MakeBee(string dna = ProcessorDNAName,
-                                    StoreClass data = null,
-                                    BeeDNAClass usedna = null,
-                                    JArray cmd = null)
+                                StoreClass data = null,
+                                BeeDNAClass usedna = null,
+                                JArray cmd = null)
         {
             // Assume failure
             BeeClass c_Ans = null;

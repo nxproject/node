@@ -236,7 +236,7 @@ namespace NX.Engine
             // Set
             this.Parent.NginXInfo[this.Genome, NginX.ServicesClass.Types.BumbleBee] = c_Info;
             // And update environment
-            this.Parent.Add("nginx_bumble", this.Genome + "=" + location);
+            this.Parent.Add("routing_bumble", this.Genome + "=" + location);
         }
         #endregion
 

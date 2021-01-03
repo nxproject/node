@@ -178,9 +178,10 @@ namespace Proc.Traefik
         #endregion
 
         #region Enviroment
-        public string ENVDomain { get { return this.Parent.Parent["traefik_domain"]; } }
-        public string ENVEMail { get { return this.Parent.Parent["traefik_email"]; } }
-        public string ENVProvider { get { return this.Parent.Parent["traefik_provider"].IfEmpty("namecheap"); } }
+        public string ENVDomain { get { return this.Parent.Parent["routing_domain"]; } }
+        public string ENVEMail { get { return this.Parent.Parent["routing_email"]; } }
+        public string ENVProvider { get { return this.Parent.Parent["routing_provider"].IfEmpty("namecheap"); } }
+        public string ENVCatchAll { get { return this.Parent.Parent["routing_catchall"].IfEmpty("https://google.com"); } }
         #endregion
 
         #region Methods

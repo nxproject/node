@@ -4,7 +4,7 @@ FROM {repo_project}/base:{tier}
 LABEL {proj_label}
 
 RUN set -ex; \
-curl -o /usr/local/bin/traefik "https://github.com/containous/traefik/releases/download/v1.7.9/traefik_linux-amd64"; \
+curl -o /usr/local/bin/traefik "https://github.com/containous/traefik/releases/download/v2.3.6/traefik_linux-amd64"; \
 chmod +x /usr/local/bin/traefik
 COPY entrypoint.sh /
 EXPOSE 80

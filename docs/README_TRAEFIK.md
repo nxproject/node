@@ -21,9 +21,10 @@ for HTTP support.  In order to do this you need to define the three environment 
 
 Setting|Meaning
 -------|-------
-traefik_domain|The domain to be used (eg. mydomain.com)
-traefik_email|An email address where notifications will be sent
-traefik_provider|The domain provider name (Default: namecheap)
+routing_domain|The domain to be used (eg. mydomain.com)
+routing_email|An email address where notifications will be sent
+routing_provider|The domain provider name (Default: namecheap)
+routing_catchall|The route if all else fails (Default: https:google.com)
 
 You need to setup the DNS for the domain per [these instructions](https://letsencrypt.org/how-it-works/).
 
