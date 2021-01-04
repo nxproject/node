@@ -12,8 +12,6 @@
   "http_threads": "4", // Number of HTTP process threads to run
 
   // Let's link in React
-
-
   "ui": "react",
 
   // Profile

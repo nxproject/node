@@ -3546,6 +3546,25 @@ namespace NX.Shared
             return iAns;
         }
 
+        public static int MoveDirectoryTree(this string source, string target)
+        {
+            // The count
+            int iAns = 0;
+
+            // Make sure that they exists
+            source.AssurePath();
+            target.AssurePath();
+
+            try
+            {
+                System.IO.Directory.Move(source, target);
+                iAns = 1;
+            }
+            catch { }
+
+            return iAns;
+        }
+
         public static bool DirectoryExists(this string path)
         {
             return System.IO.Directory.Exists(path);
@@ -3563,6 +3582,20 @@ namespace NX.Shared
             try
             {
                 System.IO.File.Copy(from, to, true);
+                bAns = true;
+            }
+            catch { }
+
+            return bAns;
+        }
+
+        public static bool MoveFile(this string from, string to)
+        {
+            bool bAns = false;
+
+            try
+            {
+                System.IO.File.Move(from, to, true);
                 bAns = true;
             }
             catch { }

@@ -24,6 +24,7 @@
 
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 
 using NX.Engine;
@@ -34,7 +35,6 @@ namespace NX.Engine.Files
     public class ManagerClass : BumbleBeeClass
     {
         #region Constants
-        private const string MinioPrefix = "__";
         public const string MappedFolder = "/etc/files";
         #endregion
 
@@ -66,85 +66,108 @@ namespace NX.Engine.Files
         /// 
         /// The following code modified from https://stackoverflow.com/questions/8466703/httplistener-and-file-upload
         /// </summary>
-        public void Upload(HTTPCallClass call, DocumentClass doc)
+        public DocumentClass Upload(HTTPCallClass call, DocumentClass doc, ManagerClass mgr = null, string path = null)
         {
             try
             {
-                doc.Location.GetDirectoryFromPath().AssurePath();
-
                 var input = call.Request.InputStream;
                 Byte[] boundaryBytes = call.Request.ContentEncoding.GetBytes(this.GetBoundary(call.Request.ContentType));
                 Int32 boundaryLen = boundaryBytes.Length;
 
-                using (FileStream output = new FileStream(doc.Location, FileMode.Create, FileAccess.Write))
+
+                Byte[] buffer = new Byte[1024];
+                Int32 len = input.Read(buffer, 0, 1024);
+                Int32 startPos = -1;
+
+                // Do we have a file name?
+                if (doc == null)
                 {
-                    Byte[] buffer = new Byte[1024];
-                    Int32 len = input.Read(buffer, 0, 1024);
-                    Int32 startPos = -1;
-
-                    // Find start boundary
-                    while (true)
+                    // Convert to string
+                    string sLine = buffer.FromBytes();
+                    // Find name
+                    Match c_Poss = Regex.Match(sLine, @"filename\x3D\x22(?<name>[^\x22]+)\x22");
+                    if (c_Poss.Success)
                     {
-                        if (len == 0)
+                        using (FolderClass c_Folder = new FolderClass(mgr, path))
                         {
-                            throw new Exception("Start Boundary Not Found");
-                        }
-
-                        startPos = buffer.IndexOf(len, boundaryBytes);
-                        if (startPos >= 0)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            Array.Copy(buffer, len - boundaryLen, buffer, 0, boundaryLen);
-                            len = input.Read(buffer, boundaryLen, 1024 - boundaryLen);
+                            // Make path
+                            c_Folder.AssurePath();
+                            // And map document
+                            doc = new DocumentClass(mgr, path.CombinePath(c_Poss.Groups["name"].Value));
                         }
                     }
+                }
 
-                    // Skip four lines (Boundary, Content-Disposition, Content-Type, and a blank)
-                    for (Int32 i = 0; i < 4; i++)
+                if (doc != null)
+                {
+                    using (FileStream output = new FileStream(doc.Location, FileMode.Create, FileAccess.Write))
                     {
+                        doc.Location.GetDirectoryFromPath().AssurePath();
+
+                        // Find start boundary
                         while (true)
                         {
                             if (len == 0)
                             {
-                                throw new Exception("Preamble not Found.");
+                                throw new Exception("Start Boundary Not Found");
                             }
 
-                            startPos = Array.IndexOf(buffer, call.Request.ContentEncoding.GetBytes("\n")[0], startPos);
+                            startPos = buffer.IndexOf(len, boundaryBytes);
                             if (startPos >= 0)
                             {
-                                startPos++;
                                 break;
                             }
                             else
                             {
-                                len = input.Read(buffer, 0, 1024);
+                                Array.Copy(buffer, len - boundaryLen, buffer, 0, boundaryLen);
+                                len = input.Read(buffer, boundaryLen, 1024 - boundaryLen);
                             }
                         }
-                    }
 
-                    Array.Copy(buffer, startPos, buffer, 0, len - startPos);
-                    len = len - startPos;
+                        // Skip four lines (Boundary, Content-Disposition, Content-Type, and a blank)
+                        for (Int32 i = 0; i < 4; i++)
+                        {
+                            while (true)
+                            {
+                                if (len == 0)
+                                {
+                                    throw new Exception("Preamble not Found.");
+                                }
 
-                    while (true)
-                    {
-                        Int32 endPos = buffer.IndexOf(len, boundaryBytes);
-                        if (endPos >= 0)
-                        {
-                            if (endPos > 0) output.Write(buffer, 0, endPos - 2);
-                            break;
+                                startPos = Array.IndexOf(buffer, call.Request.ContentEncoding.GetBytes("\n")[0], startPos);
+                                if (startPos >= 0)
+                                {
+                                    startPos++;
+                                    break;
+                                }
+                                else
+                                {
+                                    len = input.Read(buffer, 0, 1024);
+                                }
+                            }
                         }
-                        else if (len <= boundaryLen)
+
+                        Array.Copy(buffer, startPos, buffer, 0, len - startPos);
+                        len = len - startPos;
+
+                        while (true)
                         {
-                            throw new Exception("End Boundary Not Found");
-                        }
-                        else
-                        {
-                            output.Write(buffer, 0, len - boundaryLen);
-                            Array.Copy(buffer, len - boundaryLen, buffer, 0, boundaryLen);
-                            len = input.Read(buffer, boundaryLen, 1024 - boundaryLen) + boundaryLen;
+                            Int32 endPos = buffer.IndexOf(len, boundaryBytes);
+                            if (endPos >= 0)
+                            {
+                                if (endPos > 0) output.Write(buffer, 0, endPos - 2);
+                                break;
+                            }
+                            else if (len <= boundaryLen)
+                            {
+                                throw new Exception("End Boundary Not Found");
+                            }
+                            else
+                            {
+                                output.Write(buffer, 0, len - boundaryLen);
+                                Array.Copy(buffer, len - boundaryLen, buffer, 0, boundaryLen);
+                                len = input.Read(buffer, boundaryLen, 1024 - boundaryLen) + boundaryLen;
+                            }
                         }
                     }
                 }
@@ -164,20 +187,25 @@ namespace NX.Engine.Files
             }
             finally
             {
-                // Make the parameter
-                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Write, doc);
-
-                // Write to cloud
-                this.SignalChange(c_P);
-
-                // Was it handled?
-                if (c_P.Handled)
+                if (doc != null)
                 {
-                    // Delete so not to call cloud
-                    doc.Location.DeleteFile();
+                    // Make the parameter
+                    FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Write, doc);
+
+                    // Write to cloud
+                    this.SignalChange(c_P);
+
+                    // Was it handled?
+                    if (c_P.Handled)
+                    {
+                        // Delete so not to call cloud
+                        doc.Location.DeleteFile();
+                    }
                 }
                 call.RespondWithOK();
             }
+
+            return doc;
         }
 
         /// <summary>
