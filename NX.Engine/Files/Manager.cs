@@ -74,7 +74,6 @@ namespace NX.Engine.Files
                 Byte[] boundaryBytes = call.Request.ContentEncoding.GetBytes(this.GetBoundary(call.Request.ContentType));
                 Int32 boundaryLen = boundaryBytes.Length;
 
-
                 Byte[] buffer = new Byte[1024];
                 Int32 len = input.Read(buffer, 0, 1024);
                 Int32 startPos = -1;
@@ -100,6 +99,9 @@ namespace NX.Engine.Files
 
                 if (doc != null)
                 {
+                    // Assure path
+                    doc.Folder.AssurePath();
+
                     using (FileStream output = new FileStream(doc.Location, FileMode.Create, FileAccess.Write))
                     {
                         doc.Location.GetDirectoryFromPath().AssurePath();
