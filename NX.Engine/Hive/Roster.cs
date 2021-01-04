@@ -807,7 +807,7 @@ namespace NX.Engine.Hive
                     }
 
                     // Get the list of required worker bees
-                    List<string> c_Req = this.Parent.Parent.GetAsJArray("qd_worker").ToList();
+                    c_Req = this.Parent.Parent.GetAsJArray("qd_worker").ToList();
                     // Have at least one
                     if (c_Req.Count == 0) c_Req.Add("1");
                     // Parse
