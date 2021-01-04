@@ -24,9 +24,9 @@
 
   // Queens duties
 
-  "qd_uses": [ "Proc.NginX" ],
-  "qd_bumble": [ "redis" ],
-  "qd_worker": [ "1" ],
+  //"qd_uses": [ "Proc.NginX" ],
+  //"qd_bumble": [ "redis" ],
+  //"qd_worker": [ "1" ],
 
   "secure_code": "wqfmtohhofyzzrojnhvy", // The security code
   // From https://www.random.org/strings/?num=1&len=20&loweralpha=on&unique=on&format=html&rnd=new

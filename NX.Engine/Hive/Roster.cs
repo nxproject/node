@@ -759,8 +759,12 @@ namespace NX.Engine.Hive
                     // Refresh
                     this.Refresh();
 
+                    // Get the list
+                    List<string> c_Req = this.Parent.Parent.GetAsJArray("qd_uses").ToList();
+                    // Must have nginx
+                    if (!c_Req.Contains("Proc.NginX")) c_Req.Add("Proc.NginX");
                     // Get the list of required items
-                    ItemsClass c_Uses = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_uses"));
+                    ItemsClass c_Uses = new ItemsClass(c_Req);
                     // Add Traefik
                     if(this.Parent.Parent.TraefikHive.HasValue())
                     {
@@ -773,9 +777,12 @@ namespace NX.Engine.Hive
                         this.Parent.Parent.Use(c_Item.Priority);
                     }
 
-
+                    // Get list
+                    c_Req = this.Parent.Parent.GetAsJArray("qd_bumble").ToList();
+                    // Must have redis
+                    if (!c_Req.Contains("redis")) c_Req.Add("redis");
                     // Get the list of required bumble bees
-                    ItemsClass c_Requests = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_bumble"));
+                    ItemsClass c_Requests = new ItemsClass(c_Req);
 
                     // Do we not have redis?
                     if (!c_Requests.Contains("redis"))
@@ -800,7 +807,11 @@ namespace NX.Engine.Hive
                     }
 
                     // Get the list of required worker bees
-                    c_Requests = new ItemsClass(this.Parent.Parent.GetAsJArray("qd_worker").ToList());
+                    List<string> c_Req = this.Parent.Parent.GetAsJArray("qd_worker").ToList();
+                    // Have at least one
+                    if (c_Req.Count == 0) c_Req.Add("1");
+                    // Parse
+                    c_Requests = new ItemsClass(c_Req);
                     // Build table of procs vs. count
                     NamedListClass<int> c_Counts = new NamedListClass<int>();
                     // Loop thru
