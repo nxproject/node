@@ -717,6 +717,7 @@ namespace NX.Engine
             this.AddFn(new StaticFunction("datemonthname", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("MMMM"); }, 1, 1));
             this.AddFn(new StaticFunction("datedayofweek", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).DayOfWeek.ToString(); }, 1, 1));
             this.AddFn(new StaticFunction("datesortable", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("yyy-MM-dd hh:mm"); }, 1, 1));
+            this.AddFn(new StaticFunction("dateonlysortable", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("yyy-MM-dd"); }, 1, 1));
             this.AddFn(new StaticFunction("dateasfilename", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("yyyMMddhhmm"); }, 1, 1));
             this.AddFn(new StaticFunction("dateyear", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).Year; }, 1, 1));
             this.AddFn(new StaticFunction("datemonth", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).Month; }, 1, 1));

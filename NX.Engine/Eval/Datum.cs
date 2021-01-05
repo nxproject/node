@@ -53,7 +53,7 @@ namespace NX.Engine
         {
             // Assume no prefix
             this.Field = field;
-            this.Type = Types.Value;
+            this.Type = Types.Var;
             this.Prefix = "";
 
             //
@@ -84,6 +84,7 @@ namespace NX.Engine
                 }
                 else if ((this.Field.StartsWith("\"") && this.Field.EndsWith("\"")) || (this.Field.StartsWith("'") && this.Field.EndsWith("'")))
                 {
+                    this.Type = Types.Value;
                     this.Field = this.Field.Substring(1, this.Field.Length - 2);
                 }
             }
@@ -97,7 +98,8 @@ namespace NX.Engine
             Data,
             Store,
             Expression,
-            Document
+            Document,
+            Var
         }
         #endregion
 
@@ -110,8 +112,12 @@ namespace NX.Engine
 
                 switch (this.Type)
                 {
-                    case Types.Value:
+                    case Types.Var:
                         sAns = this.Parent.Vars[this.Field];
+                        break;
+
+                    case Types.Value:
+                        sAns = this.Field;
                         break;
 
                     case Types.Data:
@@ -137,7 +143,7 @@ namespace NX.Engine
             {
                 switch (this.Type)
                 {
-                    case Types.Value:
+                    case Types.Var:
                         this.Parent.Vars[this.Field] = value;
                         break;
 
@@ -394,7 +400,7 @@ namespace NX.Engine
 
             try
             {
-                var c_Ret = Expression.Evaluate(this.Parent, this.Field);
+                var c_Ret = Expression.Eval(this.Parent, this.Field);
 
                 if (!DatumClass.HideErrors && c_Ret.Error.HasValue())
                 {
