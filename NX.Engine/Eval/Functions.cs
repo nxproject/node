@@ -209,13 +209,13 @@ namespace NX.Engine
             {
                 return XCVT.ToDateTime(ps[0]).Date;
             }, 1, 1));
-                        this.AddFn(new StaticFunction("datesame", delegate (Context ctx, object[] ps)
-            {
-                DateTime c_Date0 = XCVT.ToDateTime(ps[0]);
-                DateTime c_Date1 = XCVT.ToDateTime(ps[1]);
+            this.AddFn(new StaticFunction("datesame", delegate (Context ctx, object[] ps)
+{
+    DateTime c_Date0 = XCVT.ToDateTime(ps[0]);
+    DateTime c_Date1 = XCVT.ToDateTime(ps[1]);
 
-                return c_Date0.Ticks == c_Date1.Ticks;
-            }, 2, 2));
+    return c_Date0.Ticks == c_Date1.Ticks;
+}, 2, 2));
             this.AddFn(new StaticFunction("datebefore", delegate (Context ctx, object[] ps)
             {
                 DateTime c_Date0 = XCVT.ToDateTime(ps[0]);
@@ -313,11 +313,11 @@ namespace NX.Engine
                 // The first if the if
                 bool ifte = XCVT.ToBoolean(ps[0]);
                 // If true, use second, otherwise third (if any)
-                if(ifte)
+                if (ifte)
                 {
-                    ans= XCVT.ToString(ps[1]);
+                    ans = XCVT.ToString(ps[1]);
                 }
-                else if(ps.Length == 3)
+                else if (ps.Length == 3)
                 {
                     ans = XCVT.ToString(ps[2]);
                 }
@@ -458,9 +458,9 @@ namespace NX.Engine
                 int len = XCVT.ToInt32(ps[2]) < sValue.Length - idx ? XCVT.ToInt32(ps[2]) : sValue.Length - idx;
                 return sValue.Substring(idx, len);
             }, 3, 3));
-            this.AddFn(new StaticFunction("startswith", delegate (Context ctx, object[] ps) 
-            { 
-                return XCVT.ToString(ps[0]).ToLower().StartsWith(XCVT.ToString(ps[1]).ToLower()); 
+            this.AddFn(new StaticFunction("startswith", delegate (Context ctx, object[] ps)
+            {
+                return XCVT.ToString(ps[0]).ToLower().StartsWith(XCVT.ToString(ps[1]).ToLower());
             }, 2, 2));
             this.AddFn(new StaticFunction("endswith", delegate (Context ctx, object[] ps)
             {
@@ -615,7 +615,6 @@ namespace NX.Engine
                     c_Ans = XCVT.ToString(ps[0]).Today();
                 }
                 return c_Ans.DateOnly().ToDBDate();
-                //return ExtensionsClass.Parse(ExtensionsClass.Now().AdjustTimezone(ctx.Env.Timezone).ToShortDateString()).ToUTCString();
             }, 0, 1));
             this.AddFn(new StaticFunction("now", delegate (Context ctx, object[] ps)
             {
@@ -629,13 +628,11 @@ namespace NX.Engine
                     c_Ans = XCVT.ToString(ps[0]).Now();
                 }
                 return c_Ans.ToDBDate();
-                //return ExtensionsClass.Now().AdjustTimezone(ctx.Env.Timezone).ToUTCString();
             }, 0, 1));
             this.AddFn(new StaticFunction("utcnow", delegate (Context ctx, object[] ps)
             {
                 DateTime c_Ans = "".DTNow();
                 return c_Ans.ToDBDate();
-                //return ExtensionsClass.Now().AdjustTimezone(ctx.Env.Timezone).ToUTCString();
             }, 0, 0));
             this.AddFn(new StaticFunction("timestamp", delegate (Context ctx, object[] ps)
             {
@@ -662,7 +659,7 @@ namespace NX.Engine
             }, 0, 2));
             this.AddFn(new StaticFunction("dateadjust", delegate (Context ctx, object[] ps)
             {
-                return XCVT.ToDateTime(ps[0]).AdjustTimezone(XCVT.ToString(ps[1])); 
+                return XCVT.ToDateTime(ps[0]).AdjustTimezone(XCVT.ToString(ps[1]));
             }, 2, 2));
             this.AddFn(new StaticFunction("datemonthabbrev", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("MMM"); }, 1, 1));
             this.AddFn(new StaticFunction("dateformal", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("MMMM d, yyyy"); }, 1, 1));
@@ -716,8 +713,20 @@ namespace NX.Engine
             }, 1, 1));
             this.AddFn(new StaticFunction("datemonthname", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("MMMM"); }, 1, 1));
             this.AddFn(new StaticFunction("datedayofweek", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).DayOfWeek.ToString(); }, 1, 1));
-            this.AddFn(new StaticFunction("datesortable", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("yyy-MM-dd hh:mm"); }, 1, 1));
-            this.AddFn(new StaticFunction("dateonlysortable", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("yyy-MM-dd"); }, 1, 1));
+            this.AddFn(new StaticFunction("datesortable", delegate (Context ctx, object[] ps)
+            {
+                DateTime c_Wkg = XCVT.ToDateTime(ps[0]);
+                if (ps.Length > 1) c_Wkg = c_Wkg.AdjustTimezone(XCVT.ToString(ps[1]), false);
+
+                return c_Wkg.FormattedAs("yyy-MM-dd HH:mm");
+            }, 1, 2));
+            this.AddFn(new StaticFunction("dateonlysortable", delegate (Context ctx, object[] ps)
+            {
+                DateTime c_Wkg = XCVT.ToDateTime(ps[0]);
+                if (ps.Length > 1) c_Wkg = c_Wkg.AdjustTimezone(XCVT.ToString(ps[1]), false);
+
+                return c_Wkg.FormattedAs("yyy-MM-dd");
+            }, 1, 2));
             this.AddFn(new StaticFunction("dateasfilename", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("yyyMMddhhmm"); }, 1, 1));
             this.AddFn(new StaticFunction("dateyear", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).Year; }, 1, 1));
             this.AddFn(new StaticFunction("datemonth", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).Month; }, 1, 1));
@@ -813,11 +822,34 @@ namespace NX.Engine
                     //}
                     //else
                     //{
-                        DateTime c_Date = XCVT.ToDateTime(ps[0]);
-                        sAns = c_Date.FormattedAs("hh:mm tt");
+                    DateTime c_Date = XCVT.ToDateTime(ps[0]);
+                    sAns = c_Date.FormattedAs("hh:mm tt");
                     //}
                 }
                 return sAns;
+            }, 1, 1));
+            this.AddFn(new StaticFunction("adjusttimezone", delegate (Context ctx, object[] ps)
+            {
+                //
+                DateTime c_Wkg = XCVT.ToDateTime(ps[0]);
+                string sTZ = XCVT.ToString(ps[1]);
+                bool bRev = false;
+                if (ps.Length == 3) bRev = XCVT.ToBoolean(ps[2]);
+
+                return c_Wkg.AdjustTimezone(sTZ, bRev);
+            }, 2, 3));
+            this.AddFn(new StaticFunction("istimezonevalid", delegate (Context ctx, object[] ps)
+            {
+                return XCVT.ToString(ps[0]).GetTimezone() != null;
+            }, 1, 1));
+            this.AddFn(new StaticFunction("timezoneoffset", delegate (Context ctx, object[] ps)
+            {
+                double iAns = 0;
+
+                TimeZoneInfo c_Info = XCVT.ToString(ps[0]).GetTimezone();
+                if (c_Info != null) iAns = c_Info.BaseUtcOffset.TotalMinutes;
+
+                return iAns;
             }, 1, 1));
             this.AddFn(new StaticFunction("datecompare", delegate (Context ctx, object[] ps)
             {
@@ -960,7 +992,7 @@ namespace NX.Engine
                             sFill = XCVT.ToString(ps[2]);
                         }
 
-                        StoreClass c_Wkg = StoreClass.Make( 
+                        StoreClass c_Wkg = StoreClass.Make(
                                                 "firstname", c_Addr.FirstName.IfEmpty(sFill),
                                                 "mi", c_Addr.MiddleInitial.IfEmpty(sFill),
                                                 "middlename", c_Addr.MiddleName.IfEmpty(sFill),
@@ -980,6 +1012,46 @@ namespace NX.Engine
 
                 return sAns;
             }, 1, 3));
+            this.Add("eamstext", new StaticFunction("eamstext", delegate (Context ctx, object[] ps)
+            {
+                return XCVT.ToString(ps[0]).RemoveExtraSpaces().Trim().ToUpper();
+            }, 1, 1));
+            this.Add("eams", new StaticFunction("eams", delegate (Context ctx, object[] ps)
+            {
+                return Regex.Replace(XCVT.ToString(ps[0]), @"[^\w]", " ").RemoveExtraSpaces().Trim().ToUpper();
+            }, 1, 1));
+            this.Add("eamsnumber", new StaticFunction("eamsnumber", delegate (Context ctx, object[] ps) { return Regex.Replace(XCVT.ToString(ps[0]), @"[^\d]", "").RemoveExtraSpaces().Trim().ToUpper(); }, 1, 1));
+            this.Add("eamsdate", new StaticFunction("eamsdate", delegate (Context ctx, object[] ps)
+            {
+                string sAns = "";
+
+                if (XCVT.ToString(ps[0]).HasValue())
+                {
+                    DateTime c_Date = XCVT.ToDateTime(ps[0]);
+                    sAns = c_Date.FormattedAs("MM/dd/yyyy");
+                }
+                return sAns;
+            }, 1, 1));
+            this.Add("eamsamt", new StaticFunction("eamsamt", delegate (Context ctx, object[] ps)
+            {
+                string sAns = "";
+
+                if (XCVT.ToString(ps[0]).HasValue())
+                {
+                    sAns = "{0:0.00}".FormatString(XCVT.ToDouble(ps[0]));
+                }
+                return sAns;
+            }, 1, 1));
+            this.Add("ssignature", new StaticFunction("ssignature", delegate (Context ctx, object[] ps)
+            {
+                string sAns = XCVT.ToString(ps[0]).ToUpper();
+
+                if (sAns.HasValue())
+                {
+                    if (!sAns.StartsWith("S ")) sAns = "S " + sAns;
+                }
+                return sAns;
+            }, 1, 1));
         }
         #endregion
 
@@ -991,141 +1063,141 @@ namespace NX.Engine
         /// </summary>
         /// <returns></returns>
         public override string ToString()
+{
+    JObject c_Ans = new JObject();
+
+    List<string> c_Fns = new List<string>(this.Keys);
+    c_Fns.Sort();
+
+    foreach (string sKey in c_Fns)
+    {
+        Function c_Func = this[sKey];
+        c_Ans.Set(c_Func.Formatted, c_Func.Explanation.IfEmpty());
+    }
+
+    return c_Ans.ToSimpleString();
+}
+
+private void AddFn(Function fn)
+{
+    this.Add(fn.FN, fn);
+}
+
+private object Nth(Context ctx, object[] ps, int index)
+{
+    string sAns = null;
+
+    if (ps.Length > 0)
+    {
+        if (index > 0)
         {
-            JObject c_Ans = new JObject();
-
-            List<string> c_Fns = new List<string>(this.Keys);
-            c_Fns.Sort();
-
-            foreach (string sKey in c_Fns)
+            for (int i = 0; i < ps.Length; i++)
             {
-                Function c_Func = this[sKey];
-                c_Ans.Set(c_Func.Formatted, c_Func.Explanation.IfEmpty());
-            }
-
-            return c_Ans.ToSimpleString();
-        }
-
-        private void AddFn(Function fn)
-        {
-            this.Add(fn.FN, fn);
-        }
-
-        private object Nth(Context ctx, object[] ps, int index)
-        {
-            string sAns = null;
-
-            if (ps.Length > 0)
-            {
-                if (index > 0)
+                if (ps[i] != null)
                 {
-                    for (int i = 0; i < ps.Length; i++)
+                    string sWkg = XCVT.ToString(ps[i]);
+                    if (sWkg.HasValue())
                     {
-                        if (ps[i] != null)
+                        index--;
+                        if (index == 0)
                         {
-                            string sWkg = XCVT.ToString(ps[i]);
-                            if (sWkg.HasValue())
-                            {
-                                index--;
-                                if (index == 0)
-                                {
-                                    sAns = sWkg;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (index < 0)
-                {
-                    for (int i = ps.Length - 1; i >= 0; i--)
-                    {
-                        if (ps[i] != null)
-                        {
-                            string sWkg = XCVT.ToString(ps[i]);
-                            if (sWkg.HasValue())
-                            {
-                                index++;
-                                if (index == 0)
-                                {
-                                    sAns = sWkg;
-                                    break;
-                                }
-                            }
+                            sAns = sWkg;
+                            break;
                         }
                     }
                 }
             }
-
-            return sAns;
         }
-
-        private object HTML(object ps, string attr)
+        else if (index < 0)
         {
-            return @"<{0}>".FormatString(attr) +
-                        System.Net.WebUtility.HtmlEncode(XCVT.ToString(ps)) +
-                        @"</{0}>".FormatString(attr);
-        }
-
-        private object Choice(Context ctx, object[] ps)
-        {
-            string ans = "";
-
-            // The first one is what we are looking for
-            string sKey = XCVT.ToString(ps[0]);
-            // If even count, the last is the default
-            if (0 == (ps.Length % 2)) ans = XCVT.ToString(ps[ps.Length - 1]);
-
-            // We look for each set, skipping last one if odd
-            for (int iLoop = 1; iLoop < (ps.Length - 1); iLoop++)
+            for (int i = ps.Length - 1; i >= 0; i--)
             {
-                // Get the value
-                string sMatch = XCVT.ToString(ps[iLoop]);
-                if (sMatch.IsSameValue(sKey))
+                if (ps[i] != null)
                 {
-                    // Found!
-                    ans = XCVT.ToString(ps[iLoop + 1]);
-                    break;
+                    string sWkg = XCVT.ToString(ps[i]);
+                    if (sWkg.HasValue())
+                    {
+                        index++;
+                        if (index == 0)
+                        {
+                            sAns = sWkg;
+                            break;
+                        }
+                    }
                 }
             }
-            return ans;
         }
+    }
 
-        private object Avg(Context ctx, object[] ps)
+    return sAns;
+}
+
+private object HTML(object ps, string attr)
+{
+    return @"<{0}>".FormatString(attr) +
+                System.Net.WebUtility.HtmlEncode(XCVT.ToString(ps)) +
+                @"</{0}>".FormatString(attr);
+}
+
+private object Choice(Context ctx, object[] ps)
+{
+    string ans = "";
+
+    // The first one is what we are looking for
+    string sKey = XCVT.ToString(ps[0]);
+    // If even count, the last is the default
+    if (0 == (ps.Length % 2)) ans = XCVT.ToString(ps[ps.Length - 1]);
+
+    // We look for each set, skipping last one if odd
+    for (int iLoop = 1; iLoop < (ps.Length - 1); iLoop++)
+    {
+        // Get the value
+        string sMatch = XCVT.ToString(ps[iLoop]);
+        if (sMatch.IsSameValue(sKey))
         {
-            double avg = 0;
-
-            if (ps.Length > 1)
-            {
-                foreach (object o in ps)
-                {
-                    avg += XCVT.ToDouble(o);
-                }
-
-                avg = avg / ps.Length;
-            }
-
-            return avg;
+            // Found!
+            ans = XCVT.ToString(ps[iLoop + 1]);
+            break;
         }
+    }
+    return ans;
+}
 
-        private object Var(Context ctx, object[] ps)
+private object Avg(Context ctx, object[] ps)
+{
+    double avg = 0;
+
+    if (ps.Length > 1)
+    {
+        foreach (object o in ps)
         {
-            double total = 0;
-
-            if (ps.Length > 1)
-            {
-                double avg = XCVT.ToDouble(this.Avg(ctx, ps));
-
-                foreach (object o in ps)
-                {
-                    total += (XCVT.ToDouble(o) - avg) * (XCVT.ToDouble(o) - avg);
-                }
-
-                total = total / (ps.Length - 1);
-            }
-
-            return total;
+            avg += XCVT.ToDouble(o);
         }
+
+        avg = avg / ps.Length;
+    }
+
+    return avg;
+}
+
+private object Var(Context ctx, object[] ps)
+{
+    double total = 0;
+
+    if (ps.Length > 1)
+    {
+        double avg = XCVT.ToDouble(this.Avg(ctx, ps));
+
+        foreach (object o in ps)
+        {
+            total += (XCVT.ToDouble(o) - avg) * (XCVT.ToDouble(o) - avg);
+        }
+
+        total = total / (ps.Length - 1);
+    }
+
+    return total;
+}
         #endregion
     }
 }

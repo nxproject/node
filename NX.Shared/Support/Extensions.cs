@@ -372,6 +372,11 @@ namespace NX.Shared
 
             return value;
         }
+
+        public static string RemoveExtraSpaces(this string value)
+        {
+            return Regex.Replace(value, @"\s+", " ");
+        }
         #endregion
 
         #region Splitters
@@ -4165,7 +4170,7 @@ namespace NX.Shared
                 var timeZones = TimeZoneInfo.GetSystemTimeZones();
                 foreach (var timeZone in timeZones)
                 {
-                    ITimeZones.Add(timeZone.DisplayName, timeZone);
+                    ITimeZones.Add(timeZone.Id, timeZone);
                 }
             }
 
