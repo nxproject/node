@@ -1052,6 +1052,12 @@ namespace NX.Engine
                 }
                 return sAns;
             }, 1, 1));
+
+            // Add extensions
+            if (FunctionsDefinitions.AddExtensions != null)
+            {
+                FunctionsDefinitions.AddExtensions(this);
+            }
         }
         #endregion
 
@@ -1063,141 +1069,145 @@ namespace NX.Engine
         /// </summary>
         /// <returns></returns>
         public override string ToString()
-{
-    JObject c_Ans = new JObject();
-
-    List<string> c_Fns = new List<string>(this.Keys);
-    c_Fns.Sort();
-
-    foreach (string sKey in c_Fns)
-    {
-        Function c_Func = this[sKey];
-        c_Ans.Set(c_Func.Formatted, c_Func.Explanation.IfEmpty());
-    }
-
-    return c_Ans.ToSimpleString();
-}
-
-private void AddFn(Function fn)
-{
-    this.Add(fn.FN, fn);
-}
-
-private object Nth(Context ctx, object[] ps, int index)
-{
-    string sAns = null;
-
-    if (ps.Length > 0)
-    {
-        if (index > 0)
         {
-            for (int i = 0; i < ps.Length; i++)
+            JObject c_Ans = new JObject();
+
+            List<string> c_Fns = new List<string>(this.Keys);
+            c_Fns.Sort();
+
+            foreach (string sKey in c_Fns)
             {
-                if (ps[i] != null)
+                Function c_Func = this[sKey];
+                c_Ans.Set(c_Func.Formatted, c_Func.Explanation.IfEmpty());
+            }
+
+            return c_Ans.ToSimpleString();
+        }
+
+        public void AddFn(Function fn)
+        {
+            this.Add(fn.FN, fn);
+        }
+
+        private object Nth(Context ctx, object[] ps, int index)
+        {
+            string sAns = null;
+
+            if (ps.Length > 0)
+            {
+                if (index > 0)
                 {
-                    string sWkg = XCVT.ToString(ps[i]);
-                    if (sWkg.HasValue())
+                    for (int i = 0; i < ps.Length; i++)
                     {
-                        index--;
-                        if (index == 0)
+                        if (ps[i] != null)
                         {
-                            sAns = sWkg;
-                            break;
+                            string sWkg = XCVT.ToString(ps[i]);
+                            if (sWkg.HasValue())
+                            {
+                                index--;
+                                if (index == 0)
+                                {
+                                    sAns = sWkg;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (index < 0)
+                {
+                    for (int i = ps.Length - 1; i >= 0; i--)
+                    {
+                        if (ps[i] != null)
+                        {
+                            string sWkg = XCVT.ToString(ps[i]);
+                            if (sWkg.HasValue())
+                            {
+                                index++;
+                                if (index == 0)
+                                {
+                                    sAns = sWkg;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
             }
+
+            return sAns;
         }
-        else if (index < 0)
+
+        private object HTML(object ps, string attr)
         {
-            for (int i = ps.Length - 1; i >= 0; i--)
+            return @"<{0}>".FormatString(attr) +
+                        System.Net.WebUtility.HtmlEncode(XCVT.ToString(ps)) +
+                        @"</{0}>".FormatString(attr);
+        }
+
+        private object Choice(Context ctx, object[] ps)
+        {
+            string ans = "";
+
+            // The first one is what we are looking for
+            string sKey = XCVT.ToString(ps[0]);
+            // If even count, the last is the default
+            if (0 == (ps.Length % 2)) ans = XCVT.ToString(ps[ps.Length - 1]);
+
+            // We look for each set, skipping last one if odd
+            for (int iLoop = 1; iLoop < (ps.Length - 1); iLoop++)
             {
-                if (ps[i] != null)
+                // Get the value
+                string sMatch = XCVT.ToString(ps[iLoop]);
+                if (sMatch.IsSameValue(sKey))
                 {
-                    string sWkg = XCVT.ToString(ps[i]);
-                    if (sWkg.HasValue())
-                    {
-                        index++;
-                        if (index == 0)
-                        {
-                            sAns = sWkg;
-                            break;
-                        }
-                    }
+                    // Found!
+                    ans = XCVT.ToString(ps[iLoop + 1]);
+                    break;
                 }
             }
+            return ans;
         }
-    }
 
-    return sAns;
-}
-
-private object HTML(object ps, string attr)
-{
-    return @"<{0}>".FormatString(attr) +
-                System.Net.WebUtility.HtmlEncode(XCVT.ToString(ps)) +
-                @"</{0}>".FormatString(attr);
-}
-
-private object Choice(Context ctx, object[] ps)
-{
-    string ans = "";
-
-    // The first one is what we are looking for
-    string sKey = XCVT.ToString(ps[0]);
-    // If even count, the last is the default
-    if (0 == (ps.Length % 2)) ans = XCVT.ToString(ps[ps.Length - 1]);
-
-    // We look for each set, skipping last one if odd
-    for (int iLoop = 1; iLoop < (ps.Length - 1); iLoop++)
-    {
-        // Get the value
-        string sMatch = XCVT.ToString(ps[iLoop]);
-        if (sMatch.IsSameValue(sKey))
+        private object Avg(Context ctx, object[] ps)
         {
-            // Found!
-            ans = XCVT.ToString(ps[iLoop + 1]);
-            break;
+            double avg = 0;
+
+            if (ps.Length > 1)
+            {
+                foreach (object o in ps)
+                {
+                    avg += XCVT.ToDouble(o);
+                }
+
+                avg = avg / ps.Length;
+            }
+
+            return avg;
         }
-    }
-    return ans;
-}
 
-private object Avg(Context ctx, object[] ps)
-{
-    double avg = 0;
-
-    if (ps.Length > 1)
-    {
-        foreach (object o in ps)
+        private object Var(Context ctx, object[] ps)
         {
-            avg += XCVT.ToDouble(o);
+            double total = 0;
+
+            if (ps.Length > 1)
+            {
+                double avg = XCVT.ToDouble(this.Avg(ctx, ps));
+
+                foreach (object o in ps)
+                {
+                    total += (XCVT.ToDouble(o) - avg) * (XCVT.ToDouble(o) - avg);
+                }
+
+                total = total / (ps.Length - 1);
+            }
+
+            return total;
         }
+        #endregion
 
-        avg = avg / ps.Length;
-    }
-
-    return avg;
-}
-
-private object Var(Context ctx, object[] ps)
-{
-    double total = 0;
-
-    if (ps.Length > 1)
-    {
-        double avg = XCVT.ToDouble(this.Avg(ctx, ps));
-
-        foreach (object o in ps)
-        {
-            total += (XCVT.ToDouble(o) - avg) * (XCVT.ToDouble(o) - avg);
-        }
-
-        total = total / (ps.Length - 1);
-    }
-
-    return total;
-}
+        #region Statics
+        public static Action<FunctionsDefinitions> AddExtensions { get; set; }
         #endregion
     }
 }
