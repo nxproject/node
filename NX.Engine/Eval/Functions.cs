@@ -1052,12 +1052,6 @@ namespace NX.Engine
                 }
                 return sAns;
             }, 1, 1));
-
-            // Add extensions
-            if (FunctionsDefinitions.AddExtensions != null)
-            {
-                FunctionsDefinitions.AddExtensions(this);
-            }
         }
         #endregion
 
@@ -1204,10 +1198,6 @@ namespace NX.Engine
 
             return total;
         }
-        #endregion
-
-        #region Statics
-        public static Action<FunctionsDefinitions> AddExtensions { get; set; }
         #endregion
     }
 }

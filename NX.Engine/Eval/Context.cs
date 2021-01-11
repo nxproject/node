@@ -47,9 +47,6 @@ namespace NX.Engine
             // Start anew
             this.Reset();
 
-            // And load the functions
-            if (IFunctions == null) IFunctions = new FunctionsDefinitions();
-
             // The callback
             this.Callback = cb;
 
@@ -117,15 +114,7 @@ namespace NX.Engine
         /// The functions
         /// 
         /// </summary>
-        public FunctionsDefinitions Functions
-        {
-            get
-            {
-                if (IFunctions == null) IFunctions = new FunctionsDefinitions();
-
-                return IFunctions;
-            }
-        }
+        public FunctionsDefinitions Functions {  get { return FunctionsTable; } }
         #endregion
 
         #region Methods
@@ -139,7 +128,18 @@ namespace NX.Engine
         #endregion
 
         #region Statics
-        public static FunctionsDefinitions IFunctions { get; set; }
+        private static FunctionsDefinitions IFunctionsTable { get; set; }
+        public static FunctionsDefinitions FunctionsTable 
+        { 
+            get
+            {
+                if(IFunctionsTable == null)
+                {
+                    IFunctionsTable = new FunctionsDefinitions();
+                }
+                return IFunctionsTable;
+            }
+        }
         #endregion
     }
 }
