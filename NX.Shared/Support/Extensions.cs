@@ -3439,7 +3439,7 @@ namespace NX.Shared
                     break;
 
                 case "ts":
-                    eAns = ExtensionTypes.TS;
+                    eAns = ExtensionTypes.Javascript;
                     break;
 
                 case "json":
