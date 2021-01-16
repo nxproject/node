@@ -325,6 +325,11 @@ namespace NX.Shared
             return Regex.Replace(value, @"[^0-9]", "");
         }
 
+        public static bool IsNumOnly(this string value)
+        {
+            return Regex.Match(value, @"^[+-]?(?:\d+\.?\d*|\d*\.?\d+)$").Success;
+        }
+
         public static string TrailingNumber(this string value)
         {
             string sAns = null;
@@ -3433,6 +3438,10 @@ namespace NX.Shared
                     eAns = ExtensionTypes.Javascript;
                     break;
 
+                case "ts":
+                    eAns = ExtensionTypes.TS;
+                    break;
+
                 case "json":
                 case "txt":
                 case "cs":
@@ -3865,6 +3874,10 @@ namespace NX.Shared
                     sContent = "text/xml";
                     break;
 
+                case ExtensionTypes.TS:
+                    sContent = "text/x.typescript";
+                    break;
+
                 default:
                     sContent = "application/octect-stream";
                     break;
@@ -3956,7 +3969,8 @@ namespace NX.Shared
             ODT,
             CSS,
             Javascript,
-            SVG
+            SVG,
+            TS
         }
         #endregion
 

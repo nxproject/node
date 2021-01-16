@@ -244,6 +244,45 @@ namespace NX.Engine
 
                 return c_Date0.Ticks >= c_Date1.Ticks;
             }, 2, 2));
+            this.AddFn(new StaticFunction("timeelapsed", delegate (Context ctx, object[] ps)
+            {
+                double dAns = 0;
+
+                DateTime c_Date0 = XCVT.ToDateTime(ps[0]);
+                DateTime c_Date1 = DateTime.Now;
+                string sType = "d";
+
+                // Handle optional
+                for(int i=1;i < ps.Length;i++)
+                {
+                    string sPoss = XCVT.ToString(ps[i]);
+                    if(sPoss.Length < 2)
+                    {
+                        sType = sPoss;
+                    }
+                    else
+                    {
+                        c_Date1 = XCVT.ToDateTime(ps[i]);
+                    }
+                }
+                // calculate time span
+                TimeSpan c_Span = c_Date0.Subtract(c_Date1);
+                // By type
+                switch(sType)
+                {
+                    case "m":
+                        dAns = c_Span.TotalMinutes;
+                        break;
+                    case "s":
+                        dAns = c_Span.TotalSeconds;
+                        break;
+                    default:
+                        dAns = c_Span.TotalDays;
+                        break;
+                }
+
+                return dAns;
+            }, 1, 3));
             this.AddFn(new StaticFunction("todate", delegate (Context ctx, object[] ps)
             {
                 return XCVT.ToDateTime(ps[0]).ToDBDate();
