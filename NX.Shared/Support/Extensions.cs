@@ -3875,7 +3875,7 @@ namespace NX.Shared
                     break;
 
                 case ExtensionTypes.TS:
-                    sContent = "text/x.typescript";
+                    sContent = "application/x-typescript";
                     break;
 
                 default:
