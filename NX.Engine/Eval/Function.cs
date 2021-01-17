@@ -26,6 +26,8 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 namespace NX.Engine
 {
     public delegate object FunctionDelegate(Context ctx, object[] parameters);
@@ -35,7 +37,7 @@ namespace NX.Engine
         /// <summary>
         /// define the arguments of the dynamic function
         /// </summary>
-        public Variables Arguments { get; protected set; } 
+        public Variables Arguments { get; protected set; }
 
         /// <summary>
         /// name of the function
@@ -52,13 +54,16 @@ namespace NX.Engine
         /// </summary>
         public int MinParameters { get; protected set; }
 
-        public abstract object Eval(Context ctx, object[] parameters, ParseTreeEvaluator tree);
-
-
         /// <summary>
-        /// The explanation (Added by JG)
+        /// 
+        /// Evaluation engine
+        /// 
         /// </summary>
-        public string Explanation { get; protected set; }
+        /// <param name="ctx"></param>
+        /// <param name="parameters"></param>
+        /// <param name="tree"></param>
+        /// <returns></returns>
+        public abstract object Eval(Context ctx, object[] parameters, ParseTreeEvaluator tree);
 
         /// <summary>
         /// 
@@ -71,7 +76,7 @@ namespace NX.Engine
             {
                 string sAns = this.FN + "(";
 
-                for(int iLoop =0; iLoop< this.MinParameters;iLoop++)
+                for (int iLoop = 0; iLoop < this.MinParameters; iLoop++)
                 {
                     if (iLoop != 0) sAns += ",";
                     sAns += System.Convert.ToChar(iLoop);
@@ -82,6 +87,20 @@ namespace NX.Engine
                 return sAns;
             }
         }
+
+        /// <summary>
+        /// 
+        /// The descrition of the function
+        /// 
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// 
+        /// The description of the parameters
+        /// 
+        /// </summary>
+        public List<ParameterDefinitionClass> Parameters { get; set; }
     }
 
     public class StaticFunction : Function
@@ -96,13 +115,20 @@ namespace NX.Engine
             return FunctionDelegate(ctx, parameters);
         }
 
-        public StaticFunction(string name, FunctionDelegate function, int minParameters = 0, int maxParameters = 0)
+        public StaticFunction(string name,
+                                FunctionDelegate function,
+                                int minParameters,
+                                int maxParameters,
+                                string desc,
+                                params ParameterDefinitionClass[] parameters)
         {
             FN = name;
             FunctionDelegate = function;
             MinParameters = minParameters;
             MaxParameters = maxParameters;
-            Arguments = new Variables(null);            
+            Arguments = new Variables(null);
+            Description = desc;
+            Parameters = new List<ParameterDefinitionClass>(parameters);
         }
     }
 }
