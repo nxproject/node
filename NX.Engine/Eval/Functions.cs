@@ -35,6 +35,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Text;
 
 using Newtonsoft.Json.Linq;
 
@@ -1384,6 +1385,51 @@ namespace NX.Engine
             }
 
             return total;
+        }
+
+        /// <summary>
+        /// 
+        /// Writes the documentaation to a file
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        public void Document(string path)
+        {
+            //
+            StringBuilder c_Buffer = new StringBuilder();
+
+            //
+            int iCols = 0;
+
+            // :oop thru
+            foreach(string sFN in this.Keys)
+            {
+                Function c_FN = this[sFN];
+                // Base
+                string sLine = "|" + sFN + "|" + c_FN.Formatted + "|";
+                // Adjust count
+                if (iCols < c_FN.Parameters.Count) iCols = c_FN.Parameters.Count;
+                // Loop thru
+                foreach (ParameterDefinitionClass c_P in c_FN.Parameters)
+                {
+                    sLine+= c_P.Description + " (" + c_P.Type + ")|";
+                }
+                // Add
+                c_Buffer.AppendLine(sLine);
+            }
+
+            // Make header
+            string sHeader = "|Function|Format|Params|\n|";
+            while(iCols > 1)
+            {
+                sHeader += " |";
+                iCols--;
+            }
+
+            // Make
+            string sText = sHeader + "\n" + c_Buffer.ToString();
+            // Write
+            path.WriteFile(sText);
         }
         #endregion
     }
