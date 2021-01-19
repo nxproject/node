@@ -230,6 +230,8 @@ namespace NX.Engine
 
                     case "wd":
                     case "force_queen":
+                    case "document_fn":
+                    case "document_task":
 
                         eAns = SetOptions.SaveButLocal;
                         break;
