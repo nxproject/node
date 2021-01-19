@@ -128,6 +128,16 @@ namespace NX.Engine
         {
             return this.Values.Contains(key);
         }
+
+        /// <summary>
+        /// 
+        /// Removes all entries
+        /// 
+        /// </summary>
+        public void Clear()
+        {
+            this.Values = new NamedListClass<T>();
+        }
         #endregion
     }
 }
