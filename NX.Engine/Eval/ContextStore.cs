@@ -138,6 +138,17 @@ namespace NX.Engine
         {
             this.Values = new NamedListClass<T>();
         }
+
+        /// <summary>
+        /// 
+        /// Removes an entry
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        public void Remove(string key)
+        {
+            this.Values.Remove(key);
+        }
         #endregion
     }
 }
