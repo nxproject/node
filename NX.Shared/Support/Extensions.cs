@@ -522,7 +522,7 @@ namespace NX.Shared
         /// </summary>
         /// <param name="value">The string to be capitalized</param>
         /// <returns>The capitalized string</returns>
-        public static string SmartCaps(this string value)
+        public static string SmartCaps(this string value, bool all = true)
         {
             string sAns = string.Empty;
 
@@ -545,6 +545,15 @@ namespace NX.Shared
                     {
                         sAns += sDel + saWkg[iLoop].SmartCaps();
                         sDel = c_M.Value;
+
+                        if (!all)
+                        {
+                            for (int iLoop2 = iLoop + 1; iLoop2 <= saWkg.GetUpperBound(0); iLoop2++)
+                            {
+                                sAns += sDel + saWkg[iLoop2];
+                            }
+                            break;
+                        }
                     }
                 }
                 else
@@ -3248,7 +3257,7 @@ namespace NX.Shared
 
         public static List<string> GetTreeInPath(this string path, string patt = "*")
         {
-            List<string> c_Ans =  new List<string>(Directory.GetFiles(path.AdjustPathToOS(), patt, SearchOption.AllDirectories));
+            List<string> c_Ans = new List<string>(Directory.GetFiles(path.AdjustPathToOS(), patt, SearchOption.AllDirectories));
 
             return c_Ans;
         }

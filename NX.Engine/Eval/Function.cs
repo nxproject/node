@@ -79,7 +79,7 @@ namespace NX.Engine
                 for (int iLoop = 0; iLoop < this.MinParameters; iLoop++)
                 {
                     if (iLoop != 0) sAns += ",";
-                    sAns += System.Convert.ToChar(iLoop);
+                    sAns += System.Convert.ToChar(97 + iLoop);
                 }
 
                 sAns += ")";

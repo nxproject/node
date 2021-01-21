@@ -446,6 +446,40 @@ namespace NX.Engine.Files
                 }
             }
         }
+
+        /// <summary>
+        /// 
+        /// Writes to file as a stream
+        /// 
+        /// </summary>
+        /// <param name="cb">The callback using a stream</param>
+        public void AsWriteStream(Action<Stream> cb)
+        {
+            // Make the parameter
+            FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.GetStream, this);
+            c_P.StreamCallback = cb;
+
+            // Get from cloud
+            this.Parent.SignalChange(c_P);
+
+            // Is MinIO there?
+            if (!c_P.Handled)
+            {
+                // Open
+                using (FileStream c_Stream = new FileStream(this.Path, FileMode.Create, FileAccess.Write))
+                {
+                    // Call
+                    cb(c_Stream);
+
+                    // Close
+                    try
+                    {
+                        c_Stream.Close();
+                    }
+                    catch { }
+                }
+            }
+        }
         #endregion
 
         #region Backups

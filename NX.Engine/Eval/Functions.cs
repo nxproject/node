@@ -455,16 +455,16 @@ namespace NX.Engine
 
                 return sAns;
             }, 3, 3,
-            "returns the concatenation of two values.  The delimiter is used only if both values are not empty",
+            "Returns the concatenation of two values.  The delimiter is used only if both values are not empty",
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The leading value"),
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The trailing value"),
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The delimiter")));
             this.AddFn(new StaticFunction("choice", this.Choice, 1, int.MaxValue,
-                "returns a value from a list, using teh first value as the selector",
+                "Returns a value from a list, using teh first value as the selector",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The seletion value"),
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "One or more values to be selected")));
             this.AddFn(new StaticFunction("case", this.Choice, 1, int.MaxValue,
-                "returns a value from a list, using teh first value as the selector",
+                "Returns a value from a list, using teh first value as the selector",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The seletion value"),
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "One or more values to be selected")));
             this.AddFn(new StaticFunction("ifte", delegate (Context ctx, object[] ps)
@@ -623,7 +623,7 @@ namespace NX.Engine
                 "retruns the value with leading and trailing spaces emoved",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
             this.AddFn(new StaticFunction("rtrim", delegate (Context ctx, object[] ps) { return XCVT.ToString(ps[0]).TrimEnd(); }, 1, 1,
-                "returns the value with trailing spaces removed",
+                "Returns the value with trailing spaces removed",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
             this.AddFn(new StaticFunction("ltrim", delegate (Context ctx, object[] ps) { return XCVT.ToString(ps[0]).TrimStart(); }, 1, 1,
                 "Returns the value with leading spaces removed",
@@ -688,14 +688,14 @@ namespace NX.Engine
             "Returns the value encrypted as a password",
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
             this.AddFn(new StaticFunction("hex", delegate (Context ctx, object[] ps) { return String.Format("0x{0:X}", XCVT.ToInt32(ps[0])); }, 1, 1,
-                "returns the hex representation of a numeric value",
+                "Returns the hex representation of a numeric value",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
             this.AddFn(new StaticFunction("format", delegate (Context ctx, object[] ps) { return string.Format("{0:" + XCVT.ToString(ps[0]) + "}", ps[1]); }, 2, 2,
                 "Returns a formatted value",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The format as a C# format"),
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
             this.AddFn(new StaticFunction("len", delegate (Context ctx, object[] ps) { return XCVT.ToDouble(XCVT.ToString(ps[0]).Length); }, 1, 1,
-                "returns the length of a value",
+                "Returns the length of a value",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
             this.AddFn(new StaticFunction("lower", delegate (Context ctx, object[] ps) { return XCVT.ToString(ps[0]).ToLowerInvariant(); }, 1, 1,
                 "Returns the lowercase representation of a value",
@@ -704,7 +704,7 @@ namespace NX.Engine
                 "Returns the uppercase representation of a value",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
             this.AddFn(new StaticFunction("capword", delegate (Context ctx, object[] ps) { return WesternNameClass.CapEachWord(XCVT.ToString(ps[0])); }, 1, 1,
-                "returns the value with each word capitalized",
+                "Returns the value with each word capitalized",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
             this.AddFn(new StaticFunction("word", delegate (Context ctx, object[] ps)
             {
@@ -918,7 +918,7 @@ namespace NX.Engine
             {
                 return XCVT.ToDateTime(ps[0]).AdjustTimezone(XCVT.ToString(ps[1]));
             }, 2, 2,
-            "returns the timezone adjusted date an time",
+            "Returns the timezone adjusted date an time",
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value"),
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The timezone")));
             this.AddFn(new StaticFunction("datemonthabbrev", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("MMM"); }, 1, 1,
@@ -981,7 +981,7 @@ namespace NX.Engine
                 }
                 return sAns;
             }, 1, 1,
-            "returns the day of the month in ordinal format",
+            "Returns the day of the month in ordinal format",
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The date value")));
             this.AddFn(new StaticFunction("datemonthname", delegate (Context ctx, object[] ps) { return XCVT.ToDateTime(ps[0]).FormattedAs("MMMM"); }, 1, 1,
                 "Returns the name of the month",
@@ -1135,7 +1135,7 @@ namespace NX.Engine
 
                 return c_Wkg.AdjustTimezone(sTZ, bRev);
             }, 2, 3,
-            "returns an timezone adjusted date and time",
+            "Returns an timezone adjusted date and time",
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The date value"),
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The timezone"),
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Optional, "True is the reverse adjustemnt is to take place")));
@@ -1163,7 +1163,7 @@ namespace NX.Engine
 
                 return c_Date1.CompareTo(c_Date2);
             }, 2, 2,
-            "returns the number of days difference between to dates",
+            "Returns the number of days difference between to dates",
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The base date value"),
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The second date value")));
 
@@ -1401,33 +1401,45 @@ namespace NX.Engine
             //
             int iCols = 0;
 
+            // Get the list
+            List<string> c_Fns = new List<string> (this.Keys);
+            // Sort
+            c_Fns.Sort();
+
             // :oop thru
-            foreach(string sFN in this.Keys)
+            foreach (string sFN in c_Fns)
             {
                 Function c_FN = this[sFN];
+
+                string sDesc = c_FN.Description;
+                if (sDesc.StartsWith("Returns ")) sDesc = sDesc.Substring(8);
+                sDesc = WesternNameClass.CapFirstWord(sDesc);
+
                 // Base
-                string sLine = "|" + sFN + "|" + c_FN.Formatted + "|";
+                string sLine = "|" + sFN + "|" + c_FN.Formatted + "|" + sDesc + "|";
                 // Adjust count
                 if (iCols < c_FN.Parameters.Count) iCols = c_FN.Parameters.Count;
                 // Loop thru
                 foreach (ParameterDefinitionClass c_P in c_FN.Parameters)
                 {
-                    sLine+= c_P.Description + " (" + c_P.Type + ")|";
+                    sLine+= c_P.Description + " (" + c_P.Type.ToString() + ")|";
                 }
                 // Add
                 c_Buffer.AppendLine(sLine);
             }
 
             // Make header
-            string sHeader = "|Function|Format|Params|\n|";
-            while(iCols > 1)
+            string sHeader = "|Function|Format|Returns|'";
+            string sDelim = "|-|-|-|";
+
+            for(int iCol = 0; iCol < iCols;iCol++)
             {
-                sHeader += " |";
-                iCols--;
+                sHeader += System.Convert.ToChar(97 + iCol) + "|";
+                sDelim += "-|";
             }
 
             // Make
-            string sText = sHeader + "\n" + c_Buffer.ToString();
+            string sText = sHeader + "\n" + sDelim + "\n" + c_Buffer.ToString();
             // Write
             path.WriteFile(sText);
         }

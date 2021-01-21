@@ -81,6 +81,26 @@ namespace NX.Engine
 
             return sAns;
         }
+
+        public static string CapFirstWord(string value)
+        {
+            string sAns = null;
+
+            if (value != null)
+            {
+                sAns = string.Empty;
+                string sWkg = value; //.ToLower();
+
+                while (sWkg.IndexOf("  ") != -1) sWkg = sWkg.Replace("  ", " ");
+
+                if (sWkg.Length > 0)
+                {
+                    sAns = sWkg.SmartCaps(false).Trim();
+                }
+            }
+
+            return sAns;
+        }
         #endregion
 
         /// <summary>
