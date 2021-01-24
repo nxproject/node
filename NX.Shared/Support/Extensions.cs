@@ -4640,6 +4640,11 @@ namespace NX.Shared
 
             return c_Ans;
         }
+
+        public static string Join(this string delim, params string[] values)
+        {
+            return new List<string>(values).Join(delim);
+        }
         #endregion
 
         #region Serialization
