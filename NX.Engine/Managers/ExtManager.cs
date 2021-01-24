@@ -81,6 +81,16 @@ namespace NX.Engine
 
         /// <summary>
         /// 
+        /// Loads all calls in itself
+        /// </summary>
+        /// <param name="log"></param>
+        public void SelfLoad(ILogger log)
+        {
+            this.LoadFile(this.GetType().Assembly.GetName().Name + ".dll", log);
+        }
+
+        /// <summary>
+        /// 
         /// Loads all the pugins in an assembly
         /// 
         /// </summary>
