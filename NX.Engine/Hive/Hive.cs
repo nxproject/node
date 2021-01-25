@@ -157,9 +157,7 @@ namespace NX.Engine.Hive
                 AppDomain.CurrentDomain.ProcessExit += delegate (object sender, EventArgs e)
                 {
                     // Are we the queen?
-                    if (this.Roster.QueenBee != null &&
-                            this.Roster.MeBee != null &&
-                            this.Roster.QueenBee.IsSameAs(this.Roster.MeBee))
+                    if (this.Roster.IsQueen)
                     {
                         // Bring up the follower
                         if (this.Roster.MeBee.FollowerBee != null &&

@@ -495,6 +495,20 @@ namespace NX.Engine.Hive
         /// </summary>
         public BeeClass MeBee { get; internal set; }
 
+        /// <summary>
+        /// 
+        /// Am I the queen?
+        /// 
+        /// </summary>
+        public bool IsQueen
+        {
+            get
+            {
+                return this.QueenBee != null &&
+                            this.MeBee != null &&
+                            this.QueenBee.IsSameAs(this.MeBee);
+            }
+        }
         #endregion
 
         #region Chain of Command
