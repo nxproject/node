@@ -54,6 +54,6 @@
 
   // NOTE:  If you set any of the above to "Y", set "make_genome": "n" and "make_bee": "n".
   // This will generate the files in the proper places.  Note that you will need to recompile
-  // Else
+  // Elsa
 
 }
