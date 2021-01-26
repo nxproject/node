@@ -32,7 +32,6 @@
   // From https://www.random.org/strings/?num=1&len=20&loweralpha=on&unique=on&format=html&rnd=new
 
   // Minio
-
   "minio_access": "myaccesskey",
   "minio_secret": "mysecretkey",
 
@@ -46,8 +45,15 @@
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
   "code_folder": [ "C:\\Candid Concepts\\NX\\Office" ], // Folders where extra code is located"
-  "recycle_containers": "n", // If you change root_folder or genome, set to y
-  "document_fn": "./fn.md",
-  "document_task":  "./task.ts"
+  "recycle_containers": "n", // If you change root_folder or any genome, set to y
+
+  // NX.Office
+  "document_fn": "n", // Do we generate the Fn documentation for the readme?
+  "document_task": "n", // Do we generate the Elsa TypeScript file for tasks? 
+  "document_workflow": "n" // Do we generate the Elsa TypeScript file for workflows? 
+
+  // NOTE:  If you set any of the above to "Y", set "make_genome": "n" and "make_bee": "n".
+  // This will generate the files in the proper places.  Note that you will need to recompile
+  // Else
 
 }

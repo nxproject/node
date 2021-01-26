@@ -1440,8 +1440,13 @@ namespace NX.Engine
 
             // Make
             string sText = sHeader + "\n" + sDelim + "\n" + c_Buffer.ToString();
+
+            // Read template
+            string sTemplate = (path + ".template").ReadFile();
+            // Replace
+            sTemplate = sTemplate.Replace("{{fns}}", sText);
             // Write
-            path.WriteFile(sText);
+            path.WriteFile(sTemplate);
         }
         #endregion
     }
