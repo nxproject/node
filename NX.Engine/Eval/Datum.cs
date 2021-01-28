@@ -420,6 +420,35 @@ namespace NX.Engine
 
         #region Statics
         public static bool HideErrors { get; set; }
+
+        /// <summary>
+        /// 
+        /// Evaluates a string if it is an object or store reference or an expression
+        /// 
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="expr"></param>
+        /// <returns></returns>
+        public static string Eval(Context ctx, string expr)
+        {
+            // Assume none
+            string sAns = expr;
+
+            // Defined?
+            if (expr.HasValue())
+            {
+                using (DatumClass c_Datum = new DatumClass(ctx, expr))
+                {
+                    // 
+                    if(c_Datum.Type != Types.Var)
+                    {
+                        sAns = c_Datum.Value;
+                    }
+                }
+            }
+
+            return sAns;
+        }
         #endregion
     }
 }

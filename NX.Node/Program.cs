@@ -41,7 +41,7 @@ namespace NXNode
             // Only outside a container
             if (!"".InContainer())
             {
-                // The workign code folders
+                // The working code folders
                 List<string> c_CodeFolders = c_Env.GetAsJArray("code_folder").ToList(); ;
                 // Get the root folder
                 string sBaseFolder = "".WorkingDirectory();
@@ -53,10 +53,7 @@ namespace NXNode
                     sBaseFolder = sBaseFolder.Substring(0, iPos);
                 }
                 // Add parent
-                c_CodeFolders.Add(sBaseFolder.Substring(0, sBaseFolder.LastIndexOf(@"\")));
-
-                // Get the working directory
-                string sWD = "".WorkingDirectory();
+                //c_CodeFolders.Add(sBaseFolder.Substring(0, sBaseFolder.LastIndexOf(@"\")));
 
                 // Loop thru
                 foreach (string sStartFolder in c_CodeFolders)
@@ -150,6 +147,8 @@ namespace NXNode
         {
             // Assure target
             target.AssurePath();
+
+            //Console.WriteLine("Loading " + source);
 
             // The list
             List<string> c_Files = source.GetFilesInPath();

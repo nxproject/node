@@ -69,10 +69,7 @@ namespace NX.Engine
             for (int i = 0; i < c_Pieces.Count; i++)
             {
                 //
-                using(DatumClass c_Datum = new DatumClass(ctx, c_Pieces[i]))
-                {
-                    c_Pieces[i] = c_Datum.Value;
-                }
+                c_Pieces[i] = DatumClass.Eval(ctx, c_Pieces[i]);
             }
 
             c_Ans.Value = c_Pieces.Join(" ");
