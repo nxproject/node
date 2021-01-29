@@ -1393,7 +1393,7 @@ namespace NX.Engine
         /// 
         /// </summary>
         /// <param name="path"></param>
-        public void Document(string path)
+        public void GenerateMD(string path)
         {
             //
             StringBuilder c_Buffer = new StringBuilder();
