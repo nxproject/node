@@ -321,7 +321,7 @@ namespace Proc.NginX
 
             sBody += "Server".NginxComment(1, true);
             // Open the server
-            //sBody += this.Parent["domain"].IfEmpty(c_Field.URL.RemoveProtocol().RemovePort()).NginxServerStart();
+            sBody += this.Parent["domain"].IfEmpty(c_Field.URL.RemoveProtocol().RemovePort()).NginxServerStart();
             // Set the port
             string sPort = this.Parent["routing_port"].NumOnly();
             sBody += sPort.NginxListen();

@@ -64,8 +64,11 @@ namespace Proc.SocketIO
                 // Is Socket.IO available
                 if (this.IsAvailable)
                 {
+                    //
+                    string sURL = this.Location.URLMake();
+
                     // Create
-                    this.Client = new SocketIOClient.SocketIO(this.Location.URLMake());
+                    this.Client = new SocketIOClient.SocketIO(sURL);
 
                     // Handle disconnection
                     this.Client.OnDisconnected += delegate (object sender, string e)
@@ -76,6 +79,8 @@ namespace Proc.SocketIO
 
                     // Connect
                     this.Client.ConnectAsync().Wait();
+
+                    this.Parent.LogInfo("SocketIO: Connected to {0}".FormatString(sURL));
                 }
             };
 

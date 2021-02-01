@@ -65,7 +65,7 @@ namespace Proc.SocketIO
         /// The data in the message
         /// 
         /// </summary>
-        public JObject Payload { get; private set; } = new JObject();
+        private JObject Payload { get; set; } = new JObject();
         #endregion
 
         #region Methods
@@ -88,6 +88,27 @@ namespace Proc.SocketIO
             }
 
             return bAns;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return this.Payload.ToSimpleString();
+        }
+
+        /// <summary>
+        /// 
+        /// Gets a JSON obkect from the message
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public JObject GetJObject(string key)
+        {
+            return this.Payload.GetJObject(key); 
         }
         #endregion
     }

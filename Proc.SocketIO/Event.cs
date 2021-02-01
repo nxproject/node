@@ -27,6 +27,9 @@
 /// Install-Package SocketIOClient -Version 2.0.2.3
 /// 
 
+using System;
+
+using Newtonsoft.Json.Linq;
 using SocketIOClient;
 
 using NX.Shared;
@@ -47,20 +50,54 @@ namespace Proc.SocketIO
             //
             this.Name = name;
 
+            this.Parent.Parent.LogInfo("SocketIO Event: Setting up for '{0}'".FormatString(this.Name));
+
             // Connect
             this.Parent.Client.On(this.Name, response =>
             {
+                //this.Parent.Parent.LogInfo("SocketIO Event: Reeceived '{0}': {1} count".FormatString(this.Name, response.Count));
+
                 // Loop thru
-                for(int i=0;i < response.Count;i++)
+                for (int i=0;i < response.Count;i++)
                 {
-                    // Make the message
-                    using(MessageClass c_Msg = new MessageClass(this, response.GetValue<string>(i)))
+                    //
+                    var c_Raw = response.GetValue(i);
+                    string sMsg = null;
+                    switch(c_Raw.GetType().Name)
                     {
-                        // Tell world
-                        this.MessageReceived?.Invoke(c_Msg);
+                        case "JObject":
+                            sMsg = (c_Raw as JObject).ToSimpleString();
+                            break;
+                        default:
+                            try
+                            {
+                                sMsg = c_Raw.ToString();
+                            }
+                            catch (Exception e)
+                            { 
+                                this.Parent.Parent.LogException(e);
+                            }
+                            break;
+                    }
+
+                    if (sMsg.HasValue())
+                    {
+                        //this.Parent.Parent.LogInfo("SocketIO Event: Reeceived '{0}': RAW-{1}".FormatString(this.Name, sMsg));
+
+                        // Make the message
+                        using (MessageClass c_Msg = new MessageClass(this, sMsg))
+                        {
+                            //
+                           // this.Parent.Parent.LogInfo("SocketIO Event: Reeceived '{0}': {1}".FormatString(this.Name, c_Msg.ToString()));
+
+                            // Tell world
+                            this.MessageReceived?.Invoke(c_Msg);
+                        }
                     }
                 }
             });
+
+            this.Parent.Parent.LogInfo("SocketIO Event: Listening for '{0}'".FormatString(this.Name));
         }
         #endregion
 
