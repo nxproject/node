@@ -22,6 +22,11 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System.Text;
+using System.Collections.Generic;
+
+using NX.Shared;
+
 namespace NX.Engine
 {
     /// <summary>
@@ -55,6 +60,81 @@ namespace NX.Engine
         public FNClass GetFN(string name)
         {
             return (FNClass)this.Get(name);
+        }
+
+        /// <summary>
+        /// 
+        /// Generate MD file
+        /// 
+        /// </summary>
+        /// <param name="path"></param>
+        public void GenerateMD(string path)
+        {
+            //
+            StringBuilder c_Buffer = new StringBuilder();
+
+            // Get the list
+            List<string> c_Fns = this.Names;
+            // Sort
+            c_Fns.Sort();
+
+            // :oop thru
+            foreach (string sFN in c_Fns)
+            {
+                FNClass c_FN = this.GetFN(sFN);
+
+                BaseDescriptionClass c_Desc = c_FN.Description;
+                if (c_Desc != null)
+                {
+                    string sLine = "|" + c_FN.Name + "|" + c_Desc.Description + "|";
+                    // If none. ue empty
+                    if (c_Desc.Parameters.Count == 0)
+                    {
+                        c_Buffer.AppendLine(sLine + " |");
+                    }
+                    else
+                    {
+                        bool bShowLine = true;
+
+                        foreach (string sParam in c_Desc.Parameters.Keys)
+                        {
+                            ParamDefinitionClass c_P = c_Desc.Parameters[sParam];
+                            //
+                            string sP = sParam + "|" + c_P.Description + "|" + (c_P.Type == ParamDefinitionClass.Types.Required ? c_P.Type.ToString() : "") + "|";
+
+                            if (bShowLine)
+                            {
+                                c_Buffer.AppendLine(sLine + sP);
+                                bShowLine = false;
+                            }
+                            else
+                            {
+                                c_Buffer.AppendLine("| | |" + sP);
+                            }
+
+                        }
+                    }
+                }
+
+                else
+                {
+                    c_Buffer.AppendLine("|" + c_FN.Name + "|MISSING DESCRIPTION|");
+                }
+            }
+
+            // Make header
+            string sHeader = "|Command|Description|Parameter|Use| |";
+            string sDelim = "|-|-|-|-|-|";
+
+            // Make
+            string sText = sHeader + "\n" + sDelim + "\n" + c_Buffer.ToString();
+
+            // Read template
+            string sTemplate = (path + ".template").ReadFile();
+            // Replace
+            sTemplate = sTemplate.Replace("{{fns}}", sText);
+            // Write
+            path.WriteFile(sTemplate);
         }
         #endregion
     }

@@ -1429,7 +1429,7 @@ namespace NX.Engine
             }
 
             // Make header
-            string sHeader = "|Function|Format|Returns|'";
+            string sHeader = "|Function|Format|Returns|";
             string sDelim = "|-|-|-|";
 
             for(int iCol = 0; iCol < iCols;iCol++)

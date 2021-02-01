@@ -22,79 +22,47 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 using NX.Shared;
 
-namespace NX.Engine
+namespace NX.Shared
 {
-    /// <summary>
-    /// 
-    /// Base code for a function call
-    /// 
-    /// </summary>
-    public class FNClass : IPlugIn
+    public class BaseDescriptionClass
     {
-        /// <summary>
-        /// 
-        /// Constructor
-        /// 
-        /// </summary>
         #region Constructor
-        public FNClass()
-        { }
+        public BaseDescriptionClass(string desc,
+                                NamedListClass<ParamDefinitionClass> parameters)
+        {
+            //
+            this.Description = desc;
+            this.Parameters = parameters;
+        }
         #endregion
 
-        #region IPlugIn
+        #region Properties
         /// <summary>
         /// 
-        /// The name of the fuction.  Note that the system generates
-        /// the name from the assembly and instance.  If the assembly
-        /// is called Fn.Sample and the instance is called CallX
-        /// the name would be Sample.CallX
+        /// Description of the step
         /// 
         /// </summary>
-        public string Name 
-        {
-            get { return this.ObjectFullName(); }
-        }
+        public string Description { get; set; }
 
         /// <summary>
         /// 
-        /// Code to be run when the function is loaded, once per
-        /// session.
+        /// Runtime description of the step
         /// 
         /// </summary>
-        /// <param name="env">The current environment</param>
-        public virtual void Initialize(EnvironmentClass env)
-        { }
+        public string RuntimeDescription { get; set; }
 
         /// <summary>
         /// 
-        /// Code to run when the code is disposed
+        /// Parameters
         /// 
         /// </summary>
-        public virtual void Dispose()
-        { }
-
-        /// <summary>
-        /// 
-        /// Description of the function
-        /// 
-        /// </summary>
-        public virtual BaseDescriptionClass Description {  get { return null; } }
-        #endregion
-
-        #region Methods
-        /// <summary>
-        /// 
-        /// Code called when the function is called
-        /// 
-        /// </summary>
-        /// <param name="call">The call object that received the call</param>
-        /// <param name="store">The store where the params are stored</param>
-        public virtual StoreClass Do(HTTPCallClass call, StoreClass values)
-        {
-            return null;
-        }
+        public virtual NamedListClass<ParamDefinitionClass> Parameters { get; set; }
         #endregion
     }
 }

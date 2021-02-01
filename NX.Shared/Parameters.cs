@@ -22,79 +22,62 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System;
+using System.Collections.Generic;
+using System.Text;
+
 using NX.Shared;
 
-namespace NX.Engine
+namespace NX.Shared
 {
-    /// <summary>
-    /// 
-    /// Base code for a function call
-    /// 
-    /// </summary>
-    public class FNClass : IPlugIn
+    public class ParamDefinitionClass
     {
-        /// <summary>
-        /// 
-        /// Constructor
-        /// 
-        /// </summary>
-        #region Constructor
-        public FNClass()
-        { }
+        #region Consructor
+        public ParamDefinitionClass(Types type, string desc, string elsatype = "expression", List<string> choices = null)
+        {
+            //
+            this.Type = type;
+            this.Description = desc;
+            this.ElsaType = elsatype;
+            this.Choices = choices;
+        }
         #endregion
 
-        #region IPlugIn
-        /// <summary>
-        /// 
-        /// The name of the fuction.  Note that the system generates
-        /// the name from the assembly and instance.  If the assembly
-        /// is called Fn.Sample and the instance is called CallX
-        /// the name would be Sample.CallX
-        /// 
-        /// </summary>
-        public string Name 
+        #region Enum
+        public enum Types
         {
-            get { return this.ObjectFullName(); }
+            Required,
+            Optional
         }
-
-        /// <summary>
-        /// 
-        /// Code to be run when the function is loaded, once per
-        /// session.
-        /// 
-        /// </summary>
-        /// <param name="env">The current environment</param>
-        public virtual void Initialize(EnvironmentClass env)
-        { }
-
-        /// <summary>
-        /// 
-        /// Code to run when the code is disposed
-        /// 
-        /// </summary>
-        public virtual void Dispose()
-        { }
-
-        /// <summary>
-        /// 
-        /// Description of the function
-        /// 
-        /// </summary>
-        public virtual BaseDescriptionClass Description {  get { return null; } }
         #endregion
 
-        #region Methods
+        #region Properties
         /// <summary>
         /// 
-        /// Code called when the function is called
+        /// The field type (Required/Optional)
         /// 
         /// </summary>
-        /// <param name="call">The call object that received the call</param>
-        /// <param name="store">The store where the params are stored</param>
-        public virtual StoreClass Do(HTTPCallClass call, StoreClass values)
-        {
-            return null;
-        }
+        public Types Type { get; private set; }
+
+        /// <summary>
+        /// 
+        /// The description
+        /// 
+        /// </summary>
+        public string Description { get; set; }
+
+        /// <summary>
+        /// 
+        /// The type if Elsa
+        /// 
+        /// </summary>
+        public string ElsaType { get; set; }
+
+        /// <summary>
+        /// 
+        /// Choices if type is select
+        /// </summary>
+        public List<string> Choices { get; private set; }
         #endregion
     }
 }

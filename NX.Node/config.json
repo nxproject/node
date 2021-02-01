@@ -2,6 +2,7 @@
   "hive": "demo", // The name of the hive
   "tier": "dev", // The tier that the hive runs in, change to latest for production
   "field": [ "10.192.180.160:2375" ], // The list of fields
+  "domain":  "nx9.us",  // The domain
 
   "repo_project": "nxproject", // The Docker repository name
   "root_folder": "/etc/nxproject", // folder where data is kept
@@ -48,14 +49,12 @@
   "recycle_containers": "n", // If you change root_folder or any genome, set to y
 
   // NX.Office
-  "document_fn": "n", // Do we generate the Fn documentation for the readme?
-  "document_task": "n", // Do we generate the Elsa TypeScript file for tasks? 
-  "document_workflow": "n", // Do we generate the Elsa TypeScript file for workflows? 
+  "document": "n", // Do we generate the documenttation for FN, eval functions, task and workflows into READMEs and Elsa .ts?
 
-  // NOTE:  If you set any of the above to "Y", set "make_genome": "n" and "make_bee": "n".
+  // NOTE:  If you set "document_task" above to "Y", set "make_genome": "n" and "make_bee": "n".
   // This will generate the files in the proper places.  Note that you will need to recompile
   // Elsa
 
-  "noop":  "placeholder"
+  "noop": "placeholder"
 
 }
