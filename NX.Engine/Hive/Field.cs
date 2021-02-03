@@ -515,10 +515,10 @@ namespace NX.Engine.Hive
                         // Save
                         this.Parent.Roster.MeBee = bee;
                         //
-                        this.Parent.Parent.LogInfo("I am bee {0}".FormatString(bee.Id));
+                        this.Parent.Parent.LogInfo("I am bee {0} at {1}".FormatString(bee.Id, bee.URL));
 
                         // Set the loopback URL
-                        this.Parent.Parent.LoopbackURL = bee.URL;
+                        if(!this.Parent.Parent["domain"].HasValue()) this.Parent.Parent.LoopbackURL = bee.URL;
                     }
 
                     // The change lists

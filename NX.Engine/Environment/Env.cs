@@ -361,7 +361,23 @@ namespace NX.Engine
         /// </summary>
         public string LoopbackURL
         {
-            get { return this[KeyLoopbackURL]; }
+            get 
+            {
+                string sAns = null;
+
+                string sDomain = this["domain"];
+                if (sDomain.HasValue())
+                {
+                    sAns = "http";
+                    if (this["nginx_ssl"].FromDBBoolean()) sAns += "s";
+                    sAns += "://{0}".FormatString(sDomain);
+                }
+                else
+                {
+                    sAns = this[KeyLoopbackURL];
+                }
+                return sAns;
+            }
             set { this[KeyLoopbackURL] = value; }
         }
         #endregion
