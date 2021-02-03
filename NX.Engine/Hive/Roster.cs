@@ -944,7 +944,27 @@ namespace NX.Engine.Hive
             else
             {
                 this.Parent.Parent.LogInfo("Queen status is {0}, expected queen".FormatString(this.Parent.State));
+
+                // Start ascension thread
+                SafeThreadManagerClass.StartThread("".GUID(), new ParameterizedThreadStart(AscendThread));
             }
+        }
+
+        private void AscendThread(object status)
+        {
+            //
+            SafeThreadStatusClass c_Status = status as SafeThreadStatusClass;
+
+            // Celan up
+            SafeThreadManagerClass.StopThread(this.Parent.LabelQueen);
+
+            // Something went wrong, make ourselves queen
+            this.Parent.State = HiveClass.States.Ascending;
+            // And again
+            this.CheckForQueen();
+
+            //
+            c_Status.End();
         }
 
         /// <summary>
