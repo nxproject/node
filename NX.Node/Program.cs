@@ -93,7 +93,7 @@ namespace NXNode
                 }
 
                 // Do we need to recycle?
-                if(c_Env["recycle_containers"].FromDBBoolean())
+                if (c_Env["recycle_containers"].FromDBBoolean())
                 {
                     c_Env.Hive.KillAll();
                 }
@@ -148,7 +148,7 @@ namespace NXNode
             // Assure target
             target.AssurePath();
 
-           // Console.WriteLine("Loading " + source);
+            // Console.WriteLine("Loading " + source);
 
             // The list
             List<string> c_Files = source.GetFilesInPath();

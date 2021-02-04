@@ -72,38 +72,34 @@ namespace NX.Engine
             // Assume none
             T c_Ans;
 
-            //
-            lock (this)
+            // Name missing?
+            if (!name.HasValue())
             {
-                // Name missing?
-                if (!name.HasValue())
+                // Sse the type
+                name = typeof(T).FullName;
+            }
+
+            // Already in memory?
+            if (!this.Values.ContainsKey(name))
+            {
+                try
                 {
-                    // Sse the type
-                    name = typeof(T).FullName;
+                    // Nope, make one
+                    c_Ans = (T)Activator.CreateInstance(typeof(T), this.Parent);
+                }
+                catch (Exception e)
+                {
+                    //
+                    this.Parent.LogException("Creating {0}".FormatString(typeof(T).FullName), e);
+                    c_Ans = default(T);
                 }
 
-                // Already in memory?
-                if (!this.Values.ContainsKey(name))
-                {
-                    try
-                    {
-                        // Nope, make one
-                        c_Ans = (T)Activator.CreateInstance(typeof(T), this.Parent);
-                    }
-                    catch (Exception e)
-                    {
-                        //
-                        this.Parent.LogException("Creating {0}".FormatString(typeof(T).FullName), e);
-                        c_Ans = default(T);
-                    }
-
-                    // Save
-                    this.Values.Add(name, c_Ans);
-                }
-                else
-                {
-                    c_Ans = (T)this.Values[name];
-                }
+                // Save
+                this.Values.Add(name, c_Ans);
+            }
+            else
+            {
+                c_Ans = (T)this.Values[name];
             }
 
             //
@@ -120,7 +116,7 @@ namespace NX.Engine
         public void Set<T>(string name, T obj) where T : ChildOfClass<EnvironmentClass>
         {
             // And save
-            this.Values[name] =  obj;
+            this.Values[name] = obj;
         }
         #endregion
     }
