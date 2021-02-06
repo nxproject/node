@@ -786,8 +786,7 @@ namespace NX.Engine
         }
         #endregion
 
-        #region Site and user properties
-        //public SiteInfoClass SiteInfo { get { return this.Parent.SiteInfo; } }
+        #region User properties
         public UserInfoClass UserInfo { get; set; }
         #endregion
     }
