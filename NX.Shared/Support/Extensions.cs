@@ -148,6 +148,25 @@ namespace NX.Shared
             return string.Join(delim, values.Select(x => x.ToString()).ToArray());
         }
 
+        public static string JoinSpaces(this List<string> values)
+        {
+            string sAns = "";
+
+            foreach(string sPiece in values)
+            {
+                if(sPiece.Contains(" "))
+                {
+                    sAns += '"' + sPiece + '"';
+                }
+                else
+                {
+                    sAns += sPiece;
+                }
+                sAns += " ";
+            }
+            return sAns.Trim(); ;
+        }
+
         public static int IndexOf(this Byte[] buffer, int len, Byte[] boundaryBytes)
         {
             for (Int32 i = 0; i <= len - boundaryBytes.Length; i++)

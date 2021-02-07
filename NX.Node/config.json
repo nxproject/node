@@ -17,7 +17,7 @@
 
   // Profile
 
-  "uses": [ "Proc.NginX", "Proc.SocketIO", "Route.File", "Proc.Office" ], // To give the system some flavor
+  "uses": [ "Proc.NginX", "Proc.SocketIO", "Route.File", "Proc.Office", "Proc.IOTIF"  ], // To give the system some flavor
 
   // Use MongoDb
 
@@ -45,7 +45,7 @@
   "verbose": "n", // Tell me what is going on
   "make_genome": "y", // Make the genome (reload image) ("y" when ready to release)
   "make_bee": "y", // Make a bee *"y" when ready to test in a container)
-  "code_folder": [ "C:\\Candid Concepts\\NX\\Node", "C:\\Candid Concepts\\NX\\Office", "C:\\Candid Concepts\\NX\\IOT" ], // Folders where extra code is located"
+  "code_folder": [ "C:\\Candid Concepts\\NX\\Node", "C:\\Candid Concepts\\NX\\Office" ], // Folders where extra code is located"
   "recycle_containers": "n", // If you change root_folder or any genome, set to y
 
   // NX.Office
