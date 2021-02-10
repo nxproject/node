@@ -10,8 +10,8 @@
 	],
 	"Image": "{repo_project}/socketio:{tier}",
 	"Env": [
-		"DEBUG=true" //,
-		//"API_KEY={socketio_key}"
+		"DEBUG=true",
+		"CHANNEL={siochannel}"
 	],
 	"WorkingDir": "/etc/wd"
 }

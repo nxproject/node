@@ -11,9 +11,9 @@
 
   <ItemGroup>
     <PackageReference Include="Jint" Version="2.11.58" />
-    <PackageReference Include="NUglify" Version="1.6.4" />
-    <PackageReference Include="SocketIOClient" Version="2.0.2.6" />
-    <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
+    <PackageReference Include="NUglify" Version="1.13.2" />
+    <PackageReference Include="SocketIOClient" Version="2.1.5" />
+    <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
     <PackageReference Include="System.Globalization" Version="4.3.0" />
   </ItemGroup>
 

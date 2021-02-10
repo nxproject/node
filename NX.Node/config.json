@@ -1,8 +1,20 @@
 {
-  "hive": "demo", // The name of the hive
   "tier": "dev", // The tier that the hive runs in, change to latest for production
-  "field": [ "10.192.180.160:2375" ], // The list of fields
-  "domain":  "nx9.us",  // The domain
+
+  //// Production
+  "hive": "demo", // The name of the hive
+  "field": [ "10.192.150.155:2375" ], // The list of fields
+  "domain": "10.192.150.155", // "nx9.us", // The domain
+
+  // Testing
+
+  //"hive": "alpha",
+  //"field": [ "10.192.150.151:2375" ],
+  //"domain": "10.192.150.151",
+
+  //"hive": "beta",
+  //"field": [ "10.192.180.160:2375" ],
+  //"domain": "10.192.180.160",
 
   "repo_project": "nxproject", // The Docker repository name
   "root_folder": "/etc/nxproject", // folder where data is kept
@@ -17,7 +29,7 @@
 
   // Profile
 
-  "uses": [ "Proc.NginX", "Proc.SocketIO", "Route.File", "Proc.Office", "Proc.IOTIF"  ], // To give the system some flavor
+  "uses": [ "Proc.NginX", "Proc.SocketIO", "Route.File", "Proc.Office" ], // To give the system some flavor
 
   // Use MongoDb
 
@@ -29,8 +41,7 @@
   //"qd_bumble": [ "redis" ],
   //"qd_worker": [ "1" ],
 
-  "secure_code": "wqfmtohhofyzzrojnhvy", // The security code
-  // From https://www.random.org/strings/?num=1&len=20&loweralpha=on&unique=on&format=html&rnd=new
+  "secure_code": "random", // The security code
 
   // Minio
   "minio_access": "myaccesskey",
@@ -39,7 +50,6 @@
   // These are for development
 
   "routing_bumble": [], // Allow access to SocketIO
-  //"routing_proc": [ "Chores" ], // Map Chores procs
   "routing_debug": "n",
 
   "verbose": "n", // Tell me what is going on

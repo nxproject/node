@@ -407,10 +407,6 @@ namespace NX.Engine.Hive
                             c_Target.Devices = this.DoDeviceMappings(source.GetJArray("Devices"));
                             break;
 
-                        case "DiskQuota":
-                            c_Target.DiskQuota = source.Get("DiskQuota").ToInteger(0);
-                            break;
-
                         case "KernelMemory":
                             c_Target.KernelMemory = source.Get("KernelMemory").ToInteger(0);
                             break;
@@ -591,10 +587,6 @@ namespace NX.Engine.Hive
 
                         case "GroupAdd":
                             c_Target.GroupAdd = source.GetJArray("GroupAdd").ToList();
-                            break;
-
-                        case "InitPath":
-                            c_Target.InitPath = source.Get("InitPath");
                             break;
                     }
                 }

@@ -227,13 +227,32 @@ namespace NX.Engine.Hive
         #endregion
 
         #region Hive
-        public void CreateHive(string values)
+        /// <summary>
+        /// 
+        /// Copies domain to a new hive 
+        /// 
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="field"></param>
+        /// <param name="domain"></param>
+        /// <param name="email"></param>
+        /// <param name="tier"></param>
+        public void CreateHive(string name, string field, string domain, string email, string tier=null)
         {
             // Make environment
-            using (EnvironmentClass c_Env = new EnvironmentClass(values.SplitSpaces().ToArray()))
+            using (EnvironmentClass c_Env = new EnvironmentClass(this.Parent))
             {
+                // Fill
+                c_Env["hive"] = name;
+                c_Env.Set("field", new JArray() { field });
+                c_Env["domain"] = domain;
+                c_Env["certbot_email"] = email;
+                c_Env["certbot_ssl"] = domain.HasValue().ToDBBoolean();
+
+                if (tier.HasValue()) c_Env["tier"] = tier;
+
                 // Create
-                this.MakeSelfIntoGenome("".WorkingDirectory(), c_Env.ToString());
+                this.MakeSelfIntoGenome("".WorkingDirectory(), c_Env);
             }
         }
         #endregion
@@ -680,7 +699,7 @@ namespace NX.Engine.Hive
         /// <param name="def">The definition (Dockerfile contents)</param>
         /// <param name="Genome">Genome name</param>
         /// <param name="dir">The source directory</param>
-        public void MakeGenome(FieldClass field, string genome, string dir = null, string config = null)
+        public void MakeGenome(FieldClass field, string genome, string dir = null, EnvironmentClass env = null)
         {
             // Get client
             DockerIFClass c_Client = field.DockerIF;
@@ -727,7 +746,7 @@ namespace NX.Engine.Hive
                         if (!c_Client.CheckForImage(c_BName))
                         {
                             // Build it
-                            c_Client.BuildImage(c_BName, sDir, config);
+                            c_Client.BuildImage(c_BName, sDir, env);
                         }
                     }
 
@@ -742,7 +761,7 @@ namespace NX.Engine.Hive
                         if (!c_Client.CheckForImage(c_BName))
                         {
                             // Build it
-                            c_Client.BuildImage(c_BName, sDir, config);
+                            c_Client.BuildImage(c_BName, sDir, env);
                         }
                     }
                 }
@@ -760,13 +779,16 @@ namespace NX.Engine.Hive
         /// <param name="dir">The directory where the code is at</param>
         /// <param name="config">Path to config file</param>
         /// <param name="Genome"></param
-        public void MakeSelfIntoGenome(string dir, string config = null)
+        public void MakeSelfIntoGenome(string dir, EnvironmentClass env = null)
         {
+            // If no environment, use ourselves
+            if (env == null) env = this.Parent;
+
             // Adjust the environment
-            this.Parent.SynchObject.Set("loc", dir);
+            env.SynchObject.Set("loc", dir);
 
             // Do
-            this.MakeGenome(this.MeField, ProcessorDNAName, dir, config);
+            this.MakeGenome(env.Hive.MeField, ProcessorDNAName, dir, env);
         }
 
         /// <summary>

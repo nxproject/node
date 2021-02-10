@@ -89,7 +89,7 @@ namespace NX.Engine
         #region Constructor
         /// <summary>
         /// 
-        /// Constructor
+        /// CLI Constructor
         /// 
         /// </summary>
         /// <param name="args">The command line arguments</param>
@@ -102,18 +102,58 @@ namespace NX.Engine
             // Load the arguments
             this.Parse(args);
 
+            // Initialize
+            this.Initialize(sCurrentCode);
+        }
+
+        /// <summary>
+        /// 
+        /// On-the fly constructor
+        /// 
+        /// </summary>
+        /// <param name="args"></param>
+        public EnvironmentClass(JObject args)
+            : base(null, "_env")
+        {
+            // Check to see if secured
+            string sCurrentCode = this.Router.SecureCode;
+
+            // Load the arguments
+            this.LoadFrom(args);
+
+            // Initialize
+            this.Initialize(sCurrentCode);
+        }
+
+        /// <summary>
+        /// 
+        /// Based constructor
+        /// 
+        /// </summary>
+        /// <param name="env"></param>
+        public EnvironmentClass(EnvironmentClass env)
+            : this(env.SynchObject.Clone())
+        { }
+
+        private void Initialize(string currcode)
+        { 
             // Did we get a secure code?
             string sSecureCode = this[EnvironmentClass.KeySecureCode];
+            // Do we have to gen?
+            if(sSecureCode.IsSameValue("random"))
+            {
+                sSecureCode = "".GUID();
+            }
             if (sSecureCode.HasValue())
             {
                 // Parse
                 ItemClass c_SC = new ItemClass(sSecureCode);
 
                 // Was the original secured?
-                if (!sCurrentCode.IsSameValue(RouterClass.UnsecureCode))
+                if (!currcode.IsSameValue(RouterClass.UnsecureCode))
                 {
                     // Does it match the new one?
-                    if (!c_SC.Key.IsSameValue(sCurrentCode))
+                    if (!c_SC.Key.IsSameValue(currcode))
                     {
                         // Bad
                         sSecureCode = null;
@@ -804,6 +844,10 @@ namespace NX.Engine
                 c_Ans.Remove(KeyMakeGenome);
                 c_Ans.Remove(KeyCodeFolder);
                 c_Ans.Remove(KeyMakeBee);
+
+                // SIO
+                string sIChannel = this["hive"].MD5HashString();
+                c_Ans.Set("siochannel", sIChannel + "," + sIChannel.MD5HashString());
 
                 return c_Ans;
             }

@@ -2,17 +2,13 @@
 	"@Unique": "y",
 	"@SkipRecycle": "y",
 	"@Ports": [
-		"{routing_port}",
-		"443"
+		"80"
 	],
 	"@Map": [
 		"{shared_folder}/nginx/logs:/etc/nginx/logs",
 		"{shared_folder}/nginx:/etc/nginx",
 		"{shared_folder}/nginx/certs:/certs"
 	],
-	"@Copy": [
-		"Hive/External/nginx/defaults:{shared_folder}/nginx"
-	],
-	"Image": "{repo_project}/nginx:{tier}",
+	"Image": "{repo_project}/certbot:{tier}",
 	"WorkingDir": "/etc/wd"
 }

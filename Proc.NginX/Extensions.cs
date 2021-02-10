@@ -484,6 +484,52 @@ namespace Proc.NginX
         {
             return "}".NginxLine(1);
         }
+
+        public static string NginxListenSSL(this string cert, string key, bool getcert, bool secure, int port, params string[] body)
+        {
+            return cert.NginxListenSSL(key, secure, port, new List<string>(body));
+        }
+
+        public static string NginxListenSSLAt(this string cert, string key, int port, params string[] body)
+        {
+            return cert.NginxListenSSL(key, false, false, port, body);
+        }
+
+        public static string NginxListenSSL(this string cert, string key, params string[] body)
+        {
+            return cert.NginxListenSSL(key, false, false, 443, body);
+        }
+
+        public static string NginxListenSSL(this string cert, string key, bool secure, int port, List<string> body)
+        {
+            return cert.NginxListenSSL(key, false, secure, port, body);
+        }
+
+        public static string NginxListenSSL(this string cert, string key, bool getcert, bool secure, int port, List<string> body)
+        {
+            string sAns = "";
+
+            sAns += "listen {0} ssl;".FormatString(secure ? 444 : port).NginxLine(2);
+            sAns += ("ssl_certificate " + cert + ";").NginxLine(2);
+            sAns += ("ssl_certificate_key " + key + ";").NginxLine(2);
+            sAns += "ssl_protocols SSLv3 TLSv1;".NginxLine(2);
+            sAns += "ssl_ciphers HIGH:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:AES128-SHA:RC4+RSA:RC4-SHA;".NginxLine(2);
+
+            //if (getcert)
+            //{
+            sAns += "ssl_verify_client optional_no_ca;".NginxLine(2);
+            //}
+
+
+            sAns += "".NginxProxyForwarded(true, 2);
+
+            foreach (string sLine in body)
+            {
+                sAns += sLine;
+            }
+
+            return sAns;
+        }
         #endregion
     }
 }

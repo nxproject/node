@@ -272,7 +272,7 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="name">The handy dandy name</param>
         /// <param name="df">The definition (Dockerfile contents)</param>
-        public void BuildImage(DockerIFNameClass name, string dir, string config = null)
+        public void BuildImage(DockerIFNameClass name, string dir, EnvironmentClass env = null)
         {
             // Make room
             string sFile = null;
@@ -283,7 +283,7 @@ namespace NX.Engine.Hive
             try
             {
                 // Make a temp file
-                sFile = this.CreateTarballForDockerfile(name, dir, config);
+                sFile = this.CreateTarballForDockerfile(name, dir, env);
 
                 // Using a stream so we can handle bigly
                 using (FileStream c_Stream = new FileStream(sFile, FileMode.Open))
@@ -360,8 +360,7 @@ namespace NX.Engine.Hive
                     // Do
                     this.Client.Images.DeleteImageAsync(sID, new ImageDeleteParameters()
                     {
-                        Force = true,
-                        PruneChildren = true
+                        Force = true
                     });
                 }
             }
@@ -403,7 +402,7 @@ namespace NX.Engine.Hive
         /// <returns>A byte array of the .tar file</returns>
         private string CreateTarballForDockerfile(DockerIFNameClass name, 
                                                     string directory, 
-                                                    string config = null)
+                                                    EnvironmentClass env = null)
         {
             // Make the temp file
             string sOut = "".WorkingDirectory().CombinePath("__temp");
@@ -465,10 +464,10 @@ namespace NX.Engine.Hive
                         // Assue normal processing
                         bool bDo = true;
 
-                        if (sIn.GetFileNameFromPath().IsSameValue("config.json") && config.HasValue())
+                        if (sIn.GetFileNameFromPath().IsSameValue("config.json") && env != null)
                         {
                             // Convert to bytes
-                            byte[] abBuffer = config.ToBytes();
+                            byte[] abBuffer = env.SynchObject.ToSimpleString().ToBytes();
 
                             // Set the size
                             c_Entry.Size = abBuffer.Length;
@@ -571,13 +570,16 @@ namespace NX.Engine.Hive
                 CreateContainerResponse c_Resp = this.Client.Containers.CreateContainerAsync(def.Target).Result;
 
                 // Dump warning
-                foreach (string sMsg in c_Resp.Warnings)
+                if (c_Resp != null && c_Resp.Warnings != null)
                 {
-                    this.Parent.Parent.Parent.LogError("Warnings while creating bee: {0}".FormatString(sMsg));
-                }
+                    foreach (string sMsg in c_Resp.Warnings)
+                    {
+                        this.Parent.Parent.Parent.LogError("Warnings while creating bee: {0}".FormatString(sMsg));
+                    }
 
-                // The id
-                sAns = c_Resp.ID;
+                    // The id
+                    sAns = c_Resp.ID;
+                }
             }
             catch (Exception e)
             {

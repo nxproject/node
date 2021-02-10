@@ -44,6 +44,13 @@ namespace Proc.NginX
         {
             this.Parent.LogInfo("NginX");
 
+            // Do we support SSL?
+            if (this.Parent["nginx_ssl"].FromDBBoolean())
+            {
+                this.Certbot = new BumbleBeeClass(this.Parent, "certbot");
+                this.Certbot.SetNginxInformation(".well-known", false);
+            }
+
             // Make a starting config
             this.MakeConfig(false);
 
@@ -99,6 +106,13 @@ namespace Proc.NginX
         /// 
         /// </summary>
         private NamedListClass<List<string>> Map { get; set; } = new NamedListClass<List<string>>();
+
+        /// <summary>
+        /// 
+        /// Certbot bee
+        /// 
+        /// </summary>
+        private BumbleBeeClass Certbot { get; set; }
         #endregion
 
         #region Methods
@@ -249,6 +263,10 @@ namespace Proc.NginX
             sBody += "Mask errors".NginxComment(1);
             sBody += "".NginxErrors();
 
+            // SSL stuff
+            bool bSSL = this.Parent["nginx_ssl"].FromDBBoolean();
+            bool bCertbot = false;
+
             // 
             c_Env.LogVerbose("Creating bumble bee routes");
 
@@ -274,6 +292,9 @@ namespace Proc.NginX
 
                     // Add the DNA
                     sBody += c_Info.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(c_Bee.Key));
+
+                    // Cerbot
+                    if (c_Info.Name.IsSameValue("certbot")) bCertbot = true;
                 }
             }
 
@@ -319,11 +340,40 @@ namespace Proc.NginX
                 }
             }
 
+            // 
             sBody += "Server".NginxComment(1, true);
-            // Open the server
-            sBody += this.Parent["domain"].IfEmpty(c_Field.URL.RemoveProtocol().RemovePort()).NginxServerStart();
-            // Set the port
+
+            //
             string sPort = this.Parent["routing_port"].NumOnly();
+            bool bOpenServer = true;
+
+            // SSL
+            // TBD
+            //if (bSSL && bCertbot)
+            //{
+            //    // 
+            //    sBody += "Handle ceertbot".NginxComment(1);
+            //    // 
+            //    // Open the server
+            //    sBody += this.Parent["domain"].IfEmpty(c_Field.URL.RemoveProtocol().RemovePort()).NginxServerStart();
+            //    // Normal traffic
+            //    sBody += "80".NginxListen();
+            //    sBody += ".well-known".NginxLocation("", "certbot".NginxProxyPass());
+            //    sBody += "".NginxServerEnd();
+
+            //    // Normal work is done via 443
+            //    sPort = "443";
+            //    bOpenServer = false;
+            //    // SSL open
+            //    sBody += this.Parent["domain"].IfEmpty(c_Field.URL.RemoveProtocol().RemovePort()).NginxServerStart(sslCert.NginxListenSSL(sslKey, false, 443));
+            //}
+
+            // Open the server            
+            if (bOpenServer)
+            {
+                sBody += this.Parent["domain"].IfEmpty(c_Field.URL.RemoveProtocol().RemovePort()).NginxServerStart();
+            }
+            // Set the port
             sBody += sPort.NginxListen();
 
             // Do the bees

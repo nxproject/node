@@ -1219,60 +1219,6 @@ namespace NX.Engine
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Optional, "The store name"),
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The default value (default: '')")
             ));
-
-            // EAMS
-            this.Add("eamstext", new StaticFunction("eamstext", delegate (Context ctx, object[] ps)
-            {
-                return XCVT.ToString(ps[0]).RemoveExtraSpaces().Trim().ToUpper();
-            }, 1, 1,
-            "Returns a text value formatted per CA WCAB EAMS rules",
-            new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
-            this.Add("eams", new StaticFunction("eams", delegate (Context ctx, object[] ps)
-            {
-                return Regex.Replace(XCVT.ToString(ps[0]), @"[^\w]", " ").RemoveExtraSpaces().Trim().ToUpper();
-            }, 1, 1,
-            "Returns a text only value formatted per CA WCAB EAMS rules",
-            new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
-            this.Add("eamsnumber", new StaticFunction("eamsnumber", delegate (Context ctx, object[] ps) { return Regex.Replace(XCVT.ToString(ps[0]), @"[^\d]", "").RemoveExtraSpaces().Trim().ToUpper(); }, 1, 1,
-            "Returns a numeric value formatted per CA WCAB EAMS rules",
-            new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
-            this.Add("eamsdate", new StaticFunction("eamsdate", delegate (Context ctx, object[] ps)
-            {
-                string sAns = "";
-
-                if (XCVT.ToString(ps[0]).HasValue())
-                {
-                    DateTime c_Date = XCVT.ToDateTime(ps[0]);
-                    sAns = c_Date.FormattedAs("MM/dd/yyyy");
-                }
-                return sAns;
-            }, 1, 1,
-            "Returns a date value formatted per CA WCAB EAMS rules",
-            new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
-            this.Add("eamsamt", new StaticFunction("eamsamt", delegate (Context ctx, object[] ps)
-            {
-                string sAns = "";
-
-                if (XCVT.ToString(ps[0]).HasValue())
-                {
-                    sAns = "{0:0.00}".FormatString(XCVT.ToDouble(ps[0]));
-                }
-                return sAns;
-            }, 1, 1,
-            "Returns an amount value formatted per CA WCAB EAMS rules",
-            new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
-            this.Add("ssignature", new StaticFunction("ssignature", delegate (Context ctx, object[] ps)
-            {
-                string sAns = XCVT.ToString(ps[0]).ToUpper();
-
-                if (sAns.HasValue())
-                {
-                    if (!sAns.StartsWith("S ")) sAns = "S " + sAns;
-                }
-                return sAns;
-            }, 1, 1,
-            "Returns a text formatted as a S signature per CA WCAB EAMS rules",
-            new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
         }
         #endregion
 

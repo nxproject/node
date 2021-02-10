@@ -417,6 +417,18 @@ namespace NX.Shared
 
         /// <summary>
         /// 
+        /// Load from JSON object
+        /// 
+        /// </summary>
+        /// <param name="values"></param>
+        public void LoadFrom(JObject values)
+        {
+            //
+            this.SynchObject = values;
+        }
+
+        /// <summary>
+        /// 
         /// Adds a value to a key.
         /// If the key already exists, the value is treated 
         /// like a JSON array

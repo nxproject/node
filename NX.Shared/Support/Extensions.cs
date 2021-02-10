@@ -796,7 +796,7 @@ namespace NX.Shared
 
             if (value.HasValue())
             {
-                bAns = value.IsSameValue("y");
+                bAns = value.IsSameValue("y") || value.IsSameValue("true");
             }
 
             return bAns;
