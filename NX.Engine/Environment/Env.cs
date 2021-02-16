@@ -877,7 +877,7 @@ namespace NX.Engine
                 // Load any processors
                 if (profile.Contains(Profiles.Procs)) this.Procs.LoadFile(path, this);
 
-                this.LogInfo("Loaded {0}".FormatString(path));
+                this.LogInfo("Loaded module {0}".FormatString(path));
             }
         }
 
@@ -919,7 +919,7 @@ namespace NX.Engine
                 this.UsedModules.Add(module);
 
                 //
-                this.LogInfo("Using {0}".FormatString(module));
+                this.LogVerbose("Using {0}".FormatString(module));
 
                 // Remove the .dll if any
                 if (module.EndsWith(".dll")) module = module.Substring(0, module.Length - 1);

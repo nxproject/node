@@ -50,7 +50,7 @@ namespace Proc.SocketIO
             //
             this.Name = name;
 
-            this.Parent.Parent.LogInfo("SocketIO Event: Setting up for '{0}'".FormatString(this.Name));
+            this.Parent.Parent.LogVerbose("SocketIO Event: Setting up for '{0}'".FormatString(this.Name));
 
             // Connect
             this.Parent.Client.On(this.Name, response =>
@@ -97,7 +97,7 @@ namespace Proc.SocketIO
                 }
             });
 
-            this.Parent.Parent.LogInfo("SocketIO Event: Listening for '{0}'".FormatString(this.Name));
+            this.Parent.Parent.LogVerbose("SocketIO Event: Listening for '{0}'".FormatString(this.Name));
         }
         #endregion
 

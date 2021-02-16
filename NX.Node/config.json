@@ -1,10 +1,10 @@
 {
   "tier": "dev", // The tier that the hive runs in, change to latest for production
 
-  //// Production
+  // Production
   "hive": "demo", // The name of the hive
   "field": [ "10.192.150.155:2375" ], // The list of fields
-  "domain": "10.192.150.155", // "nx9.us", // The domain
+  "domain": "nx9.us", // The domain
 
   // Testing
 

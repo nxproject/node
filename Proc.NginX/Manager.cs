@@ -42,8 +42,6 @@ namespace Proc.NginX
         public ManagerClass(EnvironmentClass env)
             : base(env, "nginx")
         {
-            this.Parent.LogInfo("NginX");
-
             // Do we support SSL?
             if (this.Parent["nginx_ssl"].FromDBBoolean())
             {
