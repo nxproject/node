@@ -95,22 +95,22 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Packages used
 
-* [Docker.DotNet](https://github.com/dotnet/Docker.DotNet) 3.125.2
-* [DocumentFormat.OpenXML](https://github.com/OfficeDev/Open-Xml-Sdk) 2.11.3
-* [HtmlAgilityPack](https://github.com/zzzprojects/html-agility-pack) 1.11.24
-* [ICSharpCode.SharpZipLib](https://github.com/icsharpcode/SharpZipLib) 0.85.4.369
-* [iTextSharp](https://github.com/itext/itextsharp) 5.5.13.1
-* [itextSharp.xmlworker](https://github.com/itext/itextsharp) 5.5.13.1
-* [Jint](https://github.com/sebastienros/jint) 2.11.58
-* [Minio](https://github.com/minio/minio) 3.1.13
-* [MongoDB.Bson](http://mongodb.github.io/mongo-java-driver/3.0/bson/) 2.10.4
-* [MongoDB.Driver](https://github.com/mongodb/mongo-csharp-driver) 2.10.4
-* [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) 12.0.3
-* [Octokit](https://github.com/octokit) 0.48.0
-* [OpenXmlPowerTools](https://github.com/OfficeDev/Open-Xml-PowerTools) 4.5.3.2
-* [SocketIOClient](https://github.com/socketio/socket.io-client) 2.0.2.3
-* [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) 2.1.58
-* [TimeZoneConverter](https://github.com/mj1856/TimeZoneConverter) 3.2.0
+* [Docker.DotNet](https://github.com/dotnet/Docker.DotNet)
+* [DocumentFormat.OpenXML](https://github.com/OfficeDev/Open-Xml-Sdk)
+* [HtmlAgilityPack](https://github.com/zzzprojects/html-agility-pack)
+* [ICSharpCode.SharpZipLib](https://github.com/icsharpcode/SharpZipLib)
+* [iTextSharp](https://github.com/itext/itextsharp)
+* [itextSharp.xmlworker](https://github.com/itext/itextsharp)
+* [Jint](https://github.com/sebastienros/jint)
+* [Minio](https://github.com/minio/minio)
+* [MongoDB.Bson](http://mongodb.github.io/mongo-java-driver/3.0/bson/)
+* [MongoDB.Driver](https://github.com/mongodb/mongo-csharp-driver)
+* [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json)
+* [Octokit](https://github.com/octokit)
+* [OpenXmlPowerTools](https://github.com/OfficeDev/Open-Xml-PowerTools)
+* [SocketIOClient](https://github.com/socketio/socket.io-client)
+* [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis)
+* [TimeZoneConverter](https://github.com/mj1856/TimeZoneConverter)
 
 ## Why
 
