@@ -48,4 +48,4 @@ WORKDIR /etc/wd
 
 This will save you about 500MB of space in your containers.
 
-[Back to top](../README.md)
+[Home](../README.md)

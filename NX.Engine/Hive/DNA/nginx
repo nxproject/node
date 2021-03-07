@@ -3,7 +3,7 @@
 	"@SkipRecycle": "y",
 	"@Ports": [
 		"{routing_port}",
-		"443"
+		"$443"
 	],
 	"@Map": [
 		"{shared_folder}/nginx/logs:/etc/nginx/logs",

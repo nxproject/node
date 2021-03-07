@@ -22,39 +22,46 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System.Collections.Generic;
+
 using NX.Engine;
+using NX.Engine.Files;
 using NX.Shared;
 
-namespace Fn.System
+namespace Route.File
 {
     /// <summary>
     /// 
-    /// Evaluates an expression and returns a value
+    /// Uploads a file
     /// 
-    /// Uses from passed store:
-    /// 
-    /// expr        - The expression to be evaluated
-    /// new         - If true or non-zero, return a new store
-    /// 
-    /// Returns in return store:
-    /// 
-    /// value       - Result of the expression
-    ///
     /// </summary>
-    public class Eval : FNClass
+    public class Load : RouteClass
     {
-        public override StoreClass Do(HTTPCallClass call, StoreClass values)
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Support.Route + "load", "?path?" };
+        public override void Call(HTTPCallClass call, StoreClass store)
         {
-            // The return store
-            StoreClass c_Ans = values;
-            // If not the original, make a new one
-            if (XCVT.ToBoolean(values["new"])) c_Ans = new StoreClass();
+            //
+            StoreClass c_Ans = new StoreClass();
 
-            // Eval
-            c_Ans["value"] = call.Env.Evaluate(values["expr"], values).Value;
+            // Get the full path
+            string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path").URLDecode();
 
-            // ANd return the store
-            return c_Ans;
+            // Get the manager
+            NX.Engine.Files.ManagerClass c_Mgr = call.Env.Globals.Get<NX.Engine.Files.ManagerClass>();
+
+            // And upload
+            using (DocumentClass c_Doc = new DocumentClass(c_Mgr, sPath))
+            {
+                // Get
+                StoreClass c_Store = call.BodyAsStore;
+
+                // Save
+                c_Doc.Value = c_Store["content"];
+
+                c_Ans["done"] = "y";
+
+                call.RespondWithStore(c_Ans);
+            }
         }
     }
 }

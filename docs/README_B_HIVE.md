@@ -48,4 +48,4 @@ KillBee|Kills a bee
 KillBeesWithDNA|Kists all bees with a given DNA
 AssureDNA|Assures that a number of bees with a given DNA are active
 
-[Back to top](../README.md)
+[Home](../README.md)

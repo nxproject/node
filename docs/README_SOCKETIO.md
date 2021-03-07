@@ -62,4 +62,4 @@ event.MessageReceived += delegate (MessageClass msg)
 	...
 };
 
-[Back to top](../README.md)
+[Home](../README.md)

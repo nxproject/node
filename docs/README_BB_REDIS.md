@@ -120,4 +120,4 @@ this.CheckForAvailability();
 While the event delegate will be called when there is a state change, this kickstarts the
 process by doing an event call right away, to set the starting mode.
 
-[Back to top](../README.md)
+[Home](../README.md)

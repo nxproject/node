@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (jegbhe@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -485,19 +485,19 @@ namespace Proc.NginX
             return "}".NginxLine(1);
         }
 
-        public static string NginxListenSSL(this string cert, string key, bool getcert, bool secure, int port, params string[] body)
+        public static string NginxListenSSL(this string cert, string key, bool secure, int port, params string[] body)
         {
             return cert.NginxListenSSL(key, secure, port, new List<string>(body));
         }
 
         public static string NginxListenSSLAt(this string cert, string key, int port, params string[] body)
         {
-            return cert.NginxListenSSL(key, false, false, port, body);
+            return cert.NginxListenSSL(key, false, port, body);
         }
 
         public static string NginxListenSSL(this string cert, string key, params string[] body)
         {
-            return cert.NginxListenSSL(key, false, false, 443, body);
+            return cert.NginxListenSSL(key, false, 443, body);
         }
 
         public static string NginxListenSSL(this string cert, string key, bool secure, int port, List<string> body)
@@ -512,8 +512,9 @@ namespace Proc.NginX
             sAns += "listen {0} ssl;".FormatString(secure ? 444 : port).NginxLine(2);
             sAns += ("ssl_certificate " + cert + ";").NginxLine(2);
             sAns += ("ssl_certificate_key " + key + ";").NginxLine(2);
-            sAns += "ssl_protocols SSLv3 TLSv1;".NginxLine(2);
-            sAns += "ssl_ciphers HIGH:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:AES128-SHA:RC4+RSA:RC4-SHA;".NginxLine(2);
+            sAns += "ssl_protocols TLSv1.2;".NginxLine(2);
+            //sAns += "ssl_ciphers HIGH:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA:AES128-SHA:RC4+RSA:RC4-SHA;".NginxLine(2);
+            sAns += "ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;".NginxLine(2);
 
             //if (getcert)
             //{
@@ -529,6 +530,17 @@ namespace Proc.NginX
             }
 
             return sAns;
+        }
+        #endregion
+
+        #region Paths
+        public static string StoragePath (this string domain, bool live, bool cert)
+        {
+            //
+            string sDir = live ? "live" : "self";
+            string sFile = cert ? "fullchain" : "privkey";
+
+            return "/certs/{0}/{1}/{2}.pem".FormatString(sDir, domain, sFile);
         }
         #endregion
     }

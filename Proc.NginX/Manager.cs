@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (jegbhe@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +22,7 @@
 /// 
 ///--------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
 
 using NX.Engine;
@@ -38,15 +39,45 @@ namespace Proc.NginX
     /// </summary>
     public class ManagerClass : BumbleBeeClass
     {
+        #region Constants
+        private const string CertbotSynchFile = "/certs/synch.flag";
+        #endregion
+
         #region Constructor
         public ManagerClass(EnvironmentClass env)
             : base(env, "nginx")
         {
             // Do we support SSL?
-            if (this.Parent["nginx_ssl"].FromDBBoolean())
+            if (this.Parent["certbot_email"].HasValue())
             {
+                // 
+                this.Parent.LogInfo("Enabling certbot...");
+
+                //
+                CertificateClass c_Cert = new CertificateClass(this.Parent, true);
+                this.CertificateExpiration = c_Cert.Expiration;
+
+                //
+                CertbotSynchFile.DeleteFile();
+
                 this.Certbot = new BumbleBeeClass(this.Parent, "certbot");
                 this.Certbot.SetNginxInformation(".well-known", false);
+                //
+                DateTime c_Till = DateTime.Now.AddMinutes(2);
+
+                // Wait until certbot is available
+                while (!this.Certbot.IsAvailable && c_Till > DateTime.Now)
+                {
+                    10.SecondsAsTimeSpan().Sleep();
+                    this.Parent.LogInfo("Waiting for certbot bumble bee...");
+                }
+
+                this.Parent.LogInfo("Certbot bumble started, starting certificate check thread");
+
+                //
+                SafeThreadManagerClass.StartThread("".GUID(), new System.Threading.ParameterizedThreadStart(this.CheckCertificate));
+
+                this.Parent.LogInfo("Certbot support is now active");
             }
 
             // Make a starting config
@@ -111,9 +142,48 @@ namespace Proc.NginX
         /// 
         /// </summary>
         private BumbleBeeClass Certbot { get; set; }
+
+        private DateTime CertificateExpiration { get; set; }
         #endregion
 
         #region Methods
+        /// <summary>
+        /// 
+        /// Checks for a change in the certificate
+        /// 
+        /// </summary>
+        /// <param name="status"></param>
+        private void CheckCertificate(object status)
+        {
+            SafeThreadStatusClass c_Status = status as SafeThreadStatusClass;
+
+            //
+            TimeSpan c_Delay = 2.MinutesAsTimeSpan();
+
+            // Loop
+            while (c_Status.IsActive)
+            {
+                // Get certificate
+                CertificateClass c_Cert = new CertificateClass(this.Parent, true);
+                DateTime c_Exp = c_Cert.Expiration;
+
+                // Did it change
+                if (this.CertificateExpiration < c_Exp)
+                {
+                    // Save
+                    this.CertificateExpiration = c_Exp;
+
+                    // Recycle
+                    this.MakeConfig(this.IsAvailable && this.IsQueen, true);
+
+                    //
+                    c_Delay = 1.DaysAsTimeSpan();
+                }
+
+                c_Status.WaitFor(c_Delay);
+            }
+        }
+
         /// <summary>
         /// 
         /// Is this a DNA we want
@@ -149,10 +219,11 @@ namespace Proc.NginX
         /// 
         /// </summary>
         /// <param name="cando">True if we can make the config</param>
-        private void MakeConfig(bool cando)
+        public void MakeConfig(bool cando, bool force = false)
         {
             // The path to the file
             string sPath = "/etc/nginx";
+
             // Assure
             sPath.AssurePath();
             // And the file
@@ -161,7 +232,7 @@ namespace Proc.NginX
             string sSource = "".WorkingDirectory().CombinePath("Hive/External/nginx/defaults");
 
             // Can we do this?
-            if (cando || !sFile.FileExists())
+            if (cando || !sFile.FileExists() || force)
             {
                 //
                 this.Parent.LogInfo("Creating nginx.conf");
@@ -184,9 +255,11 @@ namespace Proc.NginX
                     //this.Parent.LogVerbose(sConf);
 
                     // Recycle
-                    //this.Parent.Hive.AssureDNACount("nginx", 0, 0);
-                    //this.Parent.Hive.AssureDNACount("nginx", 1);
                     this.Parent.Hive.RecycleDNA("nginx");
+
+                    // Write
+                    if (!CertbotSynchFile.FileExists()) CertbotSynchFile.WriteFile(DateTime.Now.ToString());
+
                 }
                 //
                 this.Parent.LogVerbose("End of nginx.conf maintenance");
@@ -261,9 +334,59 @@ namespace Proc.NginX
             sBody += "Mask errors".NginxComment(1);
             sBody += "".NginxErrors();
 
+            // Defualt to the me field
+            FieldClass c_Field = this.Parent.Hive.MeField;
+            // Get the field to use
+            string sField = this.Parent["field_nginx"];
+            // Any?
+            if (sField.HasValue())
+            {
+                // Get
+                FieldClass c_Poss = this.Parent.Hive.GetField(sField);
+                // Valid?
+                if (c_Poss != null)
+                {
+                    // Use it
+                    c_Field = c_Poss;
+                }
+            }
+
             // SSL stuff
-            bool bSSL = this.Parent["nginx_ssl"].FromDBBoolean();
-            bool bCertbot = false;
+            bool bSSL = this.Parent["certbot_email"].HasValue();
+            string sDomain = this.Parent.Domain;
+            CertificateClass c_Cert = null;
+
+            if (bSSL)
+            {
+                // Use the live
+                c_Cert = new CertificateClass(this.Parent, true);
+
+                // Valid?
+                if (!c_Cert.IsValid)
+                {
+                    // Switch to self-signed
+                    c_Cert = new CertificateClass(this.Parent, false);
+                    c_Env.LogInfo("Using Self certificate, expires on {0} at {1}".FormatString(c_Cert.Expiration, c_Cert.CertificatePath));
+                    //if (c_Cert.IsValid)
+                    //{
+                    //    c_Env.LogInfo("Using Self certificate, expires on {0} at {1}".FormatString(c_Cert.Expiration, c_Cert.CertificatePath));
+                    //}
+                    //else
+                    //{
+                    //    c_Env.LogInfo("No certificate is available");
+
+                    //    c_Cert = null;
+                    //}
+                }
+                else
+                {
+                    c_Env.LogInfo("Using Live certificate, expires on {0} at {1}".FormatString(c_Cert.Expiration, c_Cert.CertificatePath));
+                }
+            }
+            else
+            {
+                c_Env.LogInfo("SSL is not enabled.  Set 'certbot_email' in he config");
+            }
 
             // 
             c_Env.LogVerbose("Creating bumble bee routes");
@@ -290,9 +413,6 @@ namespace Proc.NginX
 
                     // Add the DNA
                     sBody += c_Info.NginxUpstream(c_Env.Hive.Roster.GetLocationsForDNA(c_Bee.Key));
-
-                    // Cerbot
-                    if (c_Info.Name.IsSameValue("certbot")) bCertbot = true;
                 }
             }
 
@@ -321,58 +441,38 @@ namespace Proc.NginX
             // 
             sBody += "Locations".NginxComment(1, true);
 
-            // Defualt to the me field
-            FieldClass c_Field = this.Parent.Hive.MeField;
-            // Get the field to use
-            string sField = this.Parent["field_nginx"];
-            // Any?
-            if (sField.HasValue())
-            {
-                // Get
-                FieldClass c_Poss = this.Parent.Hive.GetField(sField);
-                // Valid?
-                if (c_Poss != null)
-                {
-                    // Use it
-                    c_Field = c_Poss;
-                }
-            }
-
             // 
             sBody += "Server".NginxComment(1, true);
 
             //
             string sPort = this.Parent["routing_port"].NumOnly();
-            bool bOpenServer = true;
+
+            // Open the server
+            sBody += sDomain.NginxServerStart();
 
             // SSL
-            // TBD
-            //if (bSSL && bCertbot)
-            //{
-            //    // 
-            //    sBody += "Handle ceertbot".NginxComment(1);
-            //    // 
-            //    // Open the server
-            //    sBody += this.Parent["domain"].IfEmpty(c_Field.URL.RemoveProtocol().RemovePort()).NginxServerStart();
-            //    // Normal traffic
-            //    sBody += "80".NginxListen();
-            //    sBody += ".well-known".NginxLocation("", "certbot".NginxProxyPass());
-            //    sBody += "".NginxServerEnd();
-
-            //    // Normal work is done via 443
-            //    sPort = "443";
-            //    bOpenServer = false;
-            //    // SSL open
-            //    sBody += this.Parent["domain"].IfEmpty(c_Field.URL.RemoveProtocol().RemovePort()).NginxServerStart(sslCert.NginxListenSSL(sslKey, false, 443));
-            //}
-
-            // Open the server            
-            if (bOpenServer)
+            if (bSSL && c_Cert != null)
             {
-                sBody += this.Parent["domain"].IfEmpty(c_Field.URL.RemoveProtocol().RemovePort()).NginxServerStart();
+                // 
+                sBody += "Handle certbot".NginxComment(2);
+                //  Normal traffic
+                sBody += "80".NginxListen();
+                sBody += ".well-known".NginxLocation("", "certbot".NginxProxyPass());
+                sBody += "".NginxServerEnd();
+
+                // Normal work is done via 443
+                sPort = "443";
+
+                // Open the server
+                sBody += sDomain.NginxServerStart();
+                //
+                sBody += c_Cert.CertificatePath.NginxListenSSL(c_Cert.KeyPath, false, sPort.ToInteger());
             }
-            // Set the port
-            sBody += sPort.NginxListen();
+            else
+            {
+                // Set the port
+                sBody += sPort.NginxListen();
+            }
 
             // Do the bees
             sBody += "Bumble Bees".NginxComment(2, true);

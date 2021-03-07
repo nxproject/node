@@ -2,19 +2,25 @@
   "tier": "dev", // The tier that the hive runs in, change to latest for production
 
   // Production
+
   "hive": "demo", // The name of the hive
   "field": [ "10.192.150.155:2375" ], // The list of fields
-  "domain": "nx9.us", // The domain
+
+  // The following should be set in NX.Office unless you are running NX.Node only
+
+  //"domain": "nx9.us", // The domain   
+  //"certbot_email": "nxoffice2021@gmail.com", // Turns on certbot support
 
   // Testing
 
-  //"hive": "alpha",
+  //"hive": "site",
   //"field": [ "10.192.150.151:2375" ],
-  //"domain": "10.192.150.151",
 
-  //"hive": "beta",
+  //"hive": "site",
   //"field": [ "10.192.180.160:2375" ],
-  //"domain": "10.192.180.160",
+
+  // Allow for Docker Hub image.  Field IP will be set to 172.17.0.1
+  "field_localip": "y",
 
   "repo_project": "nxproject", // The Docker repository name
   "root_folder": "/etc/nxproject", // folder where data is kept
@@ -29,7 +35,7 @@
 
   // Profile
 
-  "uses": [ "Proc.NginX", "Proc.SocketIO", "Route.File", "Proc.Office" ], // To give the system some flavor
+  "uses": [ "BouncyCastle.Crypto", "Proc.NginX", "Proc.SocketIO", "Route.File", "Proc.Office" ], // To give the system some flavor
 
   // Use MongoDb
 
@@ -49,7 +55,7 @@
 
   // These are for development
 
-  "routing_bumble": [], // Allow access to SocketIO
+  "routing_bumble": [],
   "routing_debug": "n",
 
   "verbose": "n", // Tell me what is going on

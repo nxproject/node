@@ -42,4 +42,4 @@ are in the format of **/folder/subfolder1/subfolder2...**.  It applies to the fo
 
 The config and code_folder are not stored in the shared environment settings.
 
-[Back to top](../README.md)
+[Home](../README.md)

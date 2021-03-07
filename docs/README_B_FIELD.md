@@ -11,7 +11,7 @@ You define the field as follows:
 ```
 
 The same ip:port combination cannot be used more than once for a hive.  The feild names do
-not need to match when sharing the field among multipl hives.
+not need to match when sharing the field among multiple hives.
 
 ## Field environment settings
 
@@ -20,5 +20,6 @@ The following setting is used by the hive:
 Setting|Meaning
 -------|-------
 field|The name and IP address of the Docker API.  The syntax is name=ip, for example sales=http://cr.myco.com:8087 or test=10.0.192.99:2375.  You can enter any number of entries by repeating the --field name=ip setting.  If none are entered a=localhost:2375 is used.
+field_localip|If set to ***y***, the system will use the local IP address for the field.  Docker must use the default port 2375.
 
-[Back to top](../README.md)
+[Home](../README.md)

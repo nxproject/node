@@ -5,10 +5,13 @@
 		"80"
 	],
 	"@Map": [
-		"{shared_folder}/nginx/logs:/etc/nginx/logs",
-		"{shared_folder}/nginx:/etc/nginx",
 		"{shared_folder}/nginx/certs:/certs"
 	],
 	"Image": "{repo_project}/certbot:{tier}",
-	"WorkingDir": "/etc/wd"
+	"WorkingDir": "/etc/wd",
+	"Env": [
+		"ACCOUNT_EMAIL={certbot_email}",
+		"DOMAIN={domain}",
+		"DRY_RUN=true"
+	]
 }

@@ -15,4 +15,4 @@ When bees are added or removed, the roster alerts all processes with the changes
 This changes the behavior of the system automatically, and any bumble bee that you create should 
 make use of this mechanism.
 
-[Back to top](../README.md)
+[Home](../README.md)

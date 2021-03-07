@@ -2,10 +2,11 @@
 
 # /conf -- location for the list of configured domains
 # /certs -- location where keys are stored
+# $DOMAIN -- The domain for the certificate
 # $ACCOUNT_EMAIL -- email to associate with these registrations
 
-if not test -f /conf
-    echo "/conf is not a valid file. No config!" >&2
+if not string length $DOMAIN >/dev/null
+    echo "DOMAIN must be set" >&2
     exit 1
 end
 
@@ -19,16 +20,36 @@ if not string length $ACCOUNT_EMAIL >/dev/null
     exit 1
 end
 
-set -l doms (cat /conf | jq -r 'join(",")')
+set cert_found false
+set do_we_do false
 
-set -l extra_args
-
-if test -n "$DRY_RUN"; and test "$DRY_RUN" = 'true'
-    set extra_args --dry-run $extra_args
+if test -f /certs/live/$DOMAIN/fullchain.pem
+    set cert_found true
 end
 
-exec certbot certonly $extra_args \
-    --email $ACCOUNT_EMAIL --non-interactive --agree-tos \
-    --expand \
-    --config-dir /certs \
-    --standalone -d "$doms"
+if $cert_found
+    switch (date +%d)
+        case 20       
+            set do_we_do true
+    end
+else
+    set do_we_do true
+end
+
+if $do_we_do
+
+    #set doms (cat /conf | jq -r 'join(",")')
+
+    set extra_args
+
+    if test -n "$DRY_RUN"; and test "$DRY_RUN" = 'true'
+        set extra_args --dry-run $extra_args
+    end
+
+    exec certbot certonly $extra_args \
+        --email $ACCOUNT_EMAIL --non-interactive --agree-tos \
+        --expand \
+        --config-dir /certs \
+        --standalone -d "$DOMAIN"
+
+end

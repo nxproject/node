@@ -22,4 +22,4 @@ project/module.ext|The same owner as the git_repo environment setting, but a dif
 /module.ext|The same owner and project as git_repo.  Not needed as module is loaded automatically
 token@owner//module.ext|The same project as git_repo, but a different owner.  The token is optional, as the git_token environment setting will be used
 
-[Back to top](../README.md)
+[Home](../README.md)

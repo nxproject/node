@@ -182,7 +182,6 @@
 
   <ItemGroup>
     <Folder Include="Hive\External\nginx\logs\" />
-    <Folder Include="Hive\Genomes\certbot\" />
   </ItemGroup>
 
 </Project>

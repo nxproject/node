@@ -51,4 +51,4 @@ NB: The authentication method applies to all calls, so if you are setting up cal
 from other services, make sure that they are capable of handling the authentication
 method that you decide upon.
 
-[Back to top](../README.md)
+[Home](../README.md)

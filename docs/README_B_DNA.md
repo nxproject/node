@@ -117,4 +117,4 @@ recycled when the site changes.  If set to "y", the genome will not be recycled.
 Just like you can add your own [genomes](README_B_GENOME.md), you can add your own
 DNA defitions to the Hive/DNA folder.
 
-[Back to top](../README.md)
+[Home](../README.md)

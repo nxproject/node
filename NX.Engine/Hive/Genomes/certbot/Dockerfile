@@ -9,6 +9,7 @@ RUN apk --no-cache update && \
         certbot \
         fish \
         jq \
+        openssl \
         tini
 
 COPY crontab /crontabs/root

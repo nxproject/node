@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (jegbhe@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -203,6 +203,9 @@ namespace NX.Engine
                 }
             }
 
+            // Welcome
+            this.LogInfo("NX.Node running at {0}".FormatString("".GetLocalIP()));
+
             // -------------------------------------------------------------
             //
             // In this section we setup the defaults
@@ -225,7 +228,6 @@ namespace NX.Engine
             this["routing_port"] = sPort;
 
             this["nosql"] = this["nosql"].IfEmpty("mongodb");
-            //if (!this.GetAsJArray("field").HasValue()) this.Set("field", "".GetLocalIP() + ":2375");
 
             if (this.Process.IsSameValue("{proc}") || !this.Process.HasValue()) this.Process = "";
             this.Verbose = !!this.Verbose;
@@ -301,7 +303,7 @@ namespace NX.Engine
             };
 
             // If we have a field, setup the hive
-            if (this["field"].HasValue())
+            if (this.Fields.Count > 0)
             {
                 var junk = this.Hive;
             }
@@ -403,19 +405,21 @@ namespace NX.Engine
         {
             get 
             {
-                string sAns = null;
+                string sAns = this[KeyLoopbackURL];
 
-                string sDomain = this["domain"];
-                if (sDomain.HasValue())
+                if (!sAns.HasValue())
                 {
-                    sAns = "http";
-                    if (this["nginx_ssl"].FromDBBoolean()) sAns += "s";
-                    sAns += "://{0}".FormatString(sDomain);
+                    string sDomain = this.Domain;
+                    if (sDomain.HasValue())
+                    {
+                        sAns = "http";
+                        if (this["certbot_email"].HasValue()) sAns += "s";
+                        sAns += "://{0}".FormatString(sDomain);
+
+                        this[KeyLoopbackURL] = sAns;
+                    }
                 }
-                else
-                {
-                    sAns = this[KeyLoopbackURL];
-                }
+
                 return sAns;
             }
             set { this[KeyLoopbackURL] = value; }
@@ -848,11 +852,44 @@ namespace NX.Engine
                 // SIO
                 string sIChannel = this["hive"].MD5HashString();
                 c_Ans.Set("siochannel", sIChannel + "," + sIChannel.MD5HashString());
+                c_Ans.Set("url", this.LoopbackURL);
 
                 return c_Ans;
             }
         }
 
+        /// <summary>
+        /// 
+        /// Returns a list of fields
+        /// 
+        /// </summary>
+        public List<string> Fields
+        {
+            get
+            {
+                List<string> c_Ans = this.GetAsJArray("field").ToList();
+
+                // Do we get from system
+                if(this["field_localip"].FromDBBoolean() && "".IsLinux())
+                {
+                    c_Ans = new List<string>();
+                }
+
+                // Any?
+                if(c_Ans.Count == 0)
+                {
+                    c_Ans.Add("".GetLocalIP() + ":2375");
+                }
+
+                return c_Ans;
+            }
+        }
+
+        public string Domain
+        {
+            get { return this["domain"].IfEmpty(this.Fields[0].RemoveProtocol().RemovePort()); }
+            set { this["domain"] = value; }
+        }
         #endregion
 
         #region Modules

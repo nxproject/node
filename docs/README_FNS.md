@@ -94,4 +94,4 @@ var ans = returned["value"];
 ```
 and in this case **value** would be "109".
 
-[Back to top](../README.md)
+[Home](../README.md)

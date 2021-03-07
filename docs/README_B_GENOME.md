@@ -73,4 +73,4 @@ If you leave out the field, the local Docker instance is assumed.
 Note that the process uses folder **/build/container**, so any contents in that folder
 will be automatically deleted.
 
-[Back to top](../README.md)
+[Home](../README.md)

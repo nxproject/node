@@ -46,4 +46,4 @@ Setting|Meaning
 http_threads|The number of HTTP worker threads to run (Default: 4)
 http_port|The port that the server will listen for HTTP requests (Default: 80)
 
-[Back to top](../README.md)
+[Home](../README.md)

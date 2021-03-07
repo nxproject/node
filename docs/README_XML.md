@@ -31,4 +31,4 @@ is the equivalent of:
 Note that some of the JSON used in the system may have keys that are prefixed with
 the **$$** prefix, which is not a valid XML tag.
 
-[Back to top](../README.md)
+[Home](../README.md)

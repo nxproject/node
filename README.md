@@ -95,6 +95,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Packages used
 
+* [BouncyCastle](http://www.bouncycastle.org/csharp/)
 * [Docker.DotNet](https://github.com/dotnet/Docker.DotNet)
 * [DocumentFormat.OpenXML](https://github.com/OfficeDev/Open-Xml-Sdk)
 * [HtmlAgilityPack](https://github.com/zzzprojects/html-agility-pack)

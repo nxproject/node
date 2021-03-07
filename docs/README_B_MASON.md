@@ -46,4 +46,4 @@ DoNotRespond|bool|If true, no response is allowed
 RequestTTL|TimeSpan|Amount of time in milliseconds that the request is valid. Zero means no expiration
 ResponseTTL|TimeSpan|Amount of time in milliseconds that the response is valid. Zero means no expiration
 
-[Back to top](../README.md)
+[Home](../README.md)

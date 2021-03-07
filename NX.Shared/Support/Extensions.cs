@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (jegbhe@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -152,9 +152,9 @@ namespace NX.Shared
         {
             string sAns = "";
 
-            foreach(string sPiece in values)
+            foreach (string sPiece in values)
             {
-                if(sPiece.Contains(" "))
+                if (sPiece.Contains(" "))
                 {
                     sAns += '"' + sPiece + '"';
                 }
@@ -1478,14 +1478,21 @@ namespace NX.Shared
         {
             string sAns = null;
 
-            IPAddress[] aAddrs = Dns.GetHostAddresses(Dns.GetHostName());
-            foreach (IPAddress c_Addr in aAddrs)
+            if ("".InContainer())
             {
-                string sIP = c_Addr.ToString();
-                if (!sIP.IsIPV6())
+                sAns = "172.17.0.1";
+            }
+            else
+            {
+                // Loop thru
+                foreach (IPAddress c_Addr in Dns.GetHostAddresses(Dns.GetHostName()))
                 {
-                    sAns = sIP;
-                    break;
+                    string sIP = c_Addr.ToString();
+                    if (!sIP.IsIPV6())
+                    {
+                        sAns = sIP;
+                        break;
+                    }
                 }
             }
 

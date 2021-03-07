@@ -159,4 +159,4 @@ this.CheckForAvailability();
 ```
 Same as the redis bumble bee, we need to kickstart the process.
 
-[Back to top](../README.md)
+[Home](../README.md)
