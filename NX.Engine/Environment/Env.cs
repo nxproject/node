@@ -853,6 +853,7 @@ namespace NX.Engine
                 string sIChannel = this["hive"].MD5HashString();
                 c_Ans.Set("siochannel", sIChannel + "," + sIChannel.MD5HashString());
                 c_Ans.Set("url", this.LoopbackURL);
+                c_Ans.Set("protocol", "http" + (this["certbot_email"].HasValue() ? "s" : "") + "//");
 
                 return c_Ans;
             }
@@ -885,6 +886,11 @@ namespace NX.Engine
             }
         }
 
+        /// <summary>
+        /// 
+        /// The domain of the site
+        /// 
+        /// </summary>
         public string Domain
         {
             get { return this["domain"].IfEmpty(this.Fields[0].RemoveProtocol().RemovePort()); }
