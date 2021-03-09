@@ -79,35 +79,12 @@ namespace NX.Engine.Hive
             // Setup for normal running
             if (!this.Parent.InMakeMode)
             {
-                // Track changes in the environment
-                this.Parent.ChangedCalled += delegate (string key, object value)
-                {
-                    // According to what was changed
-                    switch (key)
-                    {
-                        case "fields":
-                        case "external":
-                            this.SetupFields();
-                            break;
-                    }
-                };
-
                 // Tell user
                 this.Parent.LogVerbose("Setting up bee synch...");
 
                 // Setup the synch availability
                 this.Parent.Messenger.AvailabilityChanged += delegate (bool isavailable)
                 {
-                    //// We're alive!
-                    //if (this.Me != null)
-                    //{
-                    //    // Synch
-                    //    this.Synch.Send("bee",
-                    //        "field", this.Me.Field.Name,
-                    //        "id", this.Me.DockerID,
-                    //        "state", "isalive");
-                    //}
-
                     // Is it available?
                     if (isavailable)
                     {

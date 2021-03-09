@@ -793,8 +793,6 @@ namespace NX.Engine.Hive
 
                     // Get list
                     c_Req = this.Parent.Parent.GetAsJArray("qd_bumble").ToList();
-                    // Must have redis
-                    if (!c_Req.Contains("redis")) c_Req.Add("redis");
                     // Get the list of required bumble bees
                     ItemsClass c_Requests = new ItemsClass(c_Req);
 

@@ -18,11 +18,6 @@ can set what the queen is required as a bumble bee by:
 and you can have multiple requirements by:
 ```
 --qd_bumble minio --qd_bumble percona
-```
- By default, the only bumble bee needed is of DNA redis which is automatically done,
- but you can change that behavior via:
- ```
- --qd_bumble !redis
  ```
 
 Similarly, you can also add to the Queen duties the orchestration of worker bees

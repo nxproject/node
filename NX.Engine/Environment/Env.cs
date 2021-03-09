@@ -44,7 +44,7 @@ namespace NX.Engine
     /// The global environment.  
     /// 
     /// </summary>
-    public class EnvironmentClass : SynchronizedStoreClass, ILogger
+    public class EnvironmentClass : StoreClass, ILogger
     {
         #region Constants
         private const string KeyID = "id";
@@ -94,7 +94,6 @@ namespace NX.Engine
         /// </summary>
         /// <param name="args">The command line arguments</param>
         public EnvironmentClass(string[] args)
-            : base(null, "_env")
         {
             // Check to see if secured
             string sCurrentCode = this.Router.SecureCode;
@@ -252,61 +251,6 @@ namespace NX.Engine
             this.LogInfo("ID is {0} in hive {1}:{2}".FormatString(this.ID, this[KeyHive], this.Tier));
             this.LogInfo("Root folder is {0}".FormatString(this.RootFolder));
             this.LogInfo("Documents folder is {0}".FormatString(this.DocFolder));
-
-            // To handle the special keys
-            this.CallbackBeforeSet = delegate (string key, object value)
-            {
-                // default
-                SetOptions eAns = SetOptions.OK;
-
-                // According to name
-                switch (key)
-                {
-                    case KeyID:
-                    case KeyProcess:
-                    case KeyMakeGenome:
-                    case KeyCodeFolder:
-                    case KeyMakeBee:
-                    case KeyLoopbackURL:
-                    case KeyConfig:
-
-                    case "wd":
-                    case "force_queen":
-                    case "document":
-
-                        eAns = SetOptions.SaveButLocal;
-                        break;
-                }
-
-                return eAns;
-            };
-
-            // And setup the synch (special case as we cannot pass this to base constructor)
-            this.SetupSynch(this);
-
-            // Handle very special cases
-            this.ChangedCalled += delegate (string key, object value)
-            {
-                switch (key)
-                {
-                    case "field":
-                        // The hive changed
-                        if (this.IHive != null)
-                        {
-                            this.IHive.Dispose();
-                            this.IHive = null;
-                        }
-                        // And rebuild
-                        var junk = this.Hive;
-                        break;
-                }
-            };
-
-            // If we have a field, setup the hive
-            if (this.Fields.Count > 0)
-            {
-                var junk = this.Hive;
-            }
         }
         #endregion
 

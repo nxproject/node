@@ -145,6 +145,12 @@
     <None Update="Hive\Genomes\mongodb\Dockerfile">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Hive\Genomes\mongodb34\docker-entrypoint.sh">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Hive\Genomes\mongodb34\Dockerfile">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Hive\Genomes\mysql\Dockerfile">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -200,6 +206,7 @@
 
   <ItemGroup>
     <Folder Include="Hive\External\nginx\logs\" />
+    <Folder Include="Hive\Genomes\mongodb34\" />
   </ItemGroup>
 
 </Project>
