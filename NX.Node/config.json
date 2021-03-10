@@ -13,11 +13,11 @@
 
   // Testing
 
-  "hive": "site",
-  "field": [ "10.192.150.151:2375" ],
-
   //"hive": "site",
-  //"field": [ "10.192.180.160:2375" ],
+  //"field": [ "10.192.150.151:2375" ],
+
+  "hive": "site",
+  "field": [ "10.192.180.160:2375" ],
 
   // Allow for Docker Hub image.  Field IP will be set to 172.17.0.1
   "field_localip": "y",

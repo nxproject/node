@@ -855,6 +855,16 @@ namespace NX.Shared
         {
             return Convert.FromBase64String(value);
         }
+
+        public static string ToBase64URL(this string value)
+        {
+            return value.IfEmpty().ToBase64().Replace("+", "-").Replace("/", "_").Replace("=", "~");
+        }
+
+        public static string FromBase64URL(this string value)
+        {
+            return value.IfEmpty().Replace("-", "+").Replace("_", "/").Replace("~", "=").FromBase64();
+        }
         #endregion
 
         #region URL
