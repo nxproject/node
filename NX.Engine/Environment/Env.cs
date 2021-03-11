@@ -1104,7 +1104,7 @@ namespace NX.Engine
         /// Starts the system
         /// 
         /// </summary>
-        public void Start()
+        public void Start(params string[] uses)
         {
             // Do we have an HTTP server?
             if (this.HTTP == null)
@@ -1133,10 +1133,10 @@ namespace NX.Engine
                 var x = this.Hive;
 
                 // Load the built-in
-                this.Use("Fn.System");
-                this.Use("Proc.Default");
-                this.Use("Route.System");
-                this.Use("Route.UI");
+                foreach(string sUse in uses)
+                {
+                    this.Use(sUse);
+                }
             }
         }
 
