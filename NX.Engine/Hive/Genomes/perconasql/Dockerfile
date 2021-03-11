@@ -1,4 +1,5 @@
 ﻿FROM centos:8
+LABEL {proj_label}
 
 LABEL org.label-schema.schema-version="1.0"
 LABEL org.label-schema.name="Percona Server for MySQL"

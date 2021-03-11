@@ -13,6 +13,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 FROM oraclelinux:7-slim
+LABEL {proj_label}
 
 ARG MYSQL_SERVER_PACKAGE=mysql-community-server-minimal-8.0.21
 ARG MYSQL_SHELL_PACKAGE=mysql-shell-8.0.21
