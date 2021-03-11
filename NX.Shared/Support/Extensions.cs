@@ -3219,13 +3219,16 @@ namespace NX.Shared
         {
             path1 = path1.IfEmpty();
             path2 = path2.IfEmpty();
-            if (path2.StartsWith(PathSeparator))
+            if (path1.HasValue())
             {
-                while (path1.EndsWith(PathSeparator)) path1 = path1.Substring(0, path1.Length - 1);
-            }
-            else
-            {
-                if (!path1.EndsWith(PathSeparator)) path1 += PathSeparator;
+                if (path2.StartsWith(PathSeparator))
+                {
+                    while (path1.EndsWith(PathSeparator)) path1 = path1.Substring(0, path1.Length - 1);
+                }
+                else
+                {
+                    if (!path1.EndsWith(PathSeparator)) path1 += PathSeparator;
+                }
             }
 
             return path1 + path2;
