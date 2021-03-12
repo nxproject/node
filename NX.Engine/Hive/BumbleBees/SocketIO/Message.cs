@@ -26,7 +26,7 @@ using System;
 using Newtonsoft.Json.Linq;
 using NX.Shared;
 
-namespace Proc.SocketIO
+namespace NX.Engine.SocketIO
 {
     /// <summary>
     /// 
@@ -80,8 +80,11 @@ namespace Proc.SocketIO
             // Assume failure
             bool bAns = false;
 
-            // Chec
-            if (this.Parent.Parent.Client != null && this.Parent.Parent.Client.Connected)
+            // Check
+            if (this.Parent != null && 
+                this.Parent.Parent != null && 
+                this.Parent.Parent.Client != null && 
+                this.Parent.Parent.Client.Connected)
             {
                 // Send
                 this.Parent.Parent.Client.EmitAsync(this.Parent.Name, this.Payload.ToSimpleString());

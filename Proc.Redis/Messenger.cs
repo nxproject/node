@@ -26,10 +26,10 @@ using System;
 
 using Newtonsoft.Json.Linq;
 
-using NX.Engine.BumbleBees.Redis;
+using NX.Engine;
 using NX.Shared;
 
-namespace NX.Engine
+namespace Proc.Redis
 {
     public class MessengerClass : ChildOfClass<EnvironmentClass>
     {
@@ -38,7 +38,7 @@ namespace NX.Engine
             : base(env)
         {
             //
-            this.Redis = this.Parent.Globals.Get<NX.Engine.BumbleBees.Redis.ManagerClass>();
+            this.Redis = this.Parent.Globals.Get<ManagerClass>();
 
             // Link
             this.Redis.AvailabilityChanged += delegate (bool isavailable)
@@ -79,7 +79,7 @@ namespace NX.Engine
         /// The Redis manager
         /// 
         /// </summary>
-        public NX.Engine.BumbleBees.Redis.ManagerClass Redis { get; private set; }
+        public ManagerClass Redis { get; private set; }
         #endregion
 
         #region Methods

@@ -56,7 +56,6 @@ And best explained in this sequence:
 * Bees
 	* [Worker Bee](docs/README_B_BEE.md)
 	* [Queen Bee](docs/README_B_QUEEN.md)
-	* [Mason Bee](docs/README_B_MASON.md)
 	* [Bumble bee](docs/README_B_BUMBLE.md)
 
 ## Other subjects

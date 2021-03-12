@@ -6,15 +6,20 @@
   
   <ItemGroup>
     <Compile Remove="Files\Support\**" />
+    <Compile Remove="Hive\Mason\**" />
     <Compile Remove="Vendors\**" />
     <EmbeddedResource Remove="Files\Support\**" />
+    <EmbeddedResource Remove="Hive\Mason\**" />
     <EmbeddedResource Remove="Vendors\**" />
     <None Remove="Files\Support\**" />
+    <None Remove="Hive\Mason\**" />
     <None Remove="Vendors\**" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Hive\BeeMessage.cs" />
+    <Compile Remove="Storage\KeyJObjectStore.cs" />
+    <Compile Remove="Storage\KeyValueStore.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,6 +33,7 @@
     <PackageReference Include="MongoDB.Driver.Core" Version="2.11.6" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Octokit" Version="0.48.0" />
+    <PackageReference Include="SocketIOClient" Version="2.1.5" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.4" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
     <PackageReference Include="System.Globalization" Version="4.3.0" />

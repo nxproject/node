@@ -349,13 +349,18 @@ namespace NX.Engine.Hive
                 c_Client.RemoveContainer(this.CV.Id);
 
                 // Remove from roster
-                // Synch
-                if (this.Parent.Parent.Synch != null)
+                using (NX.Engine.SocketIO.MessageClass c_Msg = this.Parent.Parent.Parent.Messenger.NewSys())
                 {
-                    this.Parent.Parent.Synch.SendMessage(HiveClass.MessengerMClass,
-                        "field", this.Field.Name,
-                        "id", this.DockerID,
-                        "state", "isdead");
+                    if (c_Msg != null)
+                    {
+                        c_Msg["sender"] = this.Parent.Parent.Parent.ID;
+                        c_Msg["class"] = HiveClass.MessengerMClass;
+                        c_Msg["field"] = this.Field.Name;
+                        c_Msg["id"] = this.DockerID;
+                        c_Msg["state"] = "isdead";
+
+                        c_Msg.Send();
+                    }
                 }
             }
         }

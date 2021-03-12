@@ -25,7 +25,6 @@
 using System;
 using System.Collections.Generic;
 
-using NX.Engine.BumbleBees.Redis;
 using NX.Shared;
 
 namespace NX.Engine.Hive.Mason
@@ -35,20 +34,7 @@ namespace NX.Engine.Hive.Mason
         #region Constructor
         public ManagerClass(HiveClass hive)
             : base(hive)
-        {
-            //
-            this.Redis = this.Parent.Parent.Globals.Get<NX.Engine.BumbleBees.Redis.ManagerClass>();
-
-            // Link
-            this.Redis.AvailabilityChanged += delegate (bool isavailable)
-            {
-                // Handle
-                this.HandleRedis(isavailable);
-            };
-
-            // And start
-            this.HandleRedis(this.Redis.IsAvailable);
-        }
+        { }
         #endregion
 
         #region IDisposable
@@ -91,13 +77,6 @@ namespace NX.Engine.Hive.Mason
         /// 
         /// </summary>
         private NamedListClass<QueueClass> WorkQueues { get; set; } = new NamedListClass<QueueClass>();
-
-        /// <summary>
-        /// 
-        /// The Redis manager
-        /// 
-        /// </summary>
-        internal BumbleBees.Redis.ManagerClass Redis { get; set; }
         #endregion
 
         #region Method
@@ -145,24 +124,24 @@ namespace NX.Engine.Hive.Mason
         /// <param name="msg">The message</param>
         public void Respond(MessageClass msg)
         {
-            // Redis available?
-            if (this.Redis.IsAvailable)
-            {
-                // Do we have a queue?
-                if (msg != null && !msg.DoNotRespond)
-                {
-                    // Make the queue
-                    using (ProviderQueueClass c_Queue = new ProviderQueueClass(this.Redis, this.QueueName(msg.Queue)))
-                    {
-                        // Set the timestamp
-                        msg[MessageClass.KeyMasonBee] = this.Parent.Parent.ID;
-                        msg[MessageClass.KeyResponseTS] = DateTime.Now.ToUniversalTime().ToString();
+            //// Redis available?
+            //if (this.Redis.IsAvailable)
+            //{
+            //    // Do we have a queue?
+            //    if (msg != null && !msg.DoNotRespond)
+            //    {
+            //        // Make the queue
+            //        using (ProviderQueueClass c_Queue = new ProviderQueueClass(this.Redis, this.QueueName(msg.Queue)))
+            //        {
+            //            // Set the timestamp
+            //            msg[MessageClass.KeyMasonBee] = this.Parent.Parent.ID;
+            //            msg[MessageClass.KeyResponseTS] = DateTime.Now.ToUniversalTime().ToString();
 
-                        // And send the message
-                        c_Queue.Put(msg.ToString());
-                    }
-                }
-            }
+            //            // And send the message
+            //            c_Queue.Put(msg.ToString());
+            //        }
+            //    }
+            //}
         }
 
         /// <summary>
@@ -177,32 +156,32 @@ namespace NX.Engine.Hive.Mason
             // Assume none
             string sAns = null;
 
-            // Redis available?
-            if (this.Redis.IsAvailable)
-            {
-                // Do we have a queue?
-                if (msg != null && msg.Queue.HasValue())
-                {
-                    // Make the queue
-                    using (ProviderQueueClass c_Queue = new ProviderQueueClass(this.Redis, this.QueueName(msg.Queue)))
-                    {
-                        // Set key items
-                        msg[MessageClass.KeyRequestorBee] = this.Parent.Parent.ID;
-                        msg[MessageClass.KeyRequestTS] = DateTime.Now.ToUniversalTime().ToString();
-                        // Responses?
-                        if(this.RequestQueue == null || !this.RequestQueue.IsAvailable)
-                        {
-                            // If no callback force to no response
-                            msg[MessageClass.KeyDoNotRespond] = "true";
-                        }
+            //// Redis available?
+            //if (this.Redis.IsAvailable)
+            //{
+            //    // Do we have a queue?
+            //    if (msg != null && msg.Queue.HasValue())
+            //    {
+            //        // Make the queue
+            //        using (ProviderQueueClass c_Queue = new ProviderQueueClass(this.Redis, this.QueueName(msg.Queue)))
+            //        {
+            //            // Set key items
+            //            msg[MessageClass.KeyRequestorBee] = this.Parent.Parent.ID;
+            //            msg[MessageClass.KeyRequestTS] = DateTime.Now.ToUniversalTime().ToString();
+            //            // Responses?
+            //            if(this.RequestQueue == null || !this.RequestQueue.IsAvailable)
+            //            {
+            //                // If no callback force to no response
+            //                msg[MessageClass.KeyDoNotRespond] = "true";
+            //            }
 
-                        // And send the message
-                        c_Queue.Put(msg.ToString());
-                        // Set the ID
-                        sAns = msg.ID;
-                    }
-                }
-            }
+            //            // And send the message
+            //            c_Queue.Put(msg.ToString());
+            //            // Set the ID
+            //            sAns = msg.ID;
+            //        }
+            //    }
+            //}
 
             return sAns;
         }
@@ -292,16 +271,16 @@ namespace NX.Engine.Hive.Mason
 
         public void Cleanup(string beeid)
         {
-            // If available
-            if (this.Redis.IsAvailable)
-            {
-                // Make the queue
-                using (ProviderQueueClass c_Queue = new ProviderQueueClass(this.Redis, this.QueueName(beeid)))
-                {
-                    // And delete it
-                    c_Queue.Delete();
-                }
-            }
+            //// If available
+            //if (this.Redis.IsAvailable)
+            //{
+            //    // Make the queue
+            //    using (ProviderQueueClass c_Queue = new ProviderQueueClass(this.Redis, this.QueueName(beeid)))
+            //    {
+            //        // And delete it
+            //        c_Queue.Delete();
+            //    }
+            //}
         }
         #endregion
     }

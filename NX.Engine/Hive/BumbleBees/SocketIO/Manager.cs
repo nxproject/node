@@ -36,7 +36,7 @@ using NX.Engine.Hive;
 using NX.Engine.NginX;
 using NX.Shared;
 
-namespace Proc.SocketIO
+namespace NX.Engine.SocketIO
 {
     /// <summary>
     /// 
@@ -81,6 +81,14 @@ namespace Proc.SocketIO
                     this.Client.ConnectAsync().Wait();
 
                     this.Parent.LogInfo("SocketIO: Connected to {0}".FormatString(sURL));
+
+                    // Open
+                    this.OpenSys(this.Parent["site"].MD5HashString());
+                }
+                else
+                {
+                    // Close
+                    this.CloseSys();
                 }
             };
 
@@ -120,9 +128,102 @@ namespace Proc.SocketIO
         /// 
         /// </summary>
         private NamedListClass<EventClass> Map { get; set; } = new NamedListClass<EventClass>();
+
+        /// <summary>
+        /// 
+        /// The system event
+        /// 
+        /// </summary>
+        private EventClass SystemEvent { get; set; }
+
+        /// <summary>
+        /// 
+        /// Is the system channel available?
+        /// 
+        /// </summary>
+        public bool SysEnabled { get; set; } = true;
         #endregion
 
         #region Methods
+        /// <summary>
+        /// 
+        /// Returns a new message
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public MessageClass NewSys()
+        {
+            //
+            MessageClass c_Ans = null;
+
+            if (this.SystemEvent != null && this.Client != null)
+            {
+                c_Ans = new MessageClass(this.SystemEvent);
+            }
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Opens a session
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        public void OpenSys(string id)
+        {
+            // If already created as another id, delete
+            if(this.SystemEvent != null && !this.SystemEvent.Name.IsSameValue(id))
+            {
+                this.SystemEvent.Dispose();
+                this.SystemEvent = null;
+            }
+
+            // Create
+            if(this.SystemEvent == null)
+            {
+                this.SystemEvent = new EventClass(this, id);
+                this.SystemEvent.MessageReceived += delegate (SocketIO.MessageClass msg)
+                {
+                    if (this.SysEnabled)
+                    {
+                        this.SysMessageReceived?.Invoke(msg);
+                    }
+                };
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Closes system channel
+        /// 
+        /// </summary>
+        public void CloseSys()
+        {
+            //
+            if(this.SystemEvent != null)
+            {
+                this.SystemEvent.Dispose();
+                this.SystemEvent = null;
+            }
+        }
+        #endregion
+
+        #region Events
+        /// <summary>
+        /// 
+        /// The delegate for the SysMessageReceived event
+        /// 
+        /// </summary>
+        /// <param name="msg">The message</param>
+        public delegate void OnSysReceivedHandler(MessageClass msg);
+
+        /// <summary>
+        /// 
+        /// Defines the event to be raised when a message is received
+        /// 
+        /// </summary>
+        public event OnSysReceivedHandler SysMessageReceived;
         #endregion
     }
 }

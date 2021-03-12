@@ -126,7 +126,7 @@ namespace NXNode
                 if (!c_Env.InMakeMode)
                 {
                     // And recycle
-                    c_Env.Start();
+                    Boot(c_Env);
                 }
                 else
                 {
@@ -137,12 +137,36 @@ namespace NXNode
             else
             {
                 // Only thing we are allowed inside a container
-                c_Env.Start("Fn.System", "Proc.Default", "Route.System", "Route.UI");
+                Boot(c_Env);
             }
         }
         #endregion
 
         #region Support
+        /// <summary>
+        /// 
+        /// Starts the process with the built in items
+        /// 
+        /// </summary>
+        /// <param name="env"></param>
+        private static void Boot(EnvironmentClass env)
+        {
+            // Load basic
+            env.Start(true, "Fn.System", "Proc.Default", "Route.System", "Route.UI");
+
+            // Kick the bee
+            if(!env.InMakeMode)
+            {
+                env.Hive.Roster.Refresh();
+            }
+        }
+        /// <summary>
+        /// 
+        /// Copies a code/data folder into the working directory
+        /// 
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="target"></param>
         private static void CopyFolder(string source, string target)
         {
             // Assure target

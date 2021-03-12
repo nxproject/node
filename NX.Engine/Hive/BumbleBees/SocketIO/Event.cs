@@ -34,7 +34,7 @@ using SocketIOClient;
 
 using NX.Shared;
 
-namespace Proc.SocketIO
+namespace NX.Engine.SocketIO
 {
     /// <summary>
     /// 

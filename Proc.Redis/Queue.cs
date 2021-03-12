@@ -31,7 +31,7 @@ using System;
 
 using NX.Shared;
 
-namespace NX.Engine.BumbleBees.Redis
+namespace Proc.Redis
 {
     /// <summary>
     /// 

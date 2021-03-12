@@ -780,7 +780,7 @@ namespace NX.Engine.Hive
                     // Get the list of required items
                     ItemsClass c_Uses = new ItemsClass(c_Req);
                     // Add Traefik
-                    if(this.Parent.Parent.TraefikHive.HasValue())
+                    if (this.Parent.Parent.TraefikHive.HasValue())
                     {
                         c_Uses.Add(new ItemClass("Proc.Traefik"));
                     }
@@ -793,19 +793,10 @@ namespace NX.Engine.Hive
 
                     // Get list
                     c_Req = this.Parent.Parent.GetAsJArray("qd_bumble").ToList();
+                    // Must have NginX
+                    if (!c_Req.Contains("nginx")) c_Req.Add("nginx");
                     // Get the list of required bumble bees
                     ItemsClass c_Requests = new ItemsClass(c_Req);
-
-                    // Do we not have redis?
-                    if (!c_Requests.Contains("redis"))
-                    {
-                        // Do we have not redis?
-                        if (!c_Requests.Contains("!redis"))
-                        {
-                            // Add it
-                            c_Requests.Add(new ItemClass("redis"));
-                        }
-                    }
 
                     // Loop thru
                     foreach (ItemClass c_Item in c_Requests)

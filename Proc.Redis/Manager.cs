@@ -27,10 +27,12 @@
 /// Install-Package StackExchange.Redis -Version 2.1.58
 /// 
 
-using NX.Shared;
 using StackExchange.Redis;
 
-namespace NX.Engine.BumbleBees.Redis
+using NX.Shared;
+using NX.Engine;
+
+namespace Proc.Redis
 {
     public class ManagerClass : BumbleBeeClass
     {

@@ -518,7 +518,7 @@ namespace NX.Engine.Hive
                         this.Parent.Parent.LogInfo("I am bee {0} at {1}".FormatString(bee.Id, bee.URL));
 
                         // Set the loopback URL
-                        if(!this.Parent.Parent.Domain.HasValue()) this.Parent.Parent.LoopbackURL = bee.URL;
+                        if (!this.Parent.Parent.Domain.HasValue()) this.Parent.Parent.LoopbackURL = bee.URL;
                     }
 
                     // The change lists
@@ -535,13 +535,18 @@ namespace NX.Engine.Hive
                     this.Parent.Roster.SignalDNAChanged(c_DNAsChanged);
 
                     // Now the other bees
-                    if (this.Parent.Synch != null)
+                    using (NX.Engine.SocketIO.MessageClass c_Msg = this.Parent.Parent.Messenger.NewSys())
                     {
-                        this.Parent.Synch.SendMessage(HiveClass.MessengerMClass,
-                            "field", bee.Field.Name,
-                            "id", bee.DockerID,
-                            "state", "isalive"
-                            );
+                        if (c_Msg != null)
+                        {
+                            c_Msg["sender"] = this.Parent.Parent.ID;
+                            c_Msg["class"] = HiveClass.MessengerMClass;
+                            c_Msg["field"] = bee.Field.Name;
+                            c_Msg["id"] = bee.DockerID;
+                            c_Msg["state"] = "isalive";
+
+                            c_Msg.Send();
+                        }
                     }
                 }
             }

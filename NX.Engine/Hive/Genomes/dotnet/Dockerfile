@@ -4,9 +4,9 @@ FROM mcr.microsoft.com/dotnet/core/runtime:3.1
 LABEL {proj_label}
 
 RUN apt-get update \
-	&& apt install libc6 \
-	&& apt-get install -y libgif-dev autoconf libtool automake build-essential gettext libglib2.0-dev libcairo2-dev libtiff-dev libexif-dev \
-	&& apt-get install -y libgdiplus \
+	# && apt-get install -y autoconf libtool automake build-essential gettext \
+	&& apt-get install -y --no-install-recommends libc6 libgif-dev libglib2.0-dev libcairo2-dev libtiff-dev libexif-dev libgdiplus \
+	
 	# cleanup
 	&& apt-get autoremove \
 	&& apt-get clean \

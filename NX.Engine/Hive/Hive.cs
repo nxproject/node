@@ -39,7 +39,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Newtonsoft.Json.Linq;
 
 using NX.Shared;
-using NX.Engine.Hive.Mason;
 using Octokit;
 
 namespace NX.Engine.Hive
@@ -99,34 +98,37 @@ namespace NX.Engine.Hive
                 };
 
                 // And the message receive
-                this.Parent.Messenger.MessageReceived += delegate (MessengerClass.MessageClass msg)
+                this.Parent.Messenger.SysMessageReceived += delegate (NX.Engine.SocketIO.MessageClass msg)
                 {
-                    switch (msg.MClass)
+                    if (!msg["sender"].IsSameValue(this.Parent.ID))
                     {
-                        case MessengerMClass:
-                            // Get field
-                            FieldClass c_Field = this.GetField(msg["field"]);
-                            // Valid?
-                            if (c_Field != null)
-                            {
-                                // Dead?
-                                if (msg["state"].IsSameValue("isdead"))
+                        switch (msg["class"])
+                        {
+                            case MessengerMClass:
+                                // Get field
+                                FieldClass c_Field = this.GetField(msg["field"]);
+                                // Valid?
+                                if (c_Field != null)
                                 {
-                                    // Remove
-                                    this.Roster.Remove(msg["id"], BeeClass.KillReason.FoundDead);
-                                }
-                                else
-                                {
-                                    // Make the CV
-                                    BeeCVClass c_CV = new BeeCVClass(c_Field, msg["id"]);
-                                    // Make bee
-                                    BeeClass c_Bee = new BeeClass(c_Field, c_CV);
+                                    // Dead?
+                                    if (msg["state"].IsSameValue("isdead"))
+                                    {
+                                        // Remove
+                                        this.Roster.Remove(msg["id"], BeeClass.KillReason.FoundDead);
+                                    }
+                                    else
+                                    {
+                                        // Make the CV
+                                        BeeCVClass c_CV = new BeeCVClass(c_Field, msg["id"]);
+                                        // Make bee
+                                        BeeClass c_Bee = new BeeClass(c_Field, c_CV);
 
-                                    // Add
-                                    this.Roster.Add(c_Bee);
+                                        // Add
+                                        this.Roster.Add(c_Bee);
+                                    }
                                 }
-                            }
-                            break;
+                                break;
+                        }
                     }
                 };
 
@@ -148,8 +150,6 @@ namespace NX.Engine.Hive
 
             // Out
             this.InInitialize = false;
-
-            this.Parent.Messenger.CheckAvailability();
         }
         #endregion
 
@@ -1367,10 +1367,6 @@ namespace NX.Engine.Hive
         }
         #endregion
 
-        #region Synch
-        public MessengerClass Synch { get; private set; }
-        #endregion
-
         #region Labels
         public string LabelUUID
         {
@@ -1416,27 +1412,6 @@ namespace NX.Engine.Hive
         private string MakeLabel(string value)
         {
             return this.Name + "_" + value;
-        }
-        #endregion
-
-        #region Mason
-        /// <summary>
-        /// 
-        /// The Mason Bee support
-        /// 
-        /// </summary>
-        private Mason.ManagerClass IMason { get; set; }
-        public Mason.ManagerClass Mason
-        {
-            get
-            {
-                if (this.IMason == null)
-                {
-                    this.IMason = new Mason.ManagerClass(this);
-                }
-
-                return this.IMason;
-            }
         }
         #endregion
 

@@ -29,7 +29,7 @@ using NX.Shared;
 using StackExchange.Redis;
 using System.Net;
 
-namespace NX.Engine.BumbleBees.Redis
+namespace Proc.Redis
 {
     /// <summary>
     /// 

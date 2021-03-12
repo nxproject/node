@@ -36,6 +36,7 @@ using Octokit;
 
 using NX.Engine.Hive;
 using NX.Shared;
+using NX.Engine.SocketIO;
 
 namespace NX.Engine
 {
@@ -135,11 +136,11 @@ namespace NX.Engine
         { }
 
         private void Initialize(string currcode)
-        { 
+        {
             // Did we get a secure code?
             string sSecureCode = this[EnvironmentClass.KeySecureCode];
             // Do we have to gen?
-            if(sSecureCode.IsSameValue("random"))
+            if (sSecureCode.IsSameValue("random"))
             {
                 sSecureCode = "".GUID();
             }
@@ -231,7 +232,7 @@ namespace NX.Engine
             if (this.Process.IsSameValue("{proc}") || !this.Process.HasValue()) this.Process = "";
             this.Verbose = !!this.Verbose;
 
-            if(this.TraefikHive.IsSameValue(this[EnvironmentClass.KeyHive]))
+            if (this.TraefikHive.IsSameValue(this[EnvironmentClass.KeyHive]))
             {
                 this.LogInfo("Hive will host Traefik");
 
@@ -262,12 +263,6 @@ namespace NX.Engine
         /// </summary>
         public override void Dispose()
         {
-            if (this.IMessenger != null)
-            {
-                this.IMessenger.Dispose();
-                this.IMessenger = null;
-            }
-
             if (this.HTTP != null)
             {
                 this.HTTP.Dispose();
@@ -347,7 +342,7 @@ namespace NX.Engine
         /// </summary>
         public string LoopbackURL
         {
-            get 
+            get
             {
                 string sAns = this[KeyLoopbackURL];
 
@@ -382,24 +377,6 @@ namespace NX.Engine
         #endregion
 
         #region Managers
-        /// <summary>
-        /// 
-        /// The messenger
-        /// 
-        /// </summary>
-        private MessengerClass IMessenger { get; set; }
-        public MessengerClass Messenger
-        {
-            get
-            {
-                if (this.IMessenger == null)
-                {
-                    this.IMessenger = new MessengerClass(this);
-                }
-                return this.IMessenger;
-            }
-        }
-
         /// <summary>
         /// 
         /// The call router
@@ -513,6 +490,25 @@ namespace NX.Engine
                 }
 
                 return this.IHive;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Message messenger
+        /// 
+        /// </summary>
+        private NX.Engine.SocketIO.ManagerClass IMessenger { get; set; }
+        public NX.Engine.SocketIO.ManagerClass Messenger
+        {
+            get
+            {
+                if (this.IMessenger == null)
+                {
+                    this.IMessenger = new ManagerClass(this);
+                }
+
+                return this.IMessenger;
             }
         }
 
@@ -815,13 +811,13 @@ namespace NX.Engine
                 List<string> c_Ans = this.GetAsJArray("field").ToList();
 
                 // Do we get from system
-                if(this["field_localip"].FromDBBoolean() && "".IsLinux())
+                if (this["field_localip"].FromDBBoolean() && "".IsLinux())
                 {
                     c_Ans = new List<string>();
                 }
 
                 // Any?
-                if(c_Ans.Count == 0)
+                if (c_Ans.Count == 0)
                 {
                     c_Ans.Add("".GetLocalIP() + ":2375");
                 }
@@ -1104,12 +1100,11 @@ namespace NX.Engine
         /// Starts the system
         /// 
         /// </summary>
-        public void Start(params string[] uses)
+        public void Start(bool inithive, params string[] uses)
         {
             // Do we have an HTTP server?
             if (this.HTTP == null)
             {
-
                 // Create it
                 this.HTTP = new HTTPClass(this);
                 // And start
@@ -1129,13 +1124,27 @@ namespace NX.Engine
                 var b = this.Router;
                 var c = this.Procs;
 
-                // Create the hive
-                var x = this.Hive;
-
                 // Load the built-in
-                foreach(string sUse in uses)
+                foreach (string sUse in uses)
                 {
                     this.Use(sUse);
+                }
+
+                // Do we init the hive?
+                if (inithive)
+                {
+                    HiveClass x = this.Hive;
+                }
+
+                // Now others
+                JArray c_Uses = this.GetAsJArray("uses");
+                // Any?
+                if (c_Uses != null)
+                {
+                    for (int i = 0; i < c_Uses.Count; i++)
+                    {
+                        this.Use(c_Uses.Get(i));
+                    }
                 }
             }
         }

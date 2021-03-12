@@ -35,7 +35,7 @@
 
   // Profile
 
-  "uses": [ "BouncyCastle.Crypto", "Proc.NginX", "Proc.SocketIO", "Route.File", "Proc.Office" ], // To give the system some flavor
+  "uses": [ "BouncyCastle.Crypto", "Proc.NginX", "Route.File", "Proc.Office" ], // To give the system some flavor
 
   // Use Percona
 
@@ -44,7 +44,7 @@
   // Queens duties
 
   //"qd_uses": [ "Proc.NginX" ],
-  //"qd_bumble": [ "redis" ],
+  //"qd_bumble": [ "nginx" ],
   //"qd_worker": [ "1" ],
 
   "secure_code": "random", // The security code
