@@ -3,18 +3,18 @@
 
   // Production
 
-  //"hive": "demo", // The name of the hive
-  //"field": [ "10.192.150.155:2375" ], // The list of fields
+  "hive": "demo", // The name of the hive
+  "field": [ "10.192.150.155:2375" ], // The list of fields
 
   // The following should be set in NX.Office unless you are running NX.Node only
 
-  //"domain": "nx9.us", // The domain   
-  //"certbot_email": "nxoffice2021@gmail.com", // Turns on certbot support
+  "domain": "nx9.us", // The domain   
+  "certbot_email": "nxoffice2021@gmail.com", // Turns on certbot support
 
   // Testing
 
-  "hive": "site",
-  "field": [ "10.192.150.151:2375" ],
+  //"hive": "site",
+  //"field": [ "10.192.150.151:2375" ],
 
   //"hive": "site",
   //"field": [ "10.192.180.160:2375" ],

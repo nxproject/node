@@ -135,7 +135,7 @@ namespace NX.Engine.Hive
                 {
                     string sTagName = "";
 
-                    if(c_Entry.RepoTags.Count > 0)
+                    if (c_Entry.RepoTags != null && c_Entry.RepoTags.Count > 0)
                     {
                         sTagName = c_Entry.RepoTags[0];
                     }
@@ -287,7 +287,7 @@ namespace NX.Engine.Hive
 
                 // Using a stream so we can handle bigly
                 using (FileStream c_Stream = new FileStream(sFile, FileMode.Open))
-                {                    
+                {
                     using (Stream c_Result = this.Client.Images.BuildImageFromDockerfileAsync(c_Stream, new ImageBuildParameters()
                     {
                         Dockerfile = "Dockerfile",
@@ -400,8 +400,8 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="dockerfile">The Dockerfile contents</param>
         /// <returns>A byte array of the .tar file</returns>
-        private string CreateTarballForDockerfile(DockerIFNameClass name, 
-                                                    string directory, 
+        private string CreateTarballForDockerfile(DockerIFNameClass name,
+                                                    string directory,
                                                     EnvironmentClass env = null)
         {
             // Make the temp file
@@ -802,7 +802,7 @@ namespace NX.Engine.Hive
 
             // Skip unwanted
             if (sExc.IndexOf("NotFound") == -1 &&
-                sExc.IndexOf("reuse that name") ==-1)
+                sExc.IndexOf("reuse that name") == -1)
             {
                 this.Parent.Parent.Parent.LogException("DockerIF: " + fn, e);
             }
