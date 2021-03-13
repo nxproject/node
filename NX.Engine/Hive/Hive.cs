@@ -1365,6 +1365,17 @@ namespace NX.Engine.Hive
                 }
             }
         }
+
+        /// <summary>
+        /// 
+        /// Signals a change in onarchs
+        /// 
+        /// </summary>
+        public void SignalQueenChange()
+        {
+            // Tell the world that the queen changed
+            this.QueenChanged?.Invoke();
+        }
         #endregion
 
         #region Labels
@@ -1451,6 +1462,21 @@ namespace NX.Engine.Hive
         /// 
         /// </summary>
         public event OnSetupCompletedHandler SetupCompleted;
+
+        /// <summary>
+        /// 
+        /// The delegate for the QueenChanged event
+        /// 
+        /// </summary>
+        /// <param name="isavailable">Is the bee available</param>
+        public delegate void OnCQhangedHandler();
+
+        /// <summary>
+        /// 
+        /// Defines the event to be raised when the queen changes
+        /// 
+        /// </summary>
+        public event OnCQhangedHandler QueenChanged;
         #endregion
     }
 }

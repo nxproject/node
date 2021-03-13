@@ -160,6 +160,7 @@ namespace NXNode
                 env.Hive.Roster.Refresh();
             }
         }
+
         /// <summary>
         /// 
         /// Copies a code/data folder into the working directory

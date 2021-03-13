@@ -46,7 +46,7 @@ namespace NX.Engine
                 this.Genome = genome;
 
                 // Track queen changes
-                this.Parent.Hive.Roster.QueenChanged += delegate ()
+                this.Parent.Hive.QueenChanged += delegate ()
                 {
                     // Signal
                     this.SignalQueenChange();

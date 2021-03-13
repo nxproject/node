@@ -470,21 +470,6 @@ namespace NX.Engine.Hive
                 catch { }
             }
         }
-
-        /// <summary>
-        /// 
-        /// The delegate for the QueenChanged event
-        /// 
-        /// </summary>
-        /// <param name="isavailable">Is the bee available</param>
-        public delegate void OnCQhangedHandler();
-
-        /// <summary>
-        /// 
-        /// Defines the event to be raised when the queen changes
-        /// 
-        /// </summary>
-        public event OnCQhangedHandler QueenChanged;
         #endregion
 
         #region Me
@@ -762,7 +747,7 @@ namespace NX.Engine.Hive
                 this.Parent.Parent.LogInfo("Started on queen's duties");
 
                 // Tell the world that the queen changed
-                this.QueenChanged?.Invoke();
+                this.Parent.SignalQueenChange();
 
                 // Until someone replaces us
                 while (c_Status.IsActive && this.Parent.State == HiveClass.States.Queen)
@@ -894,7 +879,7 @@ namespace NX.Engine.Hive
                 this.Parent.State = HiveClass.States.Bee;
 
                 // Tell the world
-                this.QueenChanged?.Invoke();
+                this.Parent.SignalQueenChange();
 
                 // Get the queen
                 BeeClass c_Queen = this.QueenBee;
