@@ -53,8 +53,7 @@ io.sockets.on('connection', (socket) => {
         });
         console.log('Echoing ' + channels[1]);
     }
-
-"SIO: 
+    
     if (channels.length > 2) {
         // Setup internal channel
         socket.on(channels[2], (message) => {
@@ -68,4 +67,4 @@ io.sockets.on('connection', (socket) => {
 
 // Run server
 server.listen(3000);
-console.log('Socket.IO Server 1.2 is running');
+console.log('Socket.IO Server 1.3 is running');
