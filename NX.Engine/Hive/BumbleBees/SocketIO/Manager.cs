@@ -83,7 +83,7 @@ namespace NX.Engine.SocketIO
                     this.Parent.LogInfo("SocketIO: Connected to {0}".FormatString(sURL));
 
                     // Open
-                    this.OpenSys(this.Parent["site"].MD5HashString());
+                    this.OpenSys(this.Parent.SIOChannels[0]);
                 }
                 else
                 {

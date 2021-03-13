@@ -48,8 +48,14 @@ namespace NX.Engine
                 // Track queen changes
                 this.Parent.Hive.Roster.QueenChanged += delegate ()
                 {
-                // Signal
-                this.SignalQueenChange();
+                    // Signal
+                    this.SignalQueenChange();
+
+                    // Assure DNA
+                    if (this.Parent.Hive.Roster.IsQueen)
+                    {
+                        this.Parent.Hive.AssureDNACount(this.Genome, 1);
+                    }
                 };
 
                 // Track task changes

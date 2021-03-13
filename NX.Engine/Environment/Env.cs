@@ -241,6 +241,16 @@ namespace NX.Engine
                 this.Add("hive_traefik", "*");
             }
 
+            // SIO (used elsewhere, so do not change!)
+            List<string> c_Channels = new List<string>();
+            string sSite = this["site"];
+            c_Channels.Add(sSite.MD5HashString());
+            sSite += "ws";
+            c_Channels.Add(sSite.MD5HashString());
+            c_Channels.Add(sSite.MD5HashString().MD5HashString());
+            this.SIOChannels = c_Channels;
+
+
             // Set my own ID
             if (!this.ID.HasValue()) this.ID = "".GUID();
 
@@ -364,6 +374,30 @@ namespace NX.Engine
             set { this[KeyLoopbackURL] = value; }
         }
         #endregion
+
+        /// <summary>
+        /// 
+        /// The public URL
+        /// 
+        /// </summary>
+        public string ReachableURL
+        {
+            get
+            {
+                // Assume none
+                string sAns = null;
+
+                string sDomain = this.Domain;
+                if (sDomain.HasValue())
+                {
+                    sAns = "http";
+                    if (this["certbot_email"].HasValue()) sAns += "s";
+                    sAns += "://{0}".FormatString(sDomain);
+                }
+
+                return sAns.IfEmpty(this.LoopbackURL);
+            }
+        }
 
         #region Callbacks
         public Func<bool> ValidatonCallback { get; set; }
@@ -603,6 +637,7 @@ namespace NX.Engine
         public int HTTPPort
         {
             get { return this[KeyPort].ToInteger(8086); }
+            set { this[KeyPort] = value.ToString(); }
         }
 
         /// <summary>
@@ -789,9 +824,7 @@ namespace NX.Engine
                 c_Ans.Remove(KeyCodeFolder);
                 c_Ans.Remove(KeyMakeBee);
 
-                // SIO
-                string sIChannel = this["hive"].MD5HashString();
-                c_Ans.Set("siochannel", sIChannel + "," + sIChannel.MD5HashString());
+                c_Ans.Set("siochannel", this.SIOChannels.Join(","));
                 c_Ans.Set("url", this.LoopbackURL);
                 c_Ans.Set("protocol", "http" + (this["certbot_email"].HasValue() ? "s" : "") + "//");
 
@@ -836,6 +869,13 @@ namespace NX.Engine
             get { return this["domain"].IfEmpty(this.Fields[0].RemoveProtocol().RemovePort()); }
             set { this["domain"] = value; }
         }
+
+        /// <summary>
+        /// 
+        /// The SocketIO channels used 
+        /// 
+        /// </summary>
+        public List<string> SIOChannels { get; set; }
         #endregion
 
         #region Modules

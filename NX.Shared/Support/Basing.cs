@@ -126,7 +126,7 @@ namespace NX.Shared
         /// </summary>
         /// <param name="env">The current environment</param>
         public ChildOfClass(T env)
-            : base(env)
+            : base(env, true)
         { }
         #endregion
 

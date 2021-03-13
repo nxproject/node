@@ -22,43 +22,50 @@ var raw = process.env.CHANNEL;
 if (!raw) raw = 'nxsio';
 // Break up
 let channels = raw.split(',');
+if (!Array.isArray(channels)) channels = [channels];
 
 // Listen
 io.sockets.on('connection', (socket) => {
+
     // Add connection
     connections.push(socket);
-    // Tell world
-    //console.log('Connection added: %s connections', connections.length);
     // Setup for disconnect
     socket.on('disconnect', () => {
         // Remove connection
         connections.splice(connections.indexOf(socket), 1);
-        // Tell world
-        //console.log('Connection removed: %s connections', connections.length);
     });
 
-    // Setup internal channel
-    socket.on(channels[0], (message) => {
-        // Tell world
-        //console.log('Message : ', message);
-        // Push out
-        io.sockets.emit(channels[0], message);
-    });
-    console.log('Echoing ' + channels[0] + ' as internal channel');
+    // Do each channel
+    if (channels.length > 0) {
+        // Setup internal channel
+        socket.on(channels[0], (message) => {
+            // Push out
+            io.sockets.emit(channels[0], message);
+        });
+        console.log('Echoing ' + channels[0]);
+    }
 
-    // Setup account channel
     if (channels.length > 1) {
+        // Setup internal channel
         socket.on(channels[1], (message) => {
-            // Tell world
-            //console.log('Message : ', message);
             // Push out
             io.sockets.emit(channels[1], message);
         });
-        console.log('Echoing ' + channels[1] + ' as accounts channel');
+        console.log('Echoing ' + channels[1]);
+    }
+
+"SIO: 
+    if (channels.length > 2) {
+        // Setup internal channel
+        socket.on(channels[2], (message) => {
+            // Push out
+            io.sockets.emit(channels[2], message);
+        });
+        console.log('Echoing ' + channels[2]);
     }
 
 });
 
 // Run server
 server.listen(3000);
-console.log('Socket.IO server is running');
+console.log('Socket.IO Server 1.2 is running');

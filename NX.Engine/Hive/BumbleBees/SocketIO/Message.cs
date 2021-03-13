@@ -87,7 +87,7 @@ namespace NX.Engine.SocketIO
                 this.Parent.Parent.Client.Connected)
             {
                 // Send
-                this.Parent.Parent.Client.EmitAsync(this.Parent.Name, this.Payload.ToSimpleString());
+                this.Parent.Parent.Client.EmitAsync(this.Parent.Name, this.Payload.ToSimpleString());;
             }
 
             return bAns;

@@ -10,7 +10,7 @@
 	],
 	"Image": "{repo_project}/socketio:{tier}",
 	"Env": [
-		"DEBUG=true",
+		"DEBUG=false",
 		"CHANNEL={siochannel}"
 	],
 	"WorkingDir": "/etc/wd"

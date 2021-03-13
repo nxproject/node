@@ -97,7 +97,7 @@ namespace NX.Engine.SocketIO
                 }
             });
 
-            this.Parent.Parent.LogVerbose("SocketIO Event: Listening for '{0}'".FormatString(this.Name));
+            this.Parent.Parent.LogInfo("SocketIO Event: Listening for '{0}'".FormatString(this.Name));
         }
         #endregion
 
