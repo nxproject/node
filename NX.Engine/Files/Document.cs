@@ -35,7 +35,6 @@
 using System;
 using System.IO;
 using System.Xml.Linq;
-using System.Drawing.Imaging;
 using System.Linq;
 
 using Newtonsoft.Json.Linq;

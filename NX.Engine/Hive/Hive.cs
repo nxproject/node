@@ -576,7 +576,7 @@ namespace NX.Engine.Hive
         /// One time flag
         /// 
         /// </summary>
-        private bool BaseGenomesCreated { get; set; }
+        //private bool BaseGenomesCreated { get; set; }
 
         /// <summary>
         /// 
@@ -706,42 +706,59 @@ namespace NX.Engine.Hive
                     }
                 }
 
-                // Make base
-                if (!this.BaseGenomesCreated)
+                // Get the dockerfile from
+                string sFrom = sSourceDir.CombinePath("Dockerfile").ReadFile();
+                MatchCollection c_Matches = Regex.Matches(sFrom, @"FROM\s{repo_project}/(?<basedon>[^\x3A]+)\x3A{tier}");
+                foreach(Match c_Match in c_Matches)
                 {
-                    // Set
-                    this.BaseGenomesCreated = true;
-
-                    // Do we need a base?
-                    if (!c_Name.Name.IsSameValue("dotnet"))
+                    // Make the base name
+                    DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, c_Match.Groups["basedon"].Value.AlphaNumOnly());
+                    // The directory
+                    string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);
+                    // Check to see if already made
+                    if (!c_Client.CheckForImage(c_BName))
                     {
-                        // Make the base name
-                        DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, "dotnet");
-                        // The directory
-                        string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);
-                        // Check to see if already made
-                        if (!c_Client.CheckForImage(c_BName))
-                        {
-                            // Build it
-                            c_Client.BuildImage(c_BName, sDir, env);
-                        }
-                    }
-
-                    // Do we need a base?
-                    if (!c_Name.Name.IsSameValue("base"))
-                    {
-                        // Make the base name
-                        DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, "base");
-                        // The directory
-                        string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);
-                        // Check to see if already made
-                        if (!c_Client.CheckForImage(c_BName))
-                        {
-                            // Build it
-                            c_Client.BuildImage(c_BName, sDir, env);
-                        }
+                        // Build it
+                        c_Client.BuildImage(c_BName, sDir, env);
                     }
                 }
+
+                //// Make base
+                //if (!this.BaseGenomesCreated)
+                //{
+                //    // Set
+                //    this.BaseGenomesCreated = true;
+
+                //    // Do we need a base?
+                //    if (!c_Name.Name.IsSameValue("dotnet"))
+                //    {
+                //        // Make the base name
+                //        DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, "dotnet");
+                //        // The directory
+                //        string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);
+                //        // Check to see if already made
+                //        if (!c_Client.CheckForImage(c_BName))
+                //        {
+                //            // Build it
+                //            c_Client.BuildImage(c_BName, sDir, env);
+                //        }
+                //    }
+
+                //    // Do we need a base?
+                //    if (!c_Name.Name.IsSameValue("base"))
+                //    {
+                //        // Make the base name
+                //        DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, "base");
+                //        // The directory
+                //        string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);
+                //        // Check to see if already made
+                //        if (!c_Client.CheckForImage(c_BName))
+                //        {
+                //            // Build it
+                //            c_Client.BuildImage(c_BName, sDir, env);
+                //        }
+                //    }
+                //}
 
                 // Build it
                 c_Client.BuildImage(c_Name, dir);
