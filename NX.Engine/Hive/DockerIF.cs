@@ -215,7 +215,6 @@ namespace NX.Engine.Hive
             return c_Ans;
         }
 
-
         /// <summary>
         /// 
         /// Gets an image from a repo
@@ -429,7 +428,7 @@ namespace NX.Engine.Hive
             // Assure
             directory = directory.IfEmpty();
             // Do we have a directory?
-            if (directory.HasValue())
+            if (directory.HasValue() && !directory.IsSameValue("-"))
             {
                 // Get all the files
                 this.AddEntries(c_Files, directory, false);
@@ -536,16 +535,28 @@ namespace NX.Engine.Hive
             return sOut;
         }
 
+        /// <summary>
+        /// 
+        /// Add fiels to the TBD queue
+        /// 
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="dir"></param>
+        /// <param name="isgenome"></param>
         private void AddEntries(List<DockerIFEntryClass> list, string dir, bool isgenome)
         {
-            // Get the files
-            List<string> c_Files = dir.GetTreeInPath();
-            // Loop thru
-            foreach(string sFile in c_Files)
+            // Protect
+            try
             {
-                list.Add(new DockerIFEntryClass( sFile, dir, isgenome));
+                // Get the files
+                List<string> c_Files = dir.GetTreeInPath();
+                // Loop thru
+                foreach (string sFile in c_Files)
+                {
+                    list.Add(new DockerIFEntryClass(sFile, dir, isgenome));
+                }
             }
-
+            catch { }
         }
         #endregion
 

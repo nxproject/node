@@ -766,9 +766,6 @@ namespace NX.Engine.Hive
                         // Flag
                         this.QueenDutiesOnce = true;
 
-                        // Do we need to recycle?
-                        bool bRecycle = this.Parent.Parent["recycle_containers"].FromDBBoolean();
-
                         // Loop thru genomes
                         foreach (string sGenome in this.Parent.Genomes)
                         {
@@ -776,14 +773,12 @@ namespace NX.Engine.Hive
                             bool bHasSource = this.Parent.GenomeSource(sGenome).HasValue();
 
                             // Does the genome have a source?
-                            if ((bRecycle && !sGenome.IsSameValue(HiveClass.ProcessorDNAName)) || bHasSource)
+                            if (!sGenome.IsSameValue(HiveClass.ProcessorDNAName) && bHasSource)
                             {
-                                // Kill the containers
-                                this.Parent.KillDNA(sGenome);
                                 // Remove the image
                                 this.Parent.RemoveGenome(sGenome);
                                 // And if there is a source, add
-                                if (bHasSource) this.Parent.AssureDNACount(sGenome, 1);
+                                this.Parent.AssureDNACount(sGenome, 1);
                             }
                         }
                     }
