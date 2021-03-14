@@ -4634,8 +4634,6 @@ namespace NX.Shared
             if (!sPath.FileExists())
             {
                 log.LogError("File {0} does not exist!!!".FormatString(filename));
-                // Bye
-                Environment.Exit(1);
             }
             else
             {

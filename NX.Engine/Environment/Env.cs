@@ -1160,9 +1160,9 @@ namespace NX.Engine
                 }
 
                 // Load
-                var a = this.FNS;
-                var b = this.Router;
-                var c = this.Procs;
+                this.FNS.SelfLoad(this);
+                this.Router.SelfLoad(this);
+                this.Procs.SelfLoad(this);
 
                 // Load the built-in
                 foreach (string sUse in uses)
