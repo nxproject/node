@@ -62,12 +62,12 @@ namespace Route.Docker
                 DockerIFClass c_Client = c_Field.DockerIF;
                 if(c_Client != null)
                 {
-                    foreach(ContainerListResponse c_Ctx in c_Client.ListContainers())
+                    foreach(string sCID in c_Client.ListContainersAll())
                     {
                         //
-                        if(sID.IsSameValue(c_Ctx.ID))
+                        if(sID.IsSameValue(sCID))
                         {
-                            c_Client.RestartContainer(c_Ctx.ID);
+                            c_Client.RestartContainer(sCID);
                         }
                     }
                 }

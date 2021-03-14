@@ -214,7 +214,7 @@ namespace NX.Engine.Hive
         /// <param name="domain"></param>
         /// <param name="email"></param>
         /// <param name="tier"></param>
-        public void CreateHive(string name, string field, string domain, string email, string tier=null)
+        public void CreateHive(string name, string field, string domain, string email, string tier = null)
         {
             // Make environment
             using (EnvironmentClass c_Env = new EnvironmentClass(this.Parent))
@@ -573,6 +573,74 @@ namespace NX.Engine.Hive
         #region Genomes
         /// <summary>
         /// 
+        /// Are genome images private to site
+        /// 
+        /// </summary>
+        public bool GenomesArePrivate
+        {
+            get { return this.Parent["private_genomes"].FromDBBoolean(); }
+        }
+
+        /// <summary>
+        /// 
+        /// Lists all the genomes
+        /// 
+        /// </summary>
+        public List<string> Genomes
+        {
+            get
+            {
+                List<string> c_Ans = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").GetDirectoriesInPath();
+
+                // Loop
+                for (int i = 0; i < c_Ans.Count; i++)
+                {
+                    // Only the name
+                    c_Ans[i] = c_Ans[i].GetDirectoryNameFromPath();
+                }
+
+                return c_Ans;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// The folder for the genome
+        /// 
+        /// </summary>
+        /// <param name="genome"></param>
+        /// <returns></returns>
+        public string GenomeDirectory(string genome)
+        {
+            return "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(genome).AdjustPathToOS();
+        }
+
+        /// <summary>
+        /// 
+        /// Removes the genome from the images
+        /// 
+        /// </summary>
+        /// <param name="genome"></param>
+        public void RemoveGenome(string genome)
+        {
+            // Loop thru
+            foreach (FieldClass c_Field in this.Fields.Values)
+            {
+                // Get Client
+                DockerIFClass c_Client = c_Field.DockerIF;
+                // Any?
+                if (c_Client! != null)
+                {
+                    using (DockerIFNameClass c_Name = DockerIFNameClass.Make(this.Parent, genome))
+                    {
+                        c_Client.DeleteImage(c_Name);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
         /// One time flag
         /// 
         /// </summary>
@@ -599,7 +667,7 @@ namespace NX.Engine.Hive
                 if (!done)
                 {
                     // Make
-                    this.MakeGenome(field, name.LocalNameWithTag);
+                    this.MakeGenome(field, name.Name);
                 }
                 // Callback
                 if (cb != null) cb();
@@ -669,6 +737,19 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// Returns the source of the genome working sirectory
+        /// 
+        /// </summary>
+        /// <param name="genome"></param>
+        /// <returns></returns>
+        public string GenomeSource(string genome)
+        {
+            // Check to see if there is a file
+            return this.GenomeDirectory(genome).CombinePath("nxsource").ReadFile();
+        }
+
+        /// <summary>
+        /// 
         /// Makes a Docker Genome from a definition
         /// 
         /// </summary>
@@ -687,81 +768,49 @@ namespace NX.Engine.Hive
                 DockerIFNameClass c_Name = DockerIFNameClass.Make(this.Parent, genome);
 
                 // Make source directory
-                string sSourceDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_Name.Name).AdjustPathToOS();
+                string sSourceDir = this.GenomeDirectory(genome);
+
+                // Assume normal
+                bool bForce = dir.HasValue();
 
                 // Is directory there?
                 if (!dir.HasValue())
                 {
                     // Make
-                    dir = sSourceDir;
+                    dir = this.GenomeSource(genome);
+                    //
+                    bForce = dir.HasValue();
                 }
-                else
-                {
-                    // Copy contents of source into target
-                    var c_Files = Directory.GetFiles(sSourceDir, "*.*", SearchOption.TopDirectoryOnly);
-                    // Loop thru
-                    foreach (string sFile in c_Files)
-                    {
-                        sFile.CopyFile(dir.CombinePath(sFile.GetFileNameFromPath()));
-                    }
+
+                //
+                if (bForce)
+                {                    
+                    // Delete the image 
+                    c_Client.DeleteImage(c_Name);
+
+                    this.Parent.LogInfo("Forcing a build image for {0}".FormatString(genome));
                 }
 
                 // Get the dockerfile from
                 string sFrom = sSourceDir.CombinePath("Dockerfile").ReadFile();
                 MatchCollection c_Matches = Regex.Matches(sFrom, @"FROM\s{repo_project}/(?<basedon>[^\x3A]+)\x3A{tier}");
-                foreach(Match c_Match in c_Matches)
+                foreach (Match c_Match in c_Matches)
                 {
                     // Make the base name
                     DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, c_Match.Groups["basedon"].Value.AlphaNumOnly());
-                    // The directory
-                    string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);
                     // Check to see if already made
-                    if (!c_Client.CheckForImage(c_BName))
+                    if (!c_Client.CheckForImage(c_BName) || bForce)
                     {
                         // Build it
-                        c_Client.BuildImage(c_BName, sDir, env);
+                        c_Client.BuildImage(c_BName, dir, env);
                     }
                 }
 
-                //// Make base
-                //if (!this.BaseGenomesCreated)
-                //{
-                //    // Set
-                //    this.BaseGenomesCreated = true;
-
-                //    // Do we need a base?
-                //    if (!c_Name.Name.IsSameValue("dotnet"))
-                //    {
-                //        // Make the base name
-                //        DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, "dotnet");
-                //        // The directory
-                //        string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);
-                //        // Check to see if already made
-                //        if (!c_Client.CheckForImage(c_BName))
-                //        {
-                //            // Build it
-                //            c_Client.BuildImage(c_BName, sDir, env);
-                //        }
-                //    }
-
-                //    // Do we need a base?
-                //    if (!c_Name.Name.IsSameValue("base"))
-                //    {
-                //        // Make the base name
-                //        DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, "base");
-                //        // The directory
-                //        string sDir = "".WorkingDirectory().CombinePath("Hive").CombinePath("Genomes").CombinePath(c_BName.Name);
-                //        // Check to see if already made
-                //        if (!c_Client.CheckForImage(c_BName))
-                //        {
-                //            // Build it
-                //            c_Client.BuildImage(c_BName, sDir, env);
-                //        }
-                //    }
-                //}
-
                 // Build it
-                c_Client.BuildImage(c_Name, dir);
+                if (!c_Client.CheckForImage(c_Name) || bForce)
+                {
+                    c_Client.BuildImage(c_Name, dir);
+                }
             }
         }
 
@@ -1061,6 +1110,8 @@ namespace NX.Engine.Hive
                     c_Bee.Kill(BeeClass.KillReason.NoLogs);
                 }
             }
+
+            this.Parent.LogInfo("{0} bees eradicated!".FormatString(task));
         }
         #endregion
 

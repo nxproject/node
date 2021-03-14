@@ -179,10 +179,12 @@ namespace NX.Engine.Hive
                 string sKey2 = this.Parent.Parent.LabelHive;
                 string sValue2 = this.Parent.Parent.Name;
 
+                bool bPrivate = this.Parent.Parent.GenomesArePrivate;
+
                 foreach (var c_Entry in c_List)
                 {
-                    // Must match 2
-                    int iMatched = 2;
+                    // Must match 
+                    int iMatched = (bPrivate ? 2 : 1);
 
                     // Do we have any?
                     if (c_Entry.Labels != null)
@@ -212,6 +214,7 @@ namespace NX.Engine.Hive
 
             return c_Ans;
         }
+
 
         /// <summary>
         /// 
@@ -352,6 +355,13 @@ namespace NX.Engine.Hive
             // Protect
             try
             {
+                // Kill any containers
+                foreach (string sCtxID in this.ListContainers(name))
+                {
+                    // Kill
+                    this.RemoveContainer(sCtxID);
+                }
+
                 // Get the list
                 List<string> c_IDs = this.ListImages(name);
                 // Loop thru
@@ -409,116 +419,350 @@ namespace NX.Engine.Hive
             // Delete it
             sOut.DeletePath();
 
+            //
+            string sRoot = "".WorkingDirectory();
+
+            // Assume nothing to copy
+            List<DockerIFEntryClass> c_Files = new List<DockerIFEntryClass>();
+            // Append dockerfile
+            this.AddEntries(c_Files, this.Parent.Parent.GenomeDirectory(name.Name), true);
+            // Assure
+            directory = directory.IfEmpty();
             // Do we have a directory?
             if (directory.HasValue())
             {
                 // Get all the files
-                var c_Files = directory.GetTreeInPath();
+                this.AddEntries(c_Files, directory, false);
+            }
 
-                // Assure
-                sOut.AssurePath();
-                // Add file name
-                sOut = sOut.CombinePath("I".GUID() + ".tar").AdjustPathToOS();
+            // Assure
+            sOut.AssurePath();
+            // Add file name
+            sOut = sOut.CombinePath("I".GUID() + ".tar").AdjustPathToOS();
 
-                // Make the stream
-                FileStream c_Wkg = new FileStream(sOut, FileMode.CreateNew);
+            // Make the stream
+            FileStream c_Wkg = new FileStream(sOut, FileMode.CreateNew);
 
-                // Open the tarball
-                TarOutputStream c_Tarball = new TarOutputStream(c_Wkg);
+            // Open the tarball
+            TarOutputStream c_Tarball = new TarOutputStream(c_Wkg);
 
-                // Only do the Dockerfile once (root dir)
-                bool bDoDockerfile = true;
+            // Loop thru.
+            foreach (DockerIFEntryClass c_In in c_Files)
+            {
+                //Replacing slashes as KyleGobel suggested and removing leading /
+                string tarName = c_In.TarName.Replace('\\', '/').TrimStart('/');
 
-                // Loop thru.
-                foreach (string sIn in c_Files)
+                //Let's create the entry header
+                TarEntry c_Entry = TarEntry.CreateTarEntry(tarName);
+                c_Entry.TarHeader.Mode = Convert.ToInt32("100755", 8); //chmod 755
+
+                // Is this a Dockerfile?
+                if (c_In.Path.GetFileNameFromPath().IsSameValue("Dockerfile") && c_In.IsGenome)
                 {
-                    //Replacing slashes as KyleGobel suggested and removing leading /
-                    string tarName = sIn.Substring(directory.Length).Replace('\\', '/').TrimStart('/');
+                    // Read
+                    string sDF = c_In.Path.ReadFile();
 
-                    //Let's create the entry header
-                    TarEntry c_Entry = TarEntry.CreateTarEntry(tarName);
-                    c_Entry.TarHeader.Mode = Convert.ToInt32("100755", 8); //chmod 755
-
-                    // Is this a Dockerfile?
-                    if (sIn.GetFileNameFromPath().IsSameValue("Dockerfile") && bDoDockerfile)
+                    // Labels
+                    string sLabels = @"""{0}""=""{1}""".FormatString(this.Parent.Parent.LabelGenome, name.Name);
+                    if (this.Parent.Parent.GenomesArePrivate)
                     {
-                        // No more
-                        bDoDockerfile = false;
+                        sLabels += @" ""{0}""=""{1}""".FormatString(this.Parent.Parent.LabelHive, this.Parent.Name);
+                    }
+                    // Format
+                    sDF = this.Parent.Parent.Parent.Format(sDF, true, "proj_label", sLabels);
 
-                        // Read
-                        string sDF = sIn.ReadFile();
-                        // Format
-                        sDF = this.Parent.Parent.Parent.Format(sDF, true,
-                                "proj_label", @"""{0}""=""{1}""".FormatString(this.Parent.Parent.LabelGenome, name.Name));
+                    // Set the size
+                    c_Entry.Size = sDF.Length;
+                    // And write entry
+                    c_Tarball.PutNextEntry(c_Entry);
+
+                    // Now the contents
+                    c_Tarball.Write(sDF.ToBytes(), 0, sDF.Length);
+                }
+                else
+                {
+                    // Assue normal processing
+                    bool bDo = true;
+
+                    if (c_In.Path.GetFileNameFromPath().IsSameValue("config.json") && env != null)
+                    {
+                        // Convert to bytes
+                        byte[] abBuffer = env.SynchObject.ToSimpleString().ToBytes();
 
                         // Set the size
-                        c_Entry.Size = sDF.Length;
+                        c_Entry.Size = abBuffer.Length;
                         // And write entry
                         c_Tarball.PutNextEntry(c_Entry);
 
-                        // Now the contents
-                        c_Tarball.Write(sDF.ToBytes(), 0, sDF.Length);
+                        //Now write the bytes of data                            
+                        c_Tarball.Write(abBuffer, 0, abBuffer.Length);
                     }
-                    else
+
+                    // Process
+                    if (bDo)
                     {
-                        // Assue normal processing
-                        bool bDo = true;
-
-                        if (sIn.GetFileNameFromPath().IsSameValue("config.json") && env != null)
+                        using (FileStream c_Stream = File.OpenRead(c_In.Path))
                         {
-                            // Convert to bytes
-                            byte[] abBuffer = env.SynchObject.ToSimpleString().ToBytes();
-
                             // Set the size
-                            c_Entry.Size = abBuffer.Length;
+                            c_Entry.Size = c_Stream.Length;
                             // And write entry
                             c_Tarball.PutNextEntry(c_Entry);
 
-                            //Now write the bytes of data                            
-                            c_Tarball.Write(abBuffer, 0, abBuffer.Length);
-                        }
-
-                        // Process
-                        if (bDo)
-                        {
-                            using (FileStream c_Stream = File.OpenRead(sIn))
+                            //Now write the bytes of data
+                            byte[] abBuffer = new byte[32 * 1024];
+                            while (true)
                             {
-                                // Set the size
-                                c_Entry.Size = c_Stream.Length;
-                                // And write entry
-                                c_Tarball.PutNextEntry(c_Entry);
+                                int iRead = c_Stream.Read(abBuffer, 0, abBuffer.Length);
+                                if (iRead <= 0)
+                                    break;
 
-                                //Now write the bytes of data
-                                byte[] abBuffer = new byte[32 * 1024];
-                                while (true)
-                                {
-                                    int iRead = c_Stream.Read(abBuffer, 0, abBuffer.Length);
-                                    if (iRead <= 0)
-                                        break;
-
-                                    c_Tarball.Write(abBuffer, 0, iRead);
-                                }
+                                c_Tarball.Write(abBuffer, 0, iRead);
                             }
                         }
                     }
-
-                    //Nothing more to do with this entry
-                    c_Tarball.CloseEntry();
                 }
 
-                // Close the tarball
-                c_Tarball.Close();
-
-                // Close the output stream
-                c_Wkg.Close();
+                //Nothing more to do with this entry
+                c_Tarball.CloseEntry();
             }
+
+            // Close the tarball
+            c_Tarball.Close();
+
+            // Close the output stream
+            c_Wkg.Close();
 
             // 
             return sOut;
         }
+
+        private void AddEntries(List<DockerIFEntryClass> list, string dir, bool isgenome)
+        {
+            // Get the files
+            List<string> c_Files = dir.GetTreeInPath();
+            // Loop thru
+            foreach(string sFile in c_Files)
+            {
+                list.Add(new DockerIFEntryClass( sFile, dir, isgenome));
+            }
+
+        }
         #endregion
 
         #region Containers
+        /// <summary>
+        /// 
+        /// Lists all containers
+        /// 
+        /// </summary>
+        /// <param name="name">The handy dandy name</param>
+        /// <returns>True if it exists</returns>
+        public List<string> ListContainersAll()
+        {
+            // Assume none
+            List<string> c_Ans = new List<string>();
+
+            // Protect
+            try
+            {
+                // Do we have it?
+                var c_List = this.Client.Containers.ListContainersAsync(new ContainersListParameters()
+                {
+                }).Result;
+
+                // Only if private
+                if (this.Parent.Parent.GenomesArePrivate)
+                {
+                    // Get the name
+                    string sKey2 = this.Parent.Parent.LabelHive;
+                    string sValue2 = this.Parent.Parent.Name;
+
+                    foreach (var c_Entry in c_List)
+                    {
+                        // Must match 
+                        int iMatched = 1;
+
+                        // Do we have any?
+                        if (c_Entry.Labels != null)
+                        {
+                            // Loop thru
+                            foreach (var c_KV in c_Entry.Labels)
+                            {
+                                if (c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2))
+                            {
+                                    iMatched--;
+                                }
+                                if (iMatched <= 0)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (iMatched <= 0) c_Ans.Add(c_Entry.ID);
+                    }
+                }
+                else
+                {
+                    // All
+                    foreach (var c_Entry in c_List)
+                    {
+                        c_Ans.Add(c_Entry.ID);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                this.HandleException("ListContainersAll", e);
+            }
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Lists all containers
+        /// 
+        /// </summary>
+        /// <param name="name">The handy dandy name</param>
+        /// <returns>True if it exists</returns>
+        public List<ContainerListResponse> ListContainersInfo()
+        {
+            // Assume none
+            List<ContainerListResponse> c_Ans = new List<ContainerListResponse>();
+
+            // Protect
+            try
+            {
+                // Do we have it?
+                var c_List = this.Client.Containers.ListContainersAsync(new ContainersListParameters()
+                {
+                }).Result;
+
+                // Only if private
+                if (this.Parent.Parent.GenomesArePrivate)
+                {
+                    // Get the name
+                    string sKey2 = this.Parent.Parent.LabelHive;
+                    string sValue2 = this.Parent.Parent.Name;
+
+                    foreach (var c_Entry in c_List)
+                    {
+                        // Must match 
+                        int iMatched = 1;
+
+                        // Do we have any?
+                        if (c_Entry.Labels != null)
+                        {
+                            // Loop thru
+                            foreach (var c_KV in c_Entry.Labels)
+                            {
+                                if (c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2))
+                                {
+                                    iMatched--;
+                                }
+                                if (iMatched <= 0)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (iMatched <= 0) c_Ans.Add(c_Entry);
+                    }
+                }
+                else
+                {
+                    // All
+                    c_Ans.AddRange(c_List);
+                }
+            }
+            catch (Exception e)
+            {
+                this.HandleException("ListContainersInfo", e);
+            }
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Checks to see if container is in local repo
+        /// 
+        /// </summary>
+        /// <param name="name">The handy dandy name</param>
+        /// <returns>True if it exists</returns>
+        public List<string> ListContainers(DockerIFNameClass name)
+        {
+            // Assume none
+            List<string> c_Ans = new List<string>();
+
+            // Protect
+            try
+            {
+                // Do we have it?
+                var c_List = this.Client.Containers.ListContainersAsync(new ContainersListParameters()
+                {
+                }).Result;
+
+                // Get the name
+                string sKey1 = this.Parent.Parent.LabelGenome;
+                string sValue1 = name.Name;
+                string sKey2 = this.Parent.Parent.LabelHive;
+                string sValue2 = this.Parent.Parent.Name;
+
+                bool bPrivate = this.Parent.Parent.GenomesArePrivate;
+
+                foreach (var c_Entry in c_List)
+                {
+                    // Must match 
+                    int iMatched = (bPrivate ? 2 : 1);
+
+                    // Do we have any?
+                    if (c_Entry.Labels != null)
+                    {
+                        // Loop thru
+                        foreach (var c_KV in c_Entry.Labels)
+                        {
+                            if ((c_KV.Value.IsSameValue(sValue1) && c_KV.Key.IsSameValue(sKey1) ||
+                                c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2)))
+                            {
+                                iMatched--;
+                            }
+                            if (iMatched <= 0)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    if (iMatched <= 0) c_Ans.Add(c_Entry.ID);
+                }
+            }
+            catch (Exception e)
+            {
+                this.HandleException("ListContainers", e);
+            }
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Lists the containers with a given id
+        /// 
+        /// </summary>
+        /// <param name="filter">The filter</param>
+        /// <returns></returns>
+        public IList<ContainerListResponse> ListContainersByID(string id)
+        {
+            // Make the filter
+            DockerIFFilterClass c_Filter = new DockerIFFilterClass("id", id);
+
+            // Call
+            return this.ListContainersByFilter(c_Filter);
+        }
+
         /// <summary>
         /// 
         /// Lists the containers matching a filter
@@ -526,15 +770,12 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="filter">The filter</param>
         /// <returns></returns>
-        public IList<ContainerListResponse> ListContainers(DockerIFFilterClass filter = null)
+        public IList<ContainerListResponse> ListContainersByFilter(DockerIFFilterClass filter)
         {
             // Assume none
             IList<ContainerListResponse> c_Ans = new List<ContainerListResponse>();
 
-            // Handle missing filter
-            if (filter == null) filter = new DockerIFFilterClass();
-
-            // Protect
+           // Protect
             try
             {
                 c_Ans = this.Client.Containers.ListContainersAsync(new ContainersListParameters()
@@ -545,7 +786,7 @@ namespace NX.Engine.Hive
             }
             catch (Exception e)
             {
-                this.HandleException("ListContainersAsync", e);
+                this.HandleException("ListContainersByFilter", e);
             }
 
             return c_Ans;
@@ -947,6 +1188,42 @@ namespace NX.Engine.Hive
         #endregion
     }
 
+    public class DockerIFEntryClass
+    {
+        #region Constructor
+        public DockerIFEntryClass(string file, string dir, bool isgenome)
+        {
+            //
+            this.Path = file;
+            this.TarName = file.Substring(dir.Length - (dir.EndsWith("/") ? 1 : 0));
+            this.IsGenome = isgenome;
+        }
+        #endregion
+
+        #region Properties
+        /// <summary>
+        /// 
+        /// The full path
+        /// 
+        /// </summary>
+        public string Path { get; private set; }
+
+        /// <summary>
+        /// 
+        /// The name to use in tarball
+        /// 
+        /// </summary>
+        public string TarName { get; set; }
+
+        /// <summary>
+        /// 
+        /// Is this file part of the genome?
+        /// 
+        /// </summary>
+        public bool IsGenome { get; private set; }
+        #endregion
+    }
+
     /// <summary>
     /// 
     /// Handy dandy image name tool
@@ -1064,7 +1341,7 @@ namespace NX.Engine.Hive
             DockerIFNameClass c_Ans = new DockerIFNameClass(qname);
 
             if (!c_Ans.Project.HasValue()) c_Ans.Project = env[EnvironmentClass.KeyRepoProject];
-            if (!c_Ans.Tag.HasValue()) c_Ans.Tag = env.Tier;
+            if (!c_Ans.Tag.HasValue()) c_Ans.Tag =( env["private_genomes"].FromDBBoolean() ? env["hive"] : env.Tier);
 
             return c_Ans;
         }

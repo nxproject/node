@@ -419,7 +419,7 @@ namespace NX.Engine.Hive
                     try
                     {
                         // Get
-                        IList<ContainerListResponse> c_CVs = c_Client.ListContainers(new DockerIFFilterClass("id", this.Id));
+                        IList<ContainerListResponse> c_CVs = c_Client.ListContainersByID(this.Id);
                         // Any?
                         if (c_CVs.Count > 0)
                         {

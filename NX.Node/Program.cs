@@ -92,12 +92,6 @@ namespace NXNode
                     }
                 }
 
-                // Do we need to recycle?
-                if (c_Env["recycle_containers"].FromDBBoolean())
-                {
-                    c_Env.Hive.KillAll();
-                }
-
                 // Make into image
                 if (c_Env.MakeGenome)
                 {
@@ -155,7 +149,7 @@ namespace NXNode
             env.Start(true, "Fn.System", "Proc.Default", "Route.System", "Route.UI");
 
             // Kick the bee
-            if(!env.InMakeMode)
+            if (!env.InMakeMode)
             {
                 env.Hive.Roster.Refresh();
             }

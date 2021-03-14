@@ -724,6 +724,8 @@ namespace NX.Engine.Hive
                 }
             }
         }
+        
+        private bool QueenDutiesOnce { get; set; }
 
         /// <summary>
         /// 
@@ -757,6 +759,34 @@ namespace NX.Engine.Hive
 
                     // Refresh
                     this.Refresh();
+
+                    // Do the once logic
+                    if(!this.QueenDutiesOnce)
+                    {
+                        // Flag
+                        this.QueenDutiesOnce = true;
+
+                        // Do we need to recycle?
+                        bool bRecycle = this.Parent.Parent["recycle_containers"].FromDBBoolean();
+
+                        // Loop thru genomes
+                        foreach (string sGenome in this.Parent.Genomes)
+                        {
+                            // Get the source
+                            bool bHasSource = this.Parent.GenomeSource(sGenome).HasValue();
+
+                            // Does the genome have a source?
+                            if ((bRecycle && !sGenome.IsSameValue(HiveClass.ProcessorDNAName)) || bHasSource)
+                            {
+                                // Kill the containers
+                                this.Parent.KillDNA(sGenome);
+                                // Remove the image
+                                this.Parent.RemoveGenome(sGenome);
+                                // And if there is a source, add
+                                if (bHasSource) this.Parent.AssureDNACount(sGenome, 1);
+                            }
+                        }
+                    }
 
                     // Get the list
                     List<string> c_Req = this.Parent.Parent.GetAsJArray("qd_uses").ToList();

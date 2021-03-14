@@ -387,7 +387,7 @@ namespace NX.Engine.Hive
                     // Make the filter
                     DockerIFFilterClass c_Filter = new DockerIFFilterClass(sSearchKey, sSearchValue);
                     // Get the list
-                    var c_List = c_Client.ListContainers(c_Filter);
+                    var c_List = c_Client.ListContainersByFilter(c_Filter);
 
                     this.Parent.Parent.LogVerbose("{0} bees seen...".FormatString(c_List.Count));
 
