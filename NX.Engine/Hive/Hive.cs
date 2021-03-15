@@ -81,21 +81,8 @@ namespace NX.Engine.Hive
                 // Tell user
                 this.Parent.LogVerbose("Setting up bee synch...");
 
-                // Setup the synch availability
-                this.Parent.Messenger.AvailabilityChanged += delegate (bool isavailable)
-                {
-                    // Is it available?
-                    if (isavailable)
-                    {
-                        // Stop any thread
-                        SafeThreadManagerClass.StopThread(this.LabelHive);
-                    }
-                    else
-                    {
-                        // Setup a thread to refresh
-                        this.LabelHive.StartThread(new ParameterizedThreadStart(AutoRefresh));
-                    }
-                };
+                // Setup a thread to refresh
+                this.LabelHive.StartThread(new ParameterizedThreadStart(AutoRefresh));
 
                 // And the message receive
                 this.Parent.Messenger.SysMessageReceived += delegate (NX.Engine.SocketIO.MessageClass msg)
@@ -515,6 +502,13 @@ namespace NX.Engine.Hive
         #region Sync
         /// <summary>
         /// 
+        /// Throttle
+        /// 
+        /// </summary>
+        public bool AllowAutoRefresh { get; set; } = true;
+
+        /// <summary>
+        /// 
         /// Refreshes the roster every minute
         /// 
         /// </summary>
@@ -536,32 +530,36 @@ namespace NX.Engine.Hive
                 // Every minute
                 c_Status.WaitFor(c_Wait);
 
-                // See if first time
-                bool bFirst = !this.HasSetup;
-
-                // Reload
-                this.Roster.Refresh();
-
-                // Now go to slow mode
-                c_Wait = 5.MinutesAsTimeSpan();
-
-                // If first time, do the setup
-                if (bFirst)
+                //
+                if (AllowAutoRefresh)
                 {
-                    // Get the uses list
-                    ItemsClass c_Uses = new ItemsClass(this.Parent.GetAsJArray("uses"));
-                    // Loop thru
-                    foreach (ItemClass c_Item in c_Uses)
+                    // See if first time
+                    bool bFirst = !this.HasSetup;
+
+                    // Reload
+                    this.Roster.Refresh();
+
+                    // Now go to slow mode
+                    c_Wait = 5.MinutesAsTimeSpan();
+
+                    // If first time, do the setup
+                    if (bFirst)
                     {
-                        // Load
-                        this.Parent.Use(c_Item.Priority);
+                        // Get the uses list
+                        ItemsClass c_Uses = new ItemsClass(this.Parent.GetAsJArray("uses"));
+                        // Loop thru
+                        foreach (ItemClass c_Item in c_Uses)
+                        {
+                            // Load
+                            this.Parent.Use(c_Item.Priority);
+                        }
+
+                        // And handle process option
+                        this.Parent.Use("Proc." + this.Parent.Process.IfEmpty("Default"));
+
+                        // Tell the world
+                        this.SetupCompleted?.Invoke(this.HasSetup);
                     }
-
-                    // And handle process option
-                    this.Parent.Use("Proc." + this.Parent.Process.IfEmpty("Default"));
-
-                    // Tell the world
-                    this.SetupCompleted?.Invoke(this.HasSetup);
                 }
             }
 

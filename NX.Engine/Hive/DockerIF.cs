@@ -276,6 +276,9 @@ namespace NX.Engine.Hive
         /// <param name="df">The definition (Dockerfile contents)</param>
         public void BuildImage(DockerIFNameClass name, string dir, EnvironmentClass env = null)
         {
+            // In case of long build
+            this.Parent.Parent.Parent.Hive.AllowAutoRefresh = false;
+
             // Make room
             string sFile = null;
 
@@ -313,6 +316,9 @@ namespace NX.Engine.Hive
                     // Delete temp
                     sFile.DeleteFile();
                 }
+
+                // In case of long build
+                this.Parent.Parent.Parent.Hive.AllowAutoRefresh = true;
             }
         }
 
