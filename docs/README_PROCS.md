@@ -81,5 +81,15 @@ POST /chore/securecode/idofbee/nameoffn
 ```
 In the above examples, **chore** is replaced by the value of **proc**.
 
+## Third party DLLs
+
+If you have issues when using third party DLLs and getting an error message that the DLL cannot be found, first make sure that
+the DLL is in the ***bin*** directory of ***NX.Node***.  If the DLL is found there, you should include it as a use entry:
+
+```
+env.Use("BouncyCastle.Crypto");
+```
+
+The issue is that .NET may not be able to load the DLL unless it uses the appropriate context, which enc.Use provides.
 
 [Home](../README.md)
