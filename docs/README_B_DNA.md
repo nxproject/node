@@ -54,7 +54,7 @@ This is the DNA for the processor **genome**:
     "--proc",
     "{proc}"
   ],
-  "Image": "{repo_project}/processor:{tier}",
+  "Image": "{repo_project}/processor:{hive}",
   "WorkingDir": "/etc/wd"
   }
 }
@@ -64,7 +64,7 @@ values found in the [environment settings](README_ENv.md).
 
 In the example above:
 ```JavaScript
-"Image": "{repo_project}/redis:{tier}"
+"Image": "{repo_project}/redis:{hive}"
 ```
 may be converted to:
  ```JavaScript

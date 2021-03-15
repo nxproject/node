@@ -10,7 +10,7 @@
 		"server",
 		"/data"
 	],
-	"Image": "{repo_project}/minio:{tier}",
+	"Image": "{repo_project}/minio:{hive}",
 	"Env": [
 		"MINIO_ACCESS_KEY={minio_access}",
 		"MINIO_SECRET_KEY={minio_secret}"

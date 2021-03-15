@@ -1,6 +1,6 @@
 # NXProject Traefik 1.7.9 Image
 
-FROM {repo_project}/base:{tier}
+FROM {repo_project}/base:{hive}
 LABEL {proj_label}
 
 RUN set -ex; \

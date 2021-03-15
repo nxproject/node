@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <None Update="config.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="runtimeconfig.template.json">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>

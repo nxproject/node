@@ -1,4 +1,4 @@
-FROM {repo_project}/base:{tier}
+FROM {repo_project}/base:{hive}
 LABEL {proj_label}
 
 RUN set -xe \

@@ -5,7 +5,7 @@ The processor genome file (Dockerfile) looks like this:
 ```
 # NXProject Processor 3.1.0 Image
 
-FROM {repo_project}/dotnet:{tier}
+FROM {repo_project}/dotnet:{hive}
 # FROM mcr.microsoft.com/dotnet/core/runtime:3.1
 
 LABEL {proj_label}

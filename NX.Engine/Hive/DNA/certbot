@@ -7,7 +7,7 @@
 	"@Map": [
 		"{shared_folder}/nginx/certs:/certs"
 	],
-	"Image": "{repo_project}/certbot:{tier}",
+	"Image": "{repo_project}/certbot:{hive}",
 	"WorkingDir": "/etc/wd",
 	"Env": [
 		"ACCOUNT_EMAIL={certbot_email}",

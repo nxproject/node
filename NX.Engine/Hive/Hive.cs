@@ -200,8 +200,7 @@ namespace NX.Engine.Hive
         /// <param name="field"></param>
         /// <param name="domain"></param>
         /// <param name="email"></param>
-        /// <param name="tier"></param>
-        public void CreateHive(string name, string field, string domain, string email, string tier = null)
+        public void CreateHive(string name, string field, string domain, string email)
         {
             // Make environment
             using (EnvironmentClass c_Env = new EnvironmentClass(this.Parent))
@@ -212,8 +211,6 @@ namespace NX.Engine.Hive
                 c_Env["domain"] = domain;
                 c_Env["certbot_email"] = email;
                 c_Env["certbot_ssl"] = domain.HasValue().ToDBBoolean();
-
-                if (tier.HasValue()) c_Env["tier"] = tier;
 
                 // Create
                 this.MakeSelfIntoGenome("".WorkingDirectory(), c_Env);
@@ -571,16 +568,6 @@ namespace NX.Engine.Hive
         #region Genomes
         /// <summary>
         /// 
-        /// Are genome images private to site
-        /// 
-        /// </summary>
-        public bool GenomesArePrivate
-        {
-            get { return this.Parent["private_genomes"].FromDBBoolean(); }
-        }
-
-        /// <summary>
-        /// 
         /// Lists all the genomes
         /// 
         /// </summary>
@@ -791,7 +778,7 @@ namespace NX.Engine.Hive
 
                 // Get the dockerfile from
                 string sFrom = sSourceDir.CombinePath("Dockerfile").ReadFile();
-                MatchCollection c_Matches = Regex.Matches(sFrom, @"FROM\s{repo_project}/(?<basedon>[^\x3A]+)\x3A{tier}");
+                MatchCollection c_Matches = Regex.Matches(sFrom, @"FROM\s{repo_project}/(?<basedon>[^\x3A]+)\x3A{hive}");
                 foreach (Match c_Match in c_Matches)
                 {
                     // Make the base name

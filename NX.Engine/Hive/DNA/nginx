@@ -13,6 +13,6 @@
 	"@Copy": [
 		"Hive/External/nginx/defaults:{shared_folder}/nginx"
 	],
-	"Image": "{repo_project}/nginx:{tier}",
+	"Image": "{repo_project}/nginx:{hive}",
 	"WorkingDir": "/etc/wd"
 }

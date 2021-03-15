@@ -56,8 +56,6 @@ namespace NX.Engine
         private const string KeyConfig = "config";
         private const string KeyVerbose = "verbose";
 
-        private const string KeyTier = "tier";
-
         private const string KeySystemPrefix = "system_prefix";
 
         private const string KeyRespFormat = "response_format";
@@ -212,7 +210,6 @@ namespace NX.Engine
             //
 
             this[KeyHive] = this[KeyHive].IfEmpty("default");
-            this[KeyTier] = this[KeyTier].IfEmpty("latest");
             this[KeyRepoProject] = this[KeyRepoProject].IfEmpty("nxproject");
 
             this[KeyRootFolder] = this[KeyRootFolder].IfEmpty("".WorkingDirectory()).CombinePath(this[KeyHive]);
@@ -259,7 +256,7 @@ namespace NX.Engine
             this.LogVerbose("Params: {0}".FormatString(this.SynchObject.ToSimpleString()));
 
             // Tell user
-            this.LogInfo("ID is {0} in hive {1}:{2}".FormatString(this.ID, this[KeyHive], this.Tier));
+            this.LogInfo("ID is {0} in hive {1}".FormatString(this.ID, this[KeyHive]));
             this.LogInfo("Root folder is {0}".FormatString(this.RootFolder));
             this.LogInfo("Documents folder is {0}".FormatString(this.DocFolder));
         }
@@ -587,12 +584,12 @@ namespace NX.Engine
 
         /// <summary>
         /// 
-        /// The current tier
+        /// The hive name
         /// 
         /// </summary>
-        public string Tier
+        public string HiveName
         {
-            get { return this[KeyTier]; }
+            get { return this[KeyHive]; }
         }
 
         /// <summary>
@@ -824,6 +821,7 @@ namespace NX.Engine
                 c_Ans.Remove(KeyCodeFolder);
                 c_Ans.Remove(KeyMakeBee);
 
+                // Virtual
                 c_Ans.Set("siochannel", this.SIOChannels.Join(","));
                 c_Ans.Set("url", this.LoopbackURL);
                 c_Ans.Set("protocol", "http" + (this["certbot_email"].HasValue() ? "s" : "") + "//");

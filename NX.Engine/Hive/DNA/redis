@@ -7,6 +7,6 @@
 	"@Map": [
 		"{shared_folder}/redis:/etc/wd"
 	],
-	"Image": "{repo_project}/redis:{tier}",
+	"Image": "{repo_project}/redis:{hive}",
 	"WorkingDir": "/etc/wd"
 }

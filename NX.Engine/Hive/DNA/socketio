@@ -8,7 +8,7 @@
 		"node",
 		"/etc/wd/server.js"
 	],
-	"Image": "{repo_project}/socketio:{tier}",
+	"Image": "{repo_project}/socketio:{hive}",
 	"Env": [
 		"DEBUG=false",
 		"CHANNEL={siochannel}"

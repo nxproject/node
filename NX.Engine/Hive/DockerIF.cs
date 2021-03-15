@@ -177,14 +177,13 @@ namespace NX.Engine.Hive
                 string sKey1 = this.Parent.Parent.LabelGenome;
                 string sValue1 = name.Name;
                 string sKey2 = this.Parent.Parent.LabelHive;
-                string sValue2 = this.Parent.Parent.Name;
+                string sValue2 = this.Parent.Parent.Parent.HiveName;
 
-                bool bPrivate = this.Parent.Parent.GenomesArePrivate;
-
+                // Loop thru
                 foreach (var c_Entry in c_List)
                 {
                     // Must match 
-                    int iMatched = (bPrivate ? 2 : 1);
+                    int iMatched = 2;
 
                     // Do we have any?
                     if (c_Entry.Labels != null)
@@ -469,10 +468,7 @@ namespace NX.Engine.Hive
 
                     // Labels
                     string sLabels = @"""{0}""=""{1}""".FormatString(this.Parent.Parent.LabelGenome, name.Name);
-                    if (this.Parent.Parent.GenomesArePrivate)
-                    {
-                        sLabels += @" ""{0}""=""{1}""".FormatString(this.Parent.Parent.LabelHive, this.Parent.Name);
-                    }
+                    sLabels += @" ""{0}""=""{1}""".FormatString(this.Parent.Parent.LabelHive, this.Parent.Parent.Parent.HiveName);
                     // Format
                     sDF = this.Parent.Parent.Parent.Format(sDF, true, "proj_label", sLabels);
 
@@ -587,45 +583,33 @@ namespace NX.Engine.Hive
                 {
                 }).Result;
 
-                // Only if private
-                if (this.Parent.Parent.GenomesArePrivate)
+                // Get the name
+                string sKey2 = this.Parent.Parent.LabelHive;
+                string sValue2 = this.Parent.Parent.Parent.HiveName;
+
+                foreach (var c_Entry in c_List)
                 {
-                    // Get the name
-                    string sKey2 = this.Parent.Parent.LabelHive;
-                    string sValue2 = this.Parent.Parent.Name;
+                    // Must match 
+                    int iMatched = 1;
 
-                    foreach (var c_Entry in c_List)
+                    // Do we have any?
+                    if (c_Entry.Labels != null)
                     {
-                        // Must match 
-                        int iMatched = 1;
-
-                        // Do we have any?
-                        if (c_Entry.Labels != null)
+                        // Loop thru
+                        foreach (var c_KV in c_Entry.Labels)
                         {
-                            // Loop thru
-                            foreach (var c_KV in c_Entry.Labels)
+                            if (c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2))
                             {
-                                if (c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2))
+                                iMatched--;
+                            }
+                            if (iMatched <= 0)
                             {
-                                    iMatched--;
-                                }
-                                if (iMatched <= 0)
-                                {
-                                    break;
-                                }
+                                break;
                             }
                         }
+                    }
 
-                        if (iMatched <= 0) c_Ans.Add(c_Entry.ID);
-                    }
-                }
-                else
-                {
-                    // All
-                    foreach (var c_Entry in c_List)
-                    {
-                        c_Ans.Add(c_Entry.ID);
-                    }
+                    if (iMatched <= 0) c_Ans.Add(c_Entry.ID);
                 }
             }
             catch (Exception e)
@@ -656,42 +640,33 @@ namespace NX.Engine.Hive
                 {
                 }).Result;
 
-                // Only if private
-                if (this.Parent.Parent.GenomesArePrivate)
+                // Get the name
+                string sKey2 = this.Parent.Parent.LabelHive;
+                string sValue2 = this.Parent.Parent.Parent.HiveName;
+
+                foreach (var c_Entry in c_List)
                 {
-                    // Get the name
-                    string sKey2 = this.Parent.Parent.LabelHive;
-                    string sValue2 = this.Parent.Parent.Name;
+                    // Must match 
+                    int iMatched = 1;
 
-                    foreach (var c_Entry in c_List)
+                    // Do we have any?
+                    if (c_Entry.Labels != null)
                     {
-                        // Must match 
-                        int iMatched = 1;
-
-                        // Do we have any?
-                        if (c_Entry.Labels != null)
+                        // Loop thru
+                        foreach (var c_KV in c_Entry.Labels)
                         {
-                            // Loop thru
-                            foreach (var c_KV in c_Entry.Labels)
+                            if (c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2))
                             {
-                                if (c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2))
-                                {
-                                    iMatched--;
-                                }
-                                if (iMatched <= 0)
-                                {
-                                    break;
-                                }
+                                iMatched--;
+                            }
+                            if (iMatched <= 0)
+                            {
+                                break;
                             }
                         }
-
-                        if (iMatched <= 0) c_Ans.Add(c_Entry);
                     }
-                }
-                else
-                {
-                    // All
-                    c_Ans.AddRange(c_List);
+
+                    if (iMatched <= 0) c_Ans.Add(c_Entry);
                 }
             }
             catch (Exception e)
@@ -726,14 +701,13 @@ namespace NX.Engine.Hive
                 string sKey1 = this.Parent.Parent.LabelGenome;
                 string sValue1 = name.Name;
                 string sKey2 = this.Parent.Parent.LabelHive;
-                string sValue2 = this.Parent.Parent.Name;
+                string sValue2 = this.Parent.Parent.Parent.HiveName;
 
-                bool bPrivate = this.Parent.Parent.GenomesArePrivate;
-
+                // Loop thru
                 foreach (var c_Entry in c_List)
                 {
                     // Must match 
-                    int iMatched = (bPrivate ? 2 : 1);
+                    int iMatched = 2;
 
                     // Do we have any?
                     if (c_Entry.Labels != null)
@@ -792,7 +766,7 @@ namespace NX.Engine.Hive
             // Assume none
             IList<ContainerListResponse> c_Ans = new List<ContainerListResponse>();
 
-           // Protect
+            // Protect
             try
             {
                 c_Ans = this.Client.Containers.ListContainersAsync(new ContainersListParameters()
@@ -1358,7 +1332,7 @@ namespace NX.Engine.Hive
             DockerIFNameClass c_Ans = new DockerIFNameClass(qname);
 
             if (!c_Ans.Project.HasValue()) c_Ans.Project = env[EnvironmentClass.KeyRepoProject];
-            if (!c_Ans.Tag.HasValue()) c_Ans.Tag =( env["private_genomes"].FromDBBoolean() ? env["hive"] : env.Tier);
+            c_Ans.Tag = env.HiveName;
 
             return c_Ans;
         }
