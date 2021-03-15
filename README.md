@@ -131,6 +131,7 @@ see a version number of less than 1.0. And like any programmer, the code will
 change to adapt to new things.
 
 NX.Node is one piece of a multi-part project, so expect changes as I work on the other layers!
+If this has sparked interest, all of the project is open source so look at [NX.Workspace](https://github.com/nxproject/workspace).
 
 ## My take on containers
 
