@@ -42,7 +42,6 @@ io.sockets.on('connection', (socket) => {
             // Push out
             io.sockets.emit(channels[0], message);
         });
-        console.log('Echoing ' + channels[0]);
     }
 
     if (channels.length > 1) {
@@ -51,7 +50,6 @@ io.sockets.on('connection', (socket) => {
             // Push out
             io.sockets.emit(channels[1], message);
         });
-        console.log('Echoing ' + channels[1]);
     }
     
     if (channels.length > 2) {
@@ -60,7 +58,6 @@ io.sockets.on('connection', (socket) => {
             // Push out
             io.sockets.emit(channels[2], message);
         });
-        console.log('Echoing ' + channels[2]);
     }
 
 });
@@ -68,3 +65,4 @@ io.sockets.on('connection', (socket) => {
 // Run server
 server.listen(3000);
 console.log('Socket.IO Server 1.3 is running');
+console.log('Echoing ' + channels.join(', '));
