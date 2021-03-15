@@ -60,7 +60,6 @@ And best explained in this sequence:
 
 ## Other subjects
 * [DotNet](docs/README_DOTNET.md)
-* [Tiers](docs/README_TIER.md)
 * [Git](docs/README_GIT.md)
 * [A static (maybe) web site](docs/README_STATIC.md)
 * [HTTP](docs/README_HTTP.md)

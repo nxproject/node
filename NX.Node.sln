@@ -78,7 +78,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docs\README_SOCKETIO.md = docs\README_SOCKETIO.md
 		docs\README_SQL.md = docs\README_SQL.md
 		docs\README_STATIC.md = docs\README_STATIC.md
-		docs\README_TIER.md = docs\README_TIER.md
 		docs\README_TRAEFIK.md = docs\README_TRAEFIK.md
 		docs\README_USE.md = docs\README_USE.md
 		docs\README_XML.md = docs\README_XML.md
@@ -118,7 +117,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Route.Docker", "Route.Docke
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proc.Minio", "Proc.Minio\Proc.Minio.csproj", "{B40760C2-1B0C-464B-8C1D-1AC8665331CE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proc.Redis", "Proc.Redis\Proc.Redis.csproj", "{1747C842-EFDA-48E8-82AE-012D5C8793B1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proc.Redis", "Proc.Redis\Proc.Redis.csproj", "{1747C842-EFDA-48E8-82AE-012D5C8793B1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Redis", "Redis", "{AFE145B7-C9F7-4DB7-902F-22EE52E6010A}"
 EndProject

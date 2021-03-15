@@ -75,7 +75,6 @@ may be converted to:
 Var|Value
 ---|-----
 repo_project|classic
-tier|latest
 
 ## @Unique
 
