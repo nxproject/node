@@ -216,6 +216,41 @@ namespace NX.Engine.Hive
                 this.MakeSelfIntoGenome("".WorkingDirectory(), c_Env);
             }
         }
+
+        /// <summary>
+        /// 
+        /// Destroys all bees and genomes
+        /// 
+        /// </summary>
+        public void DestroyHive()
+        {
+            // Only if not in a container
+            if (!"".InContainer())
+            {
+                // Loop thru
+                foreach (FieldClass c_Field in this.Fields.Values)
+                {
+                    // Get Docker
+                    DockerIFClass c_Client = c_Field.DockerIF;
+
+                    // Loop thru containers
+                    foreach (string sCID in c_Client.ListContainersAll())
+                    {
+                        // Stop
+                        c_Client.StopContainer(sCID);
+                        // Remove
+                        c_Client.RemoveContainer(sCID);
+                    }
+
+                    // Loop thru images
+                    foreach(string sIID in c_Client.ListImagesAll())
+                    {
+                        // Delete
+                        c_Client.DeleteImageByID(sIID);
+                    }
+                }
+            }
+        }
         #endregion
 
         #region Fields

@@ -92,6 +92,13 @@ namespace NXNode
                     }
                 }
 
+                // Do we need to recycle?
+                if(c_Env["destroy_hive"].FromDBBoolean())
+                {
+                    // Bye
+                    c_Env.Hive.DestroyHive();
+                }
+
                 // Make into image
                 if (c_Env.MakeGenome)
                 {

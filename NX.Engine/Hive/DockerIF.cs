@@ -208,7 +208,64 @@ namespace NX.Engine.Hive
             }
             catch (Exception e)
             {
-                this.HandleException("ListImagesAsync", e);
+                this.HandleException("ListImages", e);
+            }
+
+            return c_Ans;
+        }
+
+        /// <summary>
+        /// 
+        /// Lists all images
+        /// 
+        /// </summary>
+        /// <returns>True if it exists</returns>
+        public List<string> ListImagesAll()
+        {
+            // Assume none
+            List<string> c_Ans = new List<string>();
+
+            // Protect
+            try
+            {
+                // Do we have it?
+                var c_List = this.Client.Images.ListImagesAsync(new ImagesListParameters()
+                {
+                }).Result;
+
+                // Get the name
+                string sKey2 = this.Parent.Parent.LabelHive;
+                string sValue2 = this.Parent.Parent.Parent.HiveName;
+
+                // Loop thru
+                foreach (var c_Entry in c_List)
+                {
+                    // Must match 
+                    int iMatched = 1;
+
+                    // Do we have any?
+                    if (c_Entry.Labels != null)
+                    {
+                        // Loop thru
+                        foreach (var c_KV in c_Entry.Labels)
+                        {
+                            if (c_KV.Value.IsSameValue(sValue2) && c_KV.Key.IsSameValue(sKey2))
+                            {
+                                iMatched--;
+                            }
+                            if (iMatched <= 0)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    if (iMatched <= 0) c_Ans.Add(c_Entry.ID);
+                }
+            }
+            catch (Exception e)
+            {
+                this.HandleException("ListImagesAll", e);
             }
 
             return c_Ans;
@@ -381,6 +438,29 @@ namespace NX.Engine.Hive
             catch (Exception e)
             {
                 this.HandleException("DeleteImageAsync", e);
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Deletes an image from local
+        /// 
+        /// </summary>
+        /// <param name="id">The image ID</param>
+        public void DeleteImageByID(string id)
+        {
+            // Protect
+            try
+            {
+                // Do
+                this.Client.Images.DeleteImageAsync(id, new ImageDeleteParameters()
+                {
+                    Force = true
+                });
+            }
+            catch (Exception e)
+            {
+                this.HandleException("DeleteImageByID", e);
             }
         }
 
@@ -964,7 +1044,6 @@ namespace NX.Engine.Hive
                 this.HandleException("GetContainerLogsAsync;StdErr", e);
             }
         }
-
 
         /// <summary>
         /// 
