@@ -366,17 +366,16 @@ namespace Proc.NginX
                 {
                     // Switch to self-signed
                     c_Cert = new CertificateClass(this.Parent, false);
-                    c_Env.LogInfo("Using Self certificate, expires on {0} at {1}".FormatString(c_Cert.Expiration, c_Cert.CertificatePath));
-                    //if (c_Cert.IsValid)
-                    //{
-                    //    c_Env.LogInfo("Using Self certificate, expires on {0} at {1}".FormatString(c_Cert.Expiration, c_Cert.CertificatePath));
-                    //}
-                    //else
-                    //{
-                    //    c_Env.LogInfo("No certificate is available");
+                    if (c_Cert.IsValid)
+                    {
+                        c_Env.LogInfo("Using Self certificate, expires on {0} at {1}".FormatString(c_Cert.Expiration, c_Cert.CertificatePath));
+                    }
+                    else
+                    {
+                        c_Env.LogInfo("No certificate is available");
 
-                    //    c_Cert = null;
-                    //}
+                        c_Cert = null;
+                    }
                 }
                 else
                 {

@@ -61,23 +61,10 @@ namespace Proc.NginX
             this.CertificatePath = this.Domain.StoragePath(this.Live, true);
 
             this.Parse();
-
-                // 
-            if (!this.Live)
-            {
-                // Do we need a new one?
-                if (!this.IsValid && !(this.Domain.IsIPV4() || this.Domain.IsIPV6()))
-                {
-                    // Delete current
-                    this.CertificatePath.DeleteFile();
-                    this.KeyPath.DeleteFile();
-
-                    // And make
-                    this.CreateSelfSignedCertificate(2048);
-                }
-            }
         }
-        public CertificateClass(EnvironmentClass env, string path): base(env)
+
+        public CertificateClass(EnvironmentClass env, string path)
+            : base(env)
         {
             //
             this.CertificatePath = path;
@@ -170,66 +157,6 @@ namespace Proc.NginX
 
                 this.Parent.LogException("While parsing the certificate", e);
             }
-        }
-
-        /// <summary>
-        /// 
-        /// Create a self signed certificaate
-        /// 
-        /// </summary>
-        /// <param name="keysize"></param>
-        private void CreateSelfSignedCertificate(int keysize)
-        {
-            // Generate key pair
-            AsymmetricCipherKeyPair c_KP = this.GenerateKeys(keysize);
-
-            // Generating Random Numbers
-            CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
-            SecureRandom random = new SecureRandom(randomGenerator);
-            ISignatureFactory signatureFactory = new Asn1SignatureFactory("SHA512WITHRSA", c_KP.Private, random);
-
-            // The Certificate Generator
-            X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
-            certificateGenerator.AddExtension(X509Extensions.ExtendedKeyUsage.Id, true, new ExtendedKeyUsage(KeyPurposeID.IdKPServerAuth));
-
-            // Serial Number
-            BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
-            certificateGenerator.SetSerialNumber(serialNumber);
-
-            // Issuer and Subject Name
-            certificateGenerator.SetIssuerDN(new X509Name(this.Domain));
-            certificateGenerator.SetSubjectDN(new X509Name(this.Domain));
-
-            // Valid For
-            DateTime notBefore = DateTime.UtcNow.Date;
-            DateTime notAfter = notBefore.AddYears(2);
-            certificateGenerator.SetNotBefore(notBefore);
-            certificateGenerator.SetNotAfter(notAfter);
-
-            //certificateGenerator.SetPublicKey(subjectKeyPair.Public);
-            certificateGenerator.SetPublicKey(c_KP.Public);
-
-            // selfsign certificate
-            Org.BouncyCastle.X509.X509Certificate certificate = certificateGenerator.Generate(signatureFactory);
-            var dotNetPrivateKey = this.ToDotNetKey((RsaPrivateCrtKeyParameters)c_KP.Private);
-
-            // merge into X509Certificate2
-            X509Certificate2 x509 = new X509Certificate2(DotNetUtilities.ToX509Certificate(certificate));
-            x509.PrivateKey = dotNetPrivateKey;
-            x509.FriendlyName = this.Domain;
-
-            // Save
-            try
-            {
-                this.CertificatePath.WriteFile(this.PEM("CERTIFICATE", x509.Export(X509ContentType.Cert)));
-            }
-            catch
-            {
-                this.Parent.LogError("Unable to save self signed certificate, state is unknown!");
-            }
-
-            //
-            this.Parent.LogInfo("Created self signed certificate");
         }
         #endregion
 
