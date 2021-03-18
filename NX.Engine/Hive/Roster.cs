@@ -746,7 +746,7 @@ namespace NX.Engine.Hive
                 this.Parent.State = HiveClass.States.Queen;
 
                 //
-                this.Parent.Parent.LogInfo("Started on queen's duties");
+                this.Parent.Parent.LogVerbose("Started on queen's duties");
 
                 // Tell the world that the queen changed
                 this.Parent.SignalQueenChange();
@@ -756,8 +756,6 @@ namespace NX.Engine.Hive
                 {
                     // Mark oursleves
                     this.Parent.State = HiveClass.States.InQueenDuties;
-
-                    this.Parent.Parent.LogInfo("In queen's duties cycle");
 
                     // Refresh
                     this.Refresh();
@@ -787,7 +785,7 @@ namespace NX.Engine.Hive
                     // Get the list of required bumble bees
                     ItemsClass c_Requests = new ItemsClass(c_Req);
 
-                    this.Parent.Parent.LogInfo("qd_bumble is {0}".FormatString(c_Req.Join(", ")));
+                    this.Parent.Parent.LogVerbose("qd_bumble is {0}".FormatString(c_Req.Join(", ")));
 
                     // Loop thru
                     foreach (ItemClass c_Item in c_Requests)
@@ -842,6 +840,12 @@ namespace NX.Engine.Hive
                             iCount = c_Item.Option.ToInteger(0);
                         }
 
+                        // Is it a preocessor?
+                        if(!c_Item.Priority.HasValue() && iCount < 1)
+                        {
+                            iCount = 1;
+                        }
+
                         // Add
                         c_Counts[c_Item.Priority] = iCount;
                     }
@@ -890,7 +894,7 @@ namespace NX.Engine.Hive
                         this.Parent.State = HiveClass.States.Queen;
                     }
 
-                    this.Parent.Parent.LogInfo("End of queen's duties cycle");
+                    this.Parent.Parent.LogVerbose("End of queen's duties cycle");
 
                     // And do again in ten minutes
                     c_Status.WaitFor(this.Parent.Parent["qd_every"].ToInteger(1).MinutesAsTimeSpan());
