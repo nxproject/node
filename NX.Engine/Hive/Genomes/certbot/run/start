@@ -29,6 +29,6 @@ if [ "$RUN_ONCE" = "true" ]
 then
     exec /run/renew-all
 else
-    cp /run/crontab /etc/cron.d/crontab
+    cp /run/crontab /etc/cron.d/certbotsc
     exec cron -f -L 0
 fi

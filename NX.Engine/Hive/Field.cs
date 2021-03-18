@@ -666,8 +666,14 @@ namespace NX.Engine.Hive
                     // Any?
                     if (c_Zombie != null && !c_Zombie.IsGhost)
                     {
+                        // Tell user
+                        this.Parent.Parent.LogInfo("Zombie is {0}".FormatString(c_Zombie.Id));
+
                         // Kill
                         c_Zombie.Kill(BeeClass.KillReason.Zombie);
+                        // remove from internal
+                        this.Bees.Remove(c_Zombie.Id);
+
                         // Add notch
                         iCount++;
                     }

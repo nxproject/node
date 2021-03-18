@@ -53,23 +53,18 @@ namespace Proc.NginX
     public class CertificateClass : ChildOfClass<EnvironmentClass>
     {
         #region Constructor
-        public CertificateClass(EnvironmentClass env, bool live)
+        public CertificateClass(EnvironmentClass env)
             : base(env)
         {
             //
-            this.Live = live;
-            this.CertificatePath = this.Domain.StoragePath(this.Live, true);
-
-            this.Parse();
+            this.Path = this.Domain.StoragePath(true, true);
         }
 
         public CertificateClass(EnvironmentClass env, string path)
             : base(env)
         {
             //
-            this.CertificatePath = path;
-
-            this.Parse();
+            this.Path = path;
         }
         #endregion
 
@@ -83,38 +78,17 @@ namespace Proc.NginX
 
         /// <summary>
         /// 
-        /// Is it the live certificate
-        /// 
-        /// </summary>
-        public bool Live { get; private set; }
-
-        /// <summary>
-        /// 
         /// The path of the certificate
         /// 
         /// </summary>
-        public string CertificatePath { get; private set; } 
+        public string Path { get; private set; } 
 
         /// <summary>
         /// 
         /// The path to the keys
         /// 
         /// </summary>
-        public string KeyPath { get { return this.Domain.StoragePath(this.Live, false); } }
-
-        /// <summary>
-        /// 
-        /// The common name of the current certificate
-        /// 
-        /// </summary>
-        public string CommonName { get; private set; }
-
-        /// <summary>
-        /// 
-        /// The epiration date
-        /// 
-        /// </summary>
-        public DateTime Expiration { get; private set; }
+        public string KeyPath { get { return this.Domain.StoragePath(true, false); } }
 
         /// <summary>
         /// 
@@ -126,36 +100,7 @@ namespace Proc.NginX
             get
             {
                 // 
-                return this.CommonName.IsSameValue(this.Domain) &&
-                                this.Expiration>= DateTime.Today;
-            }
-        }
-        #endregion
-
-        #region Methods
-        private void Parse()
-        {
-            // Tell the world
-            //this.Parent.LogInfo("Certificate path is {0}".FormatString(this.CertificatePath));
-
-            try
-            {
-                if (this.CertificatePath.FileExists())
-                {
-                    using (X509Certificate2 c_Cert = new X509Certificate2(this.CertificatePath.ReadFileAsBytes()))
-                    {
-                        // Get items
-                        this.CommonName = c_Cert.GetNameInfo(X509NameType.SimpleName, false);
-                        this.Expiration = c_Cert.GetExpirationDateString().FromDBDate();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                this.CommonName = "";
-                this.Expiration = DateTime.MinValue;
-
-                this.Parent.LogException("While parsing the certificate", e);
+                return this.Path.FileExists();
             }
         }
         #endregion

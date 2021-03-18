@@ -757,31 +757,10 @@ namespace NX.Engine.Hive
                     // Mark oursleves
                     this.Parent.State = HiveClass.States.InQueenDuties;
 
+                    this.Parent.Parent.LogInfo("In queen's duties cycle");
+
                     // Refresh
                     this.Refresh();
-
-                    // Do the once logic
-                    if(!this.QueenDutiesOnce)
-                    {
-                        // Flag
-                        this.QueenDutiesOnce = true;
-
-                        // Loop thru genomes
-                        foreach (string sGenome in this.Parent.Genomes)
-                        {
-                            // Get the source
-                            bool bHasSource = this.Parent.GenomeSource(sGenome).HasValue();
-
-                            // Does the genome have a source?
-                            if (!sGenome.IsSameValue(HiveClass.ProcessorDNAName) && bHasSource)
-                            {
-                                // Remove the image
-                                this.Parent.RemoveGenome(sGenome);
-                                // And if there is a source, add
-                                this.Parent.AssureDNACount(sGenome, 1);
-                            }
-                        }
-                    }
 
                     // Get the list
                     List<string> c_Req = this.Parent.Parent.GetAsJArray("qd_uses").ToList();
@@ -801,28 +780,43 @@ namespace NX.Engine.Hive
                         this.Parent.Parent.Use(c_Item.Priority);
                     }
 
+                    // Assure NginX
+                    this.Parent.Parent.AddToArray("qd_bumble", "nginx");
                     // Get list
-                    c_Req = this.Parent.Parent.GetAsJArray("qd_bumble").ToList();
-                    // Must have NginX
-                    if (!c_Req.Contains("nginx")) c_Req.Add("nginx");
+                    c_Req = this.Parent.Parent.GetAsJArray("qd_bumble").ToList().Unique();
                     // Get the list of required bumble bees
                     ItemsClass c_Requests = new ItemsClass(c_Req);
+
+                    this.Parent.Parent.LogInfo("qd_bumble is {0}".FormatString(c_Req.Join(", ")));
 
                     // Loop thru
                     foreach (ItemClass c_Item in c_Requests)
                     {
+                        string sGenome = c_Item.Priority;
+
                         // Kill?
-                        if (!c_Item.Priority.StartsWith("!"))
+                        if (!sGenome.StartsWith("!"))
                         {
+                            // Do we need to recycle?
+                            if(!this.QueenDutiesOnce && this.Parent.GenomeSource(sGenome).HasValue())
+                            {
+                                // Remove genome
+                                this.Parent.RemoveGenome(sGenome);
+                                this.Refresh();
+                            }
+
                             // Call
-                            this.Parent.AssureDNACount(c_Item.Priority, 1, 1); ;
+                            this.Parent.AssureDNACount(sGenome, 1, 1); ;
                         }
                     }
+
+                    // Reset
+                    this.QueenDutiesOnce = true;
 
                     // Get the list of required worker bees
                     c_Req = this.Parent.Parent.GetAsJArray("qd_worker").ToList();
                     // Have at least one
-                    if (c_Req.Count == 0) c_Req.Add("1");
+                    if (c_Req.Count == 0) c_Req.Add("");
                     // Parse
                     c_Requests = new ItemsClass(c_Req);
                     // Build table of procs vs. count
@@ -896,6 +890,8 @@ namespace NX.Engine.Hive
                         this.Parent.State = HiveClass.States.Queen;
                     }
 
+                    this.Parent.Parent.LogInfo("End of queen's duties cycle");
+
                     // And do again in ten minutes
                     c_Status.WaitFor(this.Parent.Parent["qd_every"].ToInteger(1).MinutesAsTimeSpan());
                 }
@@ -936,6 +932,9 @@ namespace NX.Engine.Hive
                     // No new qeen?
                     this.Parent.Parent.LogInfo("No queen is available");
                 }
+
+                // Flag
+                this.QueenDutiesOnce = true;
 
                 //
                 this.Parent.Parent.LogInfo("Queen's duties have ended");

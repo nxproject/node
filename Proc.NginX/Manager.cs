@@ -47,6 +47,9 @@ namespace Proc.NginX
         public ManagerClass(EnvironmentClass env)
             : base(env, "nginx")
         {
+            //
+            CertbotSynchFile.DeleteFile();
+
             // Do we support SSL?
             if (this.Parent["certbot_email"].HasValue())
             {
@@ -54,16 +57,12 @@ namespace Proc.NginX
                 this.Parent.LogInfo("Enabling certbot...");
 
                 //
-                CertificateClass c_Cert = new CertificateClass(this.Parent, true);
-                this.CertificateExpiration = c_Cert.Expiration;
-
-                //
-                CertbotSynchFile.DeleteFile();
+                CertificateClass c_Cert = new CertificateClass(this.Parent);
 
                 this.Certbot = new BumbleBeeClass(this.Parent, "certbot");
-                this.Certbot.SetNginxInformation(".well-known", false);
+                this.Certbot.SetNginxInformation(".certbot", false);
                 //
-                DateTime c_Till = DateTime.Now.AddMinutes(2);
+                DateTime c_Till = DateTime.Now.AddMinutes(5);
 
                 // Wait until certbot is available
                 while (!this.Certbot.IsAvailable && c_Till > DateTime.Now)
@@ -75,7 +74,7 @@ namespace Proc.NginX
                 this.Parent.LogInfo("Certbot bumble started, starting certificate check thread");
 
                 //
-                SafeThreadManagerClass.StartThread("".GUID(), new System.Threading.ParameterizedThreadStart(this.CheckCertificate));
+                "".GUID().StartThread(new System.Threading.ParameterizedThreadStart(this.CheckCertificate));
 
                 this.Parent.LogInfo("Certbot support is now active");
             }
@@ -142,8 +141,6 @@ namespace Proc.NginX
         /// 
         /// </summary>
         private BumbleBeeClass Certbot { get; set; }
-
-        private DateTime CertificateExpiration { get; set; }
         #endregion
 
         #region Methods
@@ -155,33 +152,68 @@ namespace Proc.NginX
         /// <param name="status"></param>
         private void CheckCertificate(object status)
         {
+            //
             SafeThreadStatusClass c_Status = status as SafeThreadStatusClass;
 
-            //
-            TimeSpan c_Delay = 2.MinutesAsTimeSpan();
+            // Reset flag
+            CertbotSynchFile.DeleteFile();
 
-            // Loop
+            // The certificat path
+            string sPath = null;
+            using (CertificateClass c_Cert = new CertificateClass(this.Parent))
+            {
+                sPath = c_Cert.Path;
+            }
+
+            // Get current date and time
+            DateTime c_OrigLW = (sPath.FileExists() ? sPath.GetLastWriteFromPath() : DateTime.MinValue);
+
+            // Starting delay
+            TimeSpan c_Delay = 1.MinutesAsTimeSpan();
+
+            // Signal certbot
+            CertbotSynchFile.WriteFile(DateTime.Now.ToString());
+
+            //
             while (c_Status.IsActive)
             {
-                // Get certificate
-                CertificateClass c_Cert = new CertificateClass(this.Parent, true);
-                DateTime c_Exp = c_Cert.Expiration;
-
-                // Did it change
-                if (this.CertificateExpiration < c_Exp)
+                //
+                if (!CertbotSynchFile.FileExists())
                 {
-                    // Save
-                    this.CertificateExpiration = c_Exp;
+                    // Get the new date
+                    DateTime c_Now = sPath.GetLastWriteFromPath();
+                    // New?
+                    if (c_OrigLW != c_Now)
+                    {
+                        // Save
+                        c_OrigLW = c_Now;
 
-                    // Recycle
-                    this.MakeConfig(this.IsAvailable && this.IsQueen, true);
+                        // Done
+                        this.MakeConfig(true, true);
 
-                    //
-                    c_Delay = 1.DaysAsTimeSpan();
+                        // Long delay
+                        c_Delay = 1.DaysAsTimeSpan();
+                    }
+                    else if (DateTime.Today.Day == 20)
+                    {
+                        // Done this month?
+                        if (c_OrigLW.Month != DateTime.Today.Month)
+                        {
+                            // Signal certbot
+                            CertbotSynchFile.WriteFile(DateTime.Now.ToString());
+
+                            // Short delay
+                            c_Delay = 1.MinutesAsTimeSpan();
+                        }
+                    }
                 }
 
+                //
                 c_Status.WaitFor(c_Delay);
             }
+
+            // Kill self
+            c_Status.End();
         }
 
         /// <summary>
@@ -256,10 +288,6 @@ namespace Proc.NginX
 
                     // Recycle
                     this.Parent.Hive.RecycleDNA("nginx");
-
-                    // Write
-                    if (!CertbotSynchFile.FileExists()) CertbotSynchFile.WriteFile(DateTime.Now.ToString());
-
                 }
                 //
                 this.Parent.LogVerbose("End of nginx.conf maintenance");
@@ -359,32 +387,22 @@ namespace Proc.NginX
             if (bSSL)
             {
                 // Use the live
-                c_Cert = new CertificateClass(this.Parent, true);
+                c_Cert = new CertificateClass(this.Parent);
 
                 // Valid?
                 if (!c_Cert.IsValid)
                 {
-                    // Switch to self-signed
-                    c_Cert = new CertificateClass(this.Parent, false);
-                    if (c_Cert.IsValid)
-                    {
-                        c_Env.LogInfo("Using Self certificate, expires on {0} at {1}".FormatString(c_Cert.Expiration, c_Cert.CertificatePath));
-                    }
-                    else
-                    {
-                        c_Env.LogInfo("No certificate is available");
-
-                        c_Cert = null;
-                    }
+                    //
+                    c_Cert = null;
                 }
                 else
                 {
-                    c_Env.LogInfo("Using Live certificate, expires on {0} at {1}".FormatString(c_Cert.Expiration, c_Cert.CertificatePath));
+                    c_Env.LogInfo("Using SSL certificate at {0}".FormatString(c_Cert.Path));
                 }
             }
             else
             {
-                c_Env.LogInfo("SSL is not enabled.  Set 'certbot_email' in he config");
+                c_Env.LogInfo("SSL is not enabled.  Set 'certbot_email' in config.son");
             }
 
             // 
@@ -450,22 +468,26 @@ namespace Proc.NginX
             sBody += sDomain.NginxServerStart();
 
             // SSL
-            if (bSSL && c_Cert != null)
+            if (bSSL)
             {
                 // 
                 sBody += "Handle certbot".NginxComment(2);
+
                 //  Normal traffic
-                sBody += "80".NginxListen();
+                sBody += sPort.NginxListen();
                 sBody += ".well-known".NginxLocation("", "certbot".NginxProxyPass());
-                sBody += "".NginxServerEnd();
 
-                // Normal work is done via 443
-                sPort = "443";
+                if (c_Cert != null)
+                {
+                    sBody += "".NginxServerEnd();
+                    // Normal work is done via 443
+                    sPort = "443";
 
-                // Open the server
-                sBody += sDomain.NginxServerStart();
-                //
-                sBody += c_Cert.CertificatePath.NginxListenSSL(c_Cert.KeyPath, false, sPort.ToInteger());
+                    // Open the server
+                    sBody += sDomain.NginxServerStart();
+                    //
+                    sBody += c_Cert.Path.NginxListenSSL(c_Cert.KeyPath, false, sPort.ToInteger());
+                }
             }
             else
             {

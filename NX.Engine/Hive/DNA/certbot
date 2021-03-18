@@ -12,6 +12,6 @@
 	"Env": [
 		"ACCOUNT_EMAIL={certbot_email}",
 		"DOMAIN={domain}",
-		"DRY_RUN=true"
+		"DRY_RUN=false"
 	]
 }

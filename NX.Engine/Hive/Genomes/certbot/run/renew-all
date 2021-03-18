@@ -1,9 +1,13 @@
 #!/bin/bash
-
-# /certs -- location where keys are stored
-# $ACCOUNT_EMAIL -- email to associate with these registrations
-# $DOMAIN -- domain to retrieve certificate for
-
+certbotsc_start() {
+    echo $(date --utc -Ins) > /certbotsc.pid
+}
+certbotsc_exit() {
+    rm /certbotsc.pid
+}
+certbotsc_lastrun() {
+    echo $(date --utc -I) > /certbotsc.lr
+}
 if [ ! -d /certs ]
 then
     echo "/certs is not a valid directory" >&2
@@ -22,28 +26,45 @@ then
     exit 1
 fi
 
-if [ "$DRY_RUN" == "true" ]
+if [ "$DRY_RUN" = "true" ]
+then
     export EXTRA_ARGS="--dry-run $EXTRA_ARGS"
 fi
 
 
 certbot_run () {
-    exec certbot certonly $EXTRA_ARGS \
+    certbot certonly $EXTRA_ARGS \
         --email $ACCOUNT_EMAIL --non-interactive --agree-tos \
         --expand \
         --config-dir /certs \
-        --standalone -d "$DOMAIN"
+        --deploy-hook '/run/renew-all certdone' \
+        --standalone -d "$DOMAIN" >&2
 }
 
-if [ -f /certs/synch.flag ]
+if [ "${1}" = "certdone" ]
 then
-    if [ -f /certs/live/$DOMAIN/fullchain.pem ]
+    certbotsc_lastrun
+    rm /certs/synch.flag
+    exit 0
+fi
+
+if [ ! -f /certbotsc.pid ]
+then
+    certbotsc_start
+    if [ -f /certs/synch.flag ]
     then
-        if [ "$(date %d)" = "20" ]
+        if [ -f /certs/live/$DOMAIN/fullchain.pem ]
         then
+            if [ "$(date %d)" = "20" ]
+            then
+                if [ ! -f /certbotsc.lr || "$(cat /certbotsc.lr)" != "$(date --utc -I)" ]
+                then
+                    certbot_run
+                fi
+            fi
+        else
             certbot_run
         fi
-    else
-        certbot_run
     fi
+    certbotsc_exit
 fi

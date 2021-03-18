@@ -359,10 +359,12 @@ namespace NX.Engine.Hive
                         this.DumpStream(c_Result);
                     }
                 }
+
+                this.Parent.Parent.Parent.LogInfo("Built genome {0}".FormatString(name.Name));
             }
             catch (Exception e)
             {
-                this.HandleException("BuildImageFromDockerfileAsync", e);
+                this.HandleException("BuildImage", e);
             }
             finally
             {
@@ -433,11 +435,13 @@ namespace NX.Engine.Hive
                     {
                         Force = true
                     });
+
+                    this.Parent.Parent.Parent.LogInfo("Removed genome {0}".FormatString(name.Name));
                 }
             }
             catch (Exception e)
             {
-                this.HandleException("DeleteImageAsync", e);
+                this.HandleException("DeleteImage", e);
             }
         }
 
@@ -991,10 +995,12 @@ namespace NX.Engine.Hive
                     {
                         Force = true
                     }).Wait();
+
+                this.Parent.Parent.Parent.LogInfo("Removed bee {0}".FormatString(id));
             }
             catch (Exception e)
             {
-                this.HandleException("RemoveContainerAsync", e);
+                this.HandleException("RemoveContainer", e);
             }
         }
 

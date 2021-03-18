@@ -33,14 +33,16 @@ namespace NX.Engine
     public class BumbleBeeClass : ChildOfClass<EnvironmentClass>
     {
         #region Constructor
-        public BumbleBeeClass(EnvironmentClass env, string genome)
+        public BumbleBeeClass(EnvironmentClass env, string genome, bool required = false)
             : base(env)
         {
             // Only if a genome is given
             if (genome.HasValue())
             {
                 // Tell world
-                this.Parent.LogVerbose("{0} bumble bee created".FormatString(genome));
+                this.Parent.LogVerbose("{0} bumble bee requested".FormatString(genome));
+                // Add to queens duties
+                this.Parent.AddToArray("qd_bumble", genome);
 
                 // Save
                 this.Genome = genome;
@@ -91,13 +93,17 @@ namespace NX.Engine
                     }, this.Genome);
 
                 // Handle the setup
-                this.Parent.Hive.SetupCompleted += delegate (bool hassetup)
+                this.Parent.Hive.QueenChanged += delegate ()
                 {
-                    this.Parent.Hive.AssureDNACount(this.Genome, 1);
+                    // Are we the queen?
+                    if(this.Parent.Hive.Roster.IsQueen)
+                    {
+                        this.Parent.Hive.AssureDNACount(this.Genome, 1);
+                    }
                 };
 
                 // And once we are running
-                if (this.Parent.Hive.HasSetup)
+                if (required)
                 {
                     // And assure at least one
                     this.Parent.Hive.AssureDNACount(this.Genome, 1);

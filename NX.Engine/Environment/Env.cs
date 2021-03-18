@@ -1321,6 +1321,28 @@ namespace NX.Engine
         {
             return this.SystemPrefix + this.Hive.Name + "_" + value;
         }
+
+        /// <summary>
+        /// 
+        /// Adds a value to an arry field
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        public void AddToArray(string key, string value)
+        {
+            // Get
+            JArray c_Wkg = this.GetAsJArray(key);
+            // Not there?
+            if(!c_Wkg.Contains(key))
+
+            {
+                // Add
+                c_Wkg.Add(value);
+                // Save
+                this.Set(key, c_Wkg);
+            }
+        }
         #endregion
     }
 }

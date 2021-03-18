@@ -793,15 +793,6 @@ namespace NX.Engine.Hive
                 // Assume normal
                 bool bForce = dir.HasValue();
 
-                // Is directory there?
-                if (!dir.HasValue())
-                {
-                    // Make
-                    dir = this.GenomeSource(genome);
-                    //
-                    bForce = dir.HasValue();
-                }
-
                 //
                 if (bForce)
                 {                    
@@ -819,7 +810,7 @@ namespace NX.Engine.Hive
                     // Make the base name
                     DockerIFNameClass c_BName = DockerIFNameClass.Make(c_Name, c_Match.Groups["basedon"].Value.AlphaNumOnly());
                     // Check to see if already made
-                    if (!c_Client.CheckForImage(c_BName) || bForce)
+                    if (!c_Client.CheckForImage(c_BName))
                     {
                         // Build it
                         c_Client.BuildImage(c_BName, dir, env);

@@ -47,7 +47,7 @@ namespace NX.Engine.SocketIO
     {
         #region Constructor
         public ManagerClass(EnvironmentClass env)
-            : base(env, "socketio")
+            : base(env, "socketio", true)
         {
             // Handle NginX
             this.SetNginxInformation("socket.io", false);
