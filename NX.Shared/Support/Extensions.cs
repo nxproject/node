@@ -1359,6 +1359,22 @@ namespace NX.Shared
         }
 
         /// <summary>
+        ///  
+        /// Combines path in a URL
+        ///  
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="sections"></param>
+        /// <returns></returns>
+        public static string URLCombine(this string url, params string[] sections)
+        {
+            // Loop thru
+            foreach (string sSection in sections) url = url.CombinePath(sSection);
+
+            return url;
+        }
+
+        /// <summary>
         /// 
         /// Returns an Uri from a URL string, handling https, ipv6 and parameters
         /// 

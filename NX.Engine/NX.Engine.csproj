@@ -123,17 +123,17 @@
     <None Update="Hive\Genomes\certbot\Dockerfile">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Hive\Genomes\certbot\nxp\run\crontab">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Hive\Genomes\certbot\nxp\run\renew-all">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Hive\Genomes\certbot\nxp\run\start">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Hive\Genomes\certbot\renew-all">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Hive\Genomes\certbot\run\crontab">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Hive\Genomes\certbot\run\renew-all">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Hive\Genomes\certbot\run\start">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Hive\Genomes\certbot\start.fish">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -211,6 +211,7 @@
 
   <ItemGroup>
     <Folder Include="Hive\External\nginx\logs\" />
+    <Folder Include="Hive\Genomes\certbot\nxp\run\" />
     <Folder Include="Hive\Genomes\mongodb34\" />
   </ItemGroup>
 

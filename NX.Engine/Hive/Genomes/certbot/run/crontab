@@ -1,3 +1,0 @@
-# Run every minute
-# renew-all will attempt to renew all configured certs.
-*   *   *  *   *  root /bin/bash /run/renew-all > /dev/stdout

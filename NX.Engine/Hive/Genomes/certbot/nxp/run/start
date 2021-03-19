@@ -1,0 +1,9 @@
+#!/bin/bash
+env > /etc/environment
+if [ "$RUN_ONCE" = "true" ]
+then
+    exec /etc/nxp/run/renew-all
+else
+    cp /etc/nxp/run/crontab /etc/cron.d/nxpsc
+    exec cron -f -L 0
+fi

@@ -8,21 +8,23 @@ certbotsc_exit() {
 certbotsc_lastrun() {
     echo $(date --utc -I) > /certbotsc.lr
 }
+
 if [ ! -d /certs ]
 then
-    echo "/certs is not a valid directory" >&2
+    echo "/certs is not a valid directory" >> /etc/nxp/renew.log
     exit 1
 fi
 
 if [ ! $ACCOUNT_EMAIL ]
 then
-    echo "ACCOUNT_EMAIL must be set" >&2
+    echo "ACCOUNT_EMAIL must be set"  >> /etc/nxp/renew.log
+    echo ":${ACCOUNT_EMAIL}:"  >> /etc/nxp/renew.log
     exit 1
 fi
 
 if [ ! $DOMAIN ]
 then
-    echo "DOMAIN must be set" >&2
+    echo "DOMAIN must be set"  >> /etc/nxp/renew.log
     exit 1
 fi
 
@@ -31,14 +33,13 @@ then
     export EXTRA_ARGS="--dry-run $EXTRA_ARGS"
 fi
 
-
 certbot_run () {
     certbot certonly $EXTRA_ARGS \
         --email $ACCOUNT_EMAIL --non-interactive --agree-tos \
         --expand \
         --config-dir /certs \
         --deploy-hook '/run/renew-all certdone' \
-        --standalone -d "$DOMAIN" >&2
+        --standalone -d "$DOMAIN"
 }
 
 if [ "${1}" = "certdone" ]

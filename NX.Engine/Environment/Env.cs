@@ -1158,9 +1158,9 @@ namespace NX.Engine
                 }
 
                 // Load
-                this.FNS.SelfLoad(this);
-                this.Router.SelfLoad(this);
-                this.Procs.SelfLoad(this);
+                var x = this.FNS;
+                var y = this.Router;
+                var z = this.Procs;
 
                 // Load the built-in
                 foreach (string sUse in uses)
@@ -1171,7 +1171,7 @@ namespace NX.Engine
                 // Do we init the hive?
                 if (inithive)
                 {
-                    HiveClass x = this.Hive;
+                    HiveClass h = this.Hive;
                 }
 
                 // Now others
