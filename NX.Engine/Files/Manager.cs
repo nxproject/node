@@ -173,15 +173,6 @@ namespace NX.Engine.Files
                         }
                     }
                 }
-
-                //// Do we need to move to Minio?
-                //if (this.IsAvailable)
-                //{
-                //    // Copy from local to Minio
-                //    doc.ValueAsBytes = doc.Location.ReadFileAsBytes();
-                //    // Delete local copy
-                //    doc.Location.DeleteFile();
-                //}
             }
             catch (Exception e)
             {
@@ -191,6 +182,12 @@ namespace NX.Engine.Files
             {
                 if (doc != null)
                 {
+                    // Do we have a special handler?
+                    if(ManagerClass.Conversion != null)
+                    {
+                        doc = ManagerClass.Conversion(doc);
+                    }
+
                     // Make the parameter
                     FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Write, doc);
 
@@ -246,6 +243,12 @@ namespace NX.Engine.Files
             }
             finally
             {
+                // Do we have a special handler?
+                if (ManagerClass.Conversion != null)
+                {
+                    doc = ManagerClass.Conversion(doc);
+                }
+
                 // Make the parameter
                 FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Write, doc);
 
@@ -365,6 +368,15 @@ namespace NX.Engine.Files
         /// 
         /// </summary>
         public event OnFileSystemChanged FileSystemChanged;
+        #endregion
+
+        #region Statics
+        /// <summary>
+        /// 
+        /// Handler to handle conversions at upload
+        /// 
+        /// </summary>
+        public static Func<DocumentClass, DocumentClass> Conversion { get; set; }
         #endregion
     }
 

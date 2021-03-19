@@ -308,18 +308,21 @@ namespace NX.Engine.Files
         /// Delete the file (correctly)
         /// 
         /// </summary>
-        public void Delete()
+        public void Delete(bool makeroom = false)
         {
             // Delete local
             this.Location.DeleteFile();
             // And any metadata
-            this.MetadataFolder.Delete();
+            if (!makeroom)
+            {
+                this.MetadataFolder.Delete();
 
-            // Make the parameter
-            FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Delete, this);
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Delete, this);
 
-            // Get from cloud
-            this.Parent.SignalChange(c_P);
+                // Get from cloud
+                this.Parent.SignalChange(c_P);
+            }
         }
 
         /// <summary>
