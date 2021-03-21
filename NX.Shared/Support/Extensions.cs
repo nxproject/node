@@ -42,11 +42,12 @@ using System.Diagnostics;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml;
 using System.Runtime.Loader;
-using System.Text.RegularExpressions;
+
 
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using TimeZoneConverter;
+using HandlebarsDotNet;
 
 namespace NX.Shared
 {
@@ -4728,6 +4729,176 @@ namespace NX.Shared
             }
 
             return c_Assm;
+        }
+        #endregion
+        #region Handlebars
+        /// <summary>
+        /// 
+        /// Has the handlebars extension been initioalized?
+        /// 
+        /// </summary>
+        private static bool IsHandlebarsInit { get; set; }
+
+        /// <summary>
+        /// 
+        /// Initialize handlebars extensions
+        /// 
+        /// </summary>
+        private static void HandlebarsInit()
+        {
+            // Only once
+            if (!IsHandlebarsInit)
+            {
+                // Flag
+                IsHandlebarsInit = true;
+
+                // If
+                HandlebarsDotNet.Handlebars.RegisterHelper("iff", (output, options, context, arguments) =>
+                {
+                    if (arguments.Length != 3)
+                    {
+                        throw new HandlebarsException("{{#iff}} helper must have exactly three arguments");
+                    }
+
+                    // Params
+                    var field = arguments.At<string>(0);
+                    var op = arguments.At<string>(1);
+                    var value = arguments.At<string>(2);
+
+                    // Get the field value
+                    var fieldvalue = context.GetValue<string>(field);
+
+                    // Assume failure
+                    bool bCmp = false;
+
+                    // Now according to op
+                    switch (op)
+                    {
+                        case "=":
+                            bCmp = value.IsSameValue(fieldvalue);
+                            break;
+
+                        case "==":
+                            bCmp = value.IsExactSameValue(fieldvalue);
+                            break;
+
+                        case "!=":
+                            bCmp = !value.IsSameValue(fieldvalue);
+                            break;
+
+                        case "!==":
+                            bCmp = !value.IsExactSameValue(fieldvalue);
+                            break;
+
+                        case ">":
+                            bCmp = fieldvalue.CompareTo(value) > 0;
+                            break;
+
+                        case ">=":
+                            bCmp = fieldvalue.CompareTo(value) >= 0;
+                            break;
+
+                        case "<":
+                            bCmp = fieldvalue.CompareTo(value) < 0;
+                            break;
+
+                        case "<=":
+                            bCmp = fieldvalue.CompareTo(value) <= 0;
+                            break;
+                    }
+
+                    // Do
+                    if (bCmp)
+                    {
+                        options.Template(output, context);
+                    }
+                    else
+                    {
+                        options.Inverse(output, context);
+                    }
+                });
+
+                // Is
+                HandlebarsDotNet.Handlebars.RegisterHelper("is", (output, options, context, arguments) =>
+                {
+                    if (arguments.Length != 2)
+                    {
+                        throw new HandlebarsException("{{#is}} helper must have exactly two arguments");
+                    }
+
+                    // Params
+                    var field = arguments.At<string>(0);
+                    var value = arguments.At<string>(1);
+
+                    // Get the field value
+                    var fieldvalue = context.GetValue<string>(field);
+
+                    // Check
+                    bool bCmp = value.IsSameValue(fieldvalue);
+
+                    // Do
+                    if (bCmp)
+                    {
+                        options.Template(output, context);
+                    }
+                    else
+                    {
+                        options.Inverse(output, context);
+                    }
+                });
+
+                // Is Not
+                HandlebarsDotNet.Handlebars.RegisterHelper("isnt", (output, options, context, arguments) =>
+                {
+                    if (arguments.Length != 2)
+                    {
+                        throw new HandlebarsException("{{#isnt}} helper must have exactly two arguments");
+                    }
+
+                    // Params
+                    var field = arguments.At<string>(0);
+                    var value = arguments.At<string>(1);
+
+                    // Get the field value
+                    var fieldvalue = context.GetValue<string>(field);
+
+                    // Check
+                    bool bCmp = !value.IsSameValue(fieldvalue);
+
+                    // Do
+                    if (bCmp)
+                    {
+                        options.Template(output, context);
+                    }
+                    else
+                    {
+                        options.Inverse(output, context);
+                    }
+                });
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// Processes a handlerbars text using the given values
+        /// 
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public static string Handlebars(this string text, StoreClass values)
+        {
+            // Init
+            HandlebarsInit();
+
+            // Change the markers
+            text = text.IfEmpty().Replace("[[", "{{").Replace("]]", "}}");
+            // Compile
+            var c_Template = HandlebarsDotNet.Handlebars.Compile(text);
+            // Process
+            text = c_Template(values.SynchObject.ToDictionary());
+
+            return text;
         }
         #endregion
     }
