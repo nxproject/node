@@ -118,6 +118,34 @@ namespace NX.Engine
             // And save
             this.Values[name] = obj;
         }
+
+        /// <summary>
+        /// 
+        /// Removes
+        /// 
+        /// </summary>
+        /// <param name="name">The name of the object</param>
+        /// <param name="cb">Callback if the object does not exist.  Callback should pass back a new object</param>
+        /// <returns>The object stored in the Globals space</returns>
+        public void Remove<T>(string name = null) where T : ChildOfClass<EnvironmentClass>
+        {
+            // Name missing?
+            if (!name.HasValue())
+            {
+                // Sse the type
+                name = typeof(T).FullName;
+            }
+
+            // Already in memory?
+            if (this.Values.ContainsKey(name))
+            {
+                try
+                {
+                    this.Values.Remove(name);
+                }
+                catch { }
+            }
+        }
         #endregion
     }
 }
