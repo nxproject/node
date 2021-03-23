@@ -62,16 +62,19 @@ namespace Proc.NginX
                 this.Certbot = new BumbleBeeClass(this.Parent, "certbot");
                 this.Certbot.SetNginxInformation(".certbot", false);
                 //
-                DateTime c_Till = DateTime.Now.AddMinutes(5);
+                DateTime c_Till = DateTime.Now.AddMinutes(7);
 
                 // Wait until certbot is available
                 while (!this.Certbot.IsAvailable && c_Till > DateTime.Now)
                 {
                     10.SecondsAsTimeSpan().Sleep();
+
+                    this.Certbot.CheckForAvailability();
+
                     this.Parent.LogInfo("Waiting for certbot bumble bee...");
                 }
 
-                this.Parent.LogInfo("Certbot bumble started, starting certificate check thread");
+                this.Parent.LogInfo("Starting certificate check thread");
 
                 //
                 "".GUID().StartThread(new System.Threading.ParameterizedThreadStart(this.CheckCertificate));

@@ -709,6 +709,9 @@ namespace NX.Engine.Hive
                                {
                                    // Just ascended!
                                    this.Parent.Parent.LogInfo("Bee {0} is now queen".FormatString(this.Parent.Roster.MeBee.Id));
+
+                                   //
+                                   this.Parent.SignalQueenChange();
                                }
                            });
                         }
