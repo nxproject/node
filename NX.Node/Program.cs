@@ -35,110 +35,134 @@ namespace NXNode
         #region Entry point
         static void Main(string[] args)
         {
-            // Create working environment
-            EnvironmentClass c_Env = new EnvironmentClass(args);
+            // Make into list
+            List<string> c_Args = new List<string>(args);
 
-            // Only outside a container
-            if (!"".InContainer())
+            // Bootstarp condiction
+            if (c_Args.Count == 0)
             {
-                // The working code folders
-                List<string> c_CodeFolders = c_Env.GetAsJArray("code_folder").ToList(); ;
-                // Get the root folder
-                string sBaseFolder = "".WorkingDirectory();
-                // Do we have a bin?
-                int iPos = sBaseFolder.IndexOf(@"\bin\");
-                if (iPos != -1)
-                {
-                    // Remove tail
-                    sBaseFolder = sBaseFolder.Substring(0, iPos);
-                }
-                // Add parent
-                //c_CodeFolders.Add(sBaseFolder.Substring(0, sBaseFolder.LastIndexOf(@"\")));
+                // Add default
+                c_Args.Add("--config");
+                c_Args.Add("config.json");
+                c_Args.Add("--id");
+                c_Args.Add("0");
 
-                // Loop thru
-                foreach (string sStartFolder in c_CodeFolders)
+                // Create working environment
+                EnvironmentClass c_Env = new EnvironmentClass(c_Args.ToArray());
+
+                // Make a bee in the hive
+                NX.Engine.Hive.BeeClass c_Bee = c_Env.Hive.MakeWorkerBee(c_Env.Process);
+
+                // Bye
+                Environment.Exit(0);
+            }
+            else
+            {
+                // Create working environment
+                EnvironmentClass c_Env = new EnvironmentClass(c_Args.ToArray());
+
+                // Only outside a container
+                if (!"".InContainer())
                 {
-                    // Loop thru children
-                    foreach (string sAtDir in sStartFolder.GetDirectoriesInPath())
+                    // The working code folders
+                    List<string> c_CodeFolders = c_Env.GetAsJArray("code_folder").ToList(); ;
+                    // Get the root folder
+                    string sBaseFolder = "".WorkingDirectory();
+                    // Do we have a bin?
+                    int iPos = sBaseFolder.IndexOf(@"\bin\");
+                    if (iPos != -1)
                     {
-                        // Skip if working directory
-                        if (!sBaseFolder.IsSameValue(sAtDir))
-                        {
-                            // Get the folder name
-                            string sFolder = sAtDir.GetDirectoryNameFromPath();
-                            // UI?
-                            if (sFolder.StartsWith("UI.", StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                // Set target
-                                string sTargetDir = "".WorkingDirectory().CombinePath(sFolder.ToLower()).AdjustPathToOS();
-                                // Assure
-                                sTargetDir.AssurePath();
+                        // Remove tail
+                        sBaseFolder = sBaseFolder.Substring(0, iPos);
+                    }
+                    // Add parent
+                    //c_CodeFolders.Add(sBaseFolder.Substring(0, sBaseFolder.LastIndexOf(@"\")));
 
-                                // UI
-                                CopyFolder(sAtDir, sTargetDir);
-                            }
-                            else
+                    // Loop thru
+                    foreach (string sStartFolder in c_CodeFolders)
+                    {
+                        // Loop thru children
+                        foreach (string sAtDir in sStartFolder.GetDirectoriesInPath())
+                        {
+                            // Skip if working directory
+                            if (!sBaseFolder.IsSameValue(sAtDir))
                             {
-                                // Move to bin
-                                string sBinFolder = sAtDir.CombinePath("bin").CombinePath("".InDebug() ? "Debug" : "Release").AdjustPathToOS();
-                                // Loop thru code
-                                foreach (string sCodeFolder in sBinFolder.GetDirectoriesInPath())
+                                // Get the folder name
+                                string sFolder = sAtDir.GetDirectoryNameFromPath();
+                                // UI?
+                                if (sFolder.StartsWith("UI.", StringComparison.InvariantCultureIgnoreCase))
                                 {
-                                    // Do the folder
-                                    CopyFolder(sCodeFolder, "".WorkingDirectory());
+                                    // Set target
+                                    string sTargetDir = "".WorkingDirectory().CombinePath(sFolder.ToLower()).AdjustPathToOS();
+                                    // Assure
+                                    sTargetDir.AssurePath();
+
+                                    // UI
+                                    CopyFolder(sAtDir, sTargetDir);
+                                }
+                                else
+                                {
+                                    // Move to bin
+                                    string sBinFolder = sAtDir.CombinePath("bin").CombinePath("".InDebug() ? "Debug" : "Release").AdjustPathToOS();
+                                    // Loop thru code
+                                    foreach (string sCodeFolder in sBinFolder.GetDirectoriesInPath())
+                                    {
+                                        // Do the folder
+                                        CopyFolder(sCodeFolder, "".WorkingDirectory());
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // Do we need to recycle?
-                if(c_Env["destroy_hive"].FromDBBoolean())
-                {
-                    // Bye
-                    c_Env.Hive.DestroyHive();
-                }
+                    // Do we need to recycle?
+                    if (c_Env["destroy_hive"].FromDBBoolean())
+                    {
+                        // Bye
+                        c_Env.Hive.DestroyHive();
+                    }
 
-                // Make into image
-                if (c_Env.MakeGenome)
-                {
-                    // Make
-                    c_Env.Hive.MakeSelfIntoGenome("".WorkingDirectory());
+                    // Make into image
+                    if (c_Env.MakeGenome)
+                    {
+                        // Make
+                        c_Env.Hive.MakeSelfIntoGenome("".WorkingDirectory());
 
-                    // Kill processors
-                    c_Env.Hive.KillProcessorBees();
-                    // And Nginx
-                    c_Env.Hive.KillDNA("nginx");
+                        // Kill processors
+                        c_Env.Hive.KillProcessorBees();
+                        // And Nginx
+                        c_Env.Hive.KillDNA("nginx");
 
-                    //
-                    c_Env.LogInfo("Container has been created");
-                }
+                        //
+                        c_Env.LogInfo("Container has been created");
+                    }
 
-                // Do we make a bee?
-                if (c_Env.MakeBee)
-                {
-                    // Make a bee in the hive
-                    NX.Engine.Hive.BeeClass c_Bee = c_Env.Hive.MakeWorkerBee(c_Env.Process);
-                    //
-                    c_Env.LogInfo(@"Bee of proc=""{0}"" has {1} been created".FormatString(c_Env.Process, c_Bee == null ? "not " : ""));
-                }
+                    // Do we make a bee?
+                    if (c_Env.MakeBee)
+                    {
+                        // Make a bee in the hive
+                        NX.Engine.Hive.BeeClass c_Bee = c_Env.Hive.MakeWorkerBee(c_Env.Process);
+                        //
+                        c_Env.LogInfo(@"Bee of proc=""{0}"" has {1} been created".FormatString(c_Env.Process, c_Bee == null ? "not " : ""));
+                    }
 
-                // Normal mode?
-                if (!c_Env.InMakeMode)
-                {
-                    // And recycle
-                    Boot(c_Env);
+                    // Normal mode?
+                    if (!c_Env.InMakeMode)
+                    {
+                        // And recycle
+                        Boot(c_Env);
+                    }
+                    else
+                    {
+                        // Bye
+                        Environment.Exit(0);
+                    }
                 }
                 else
                 {
-                    // Bye
-                    Environment.Exit(0);
+                    // Only thing we are allowed inside a container
+                    Boot(c_Env);
                 }
-            }
-            else
-            {
-                // Only thing we are allowed inside a container
-                Boot(c_Env);
             }
         }
         #endregion

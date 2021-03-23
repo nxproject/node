@@ -98,7 +98,7 @@ namespace NX.Engine
             string sCurrentCode = this.Router.SecureCode;
 
             // Load the arguments
-            this.Parse(args);
+            this.Parse(args, true);
 
             // Initialize
             this.Initialize(sCurrentCode);

@@ -67,6 +67,7 @@ And best explained in this sequence:
 * [Kubernetes](docs/README_KUBE.md)
 * [Where do I put my files](docs/README_FOLDERS.md)
 * [How do I debug my code?](docs/README_DEBUG.md)
+* [Bootstrap](docs/README_BOOTSTRAP.md)
 
 ## Prerequisites
 

@@ -364,7 +364,7 @@ namespace NX.Shared
         /// 
         /// </summary>
         /// <param name="args"></param>
-        public void Parse(string[] args)
+        public void Parse(string[] args, bool skipnd = false)
         {
             // Start with no key
             string sKey = null;
@@ -404,6 +404,8 @@ namespace NX.Shared
                             this.Set(sKey, c_Values);
                         }
                     }
+                    else if (skipnd && sValue.StartsWith("{") && sValue.EndsWith("}"))
+                    { }
                     else
                     {
                         // Store
