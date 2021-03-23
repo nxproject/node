@@ -20,6 +20,6 @@
     "--proc",
     "{proc}"
   ],
-  "Image": "{repo_project}/processor:{hive}",
+  "Image": "{repo_project}/{hive}:processor",
   "WorkingDir": "/etc/wd"
 }

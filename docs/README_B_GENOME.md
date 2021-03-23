@@ -22,7 +22,7 @@ You can add your own genomes by adding your files to the Hive/Genomes folders.
 
 You can use the same version of the OS by using in your Dckerfile:
 ```
-FROM {repo_project}/base:{hive}
+FROM {repo_project}/{hive}:base
 ```
 Note that you MUST include the following:
 ```

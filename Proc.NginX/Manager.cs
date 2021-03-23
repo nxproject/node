@@ -51,7 +51,7 @@ namespace Proc.NginX
             CertbotSynchFile.DeleteFile();
 
             // Do we support SSL?
-            if (this.Parent["certbot_email"].HasValue())
+            if (this.Parent.UsesSSL)
             {
                 // 
                 this.Parent.LogInfo("Enabling certbot...");
@@ -383,7 +383,7 @@ namespace Proc.NginX
             }
 
             // SSL stuff
-            bool bSSL = this.Parent["certbot_email"].HasValue();
+            bool bSSL = this.Parent.UsesSSL;
             string sDomain = this.Parent.Domain;
             CertificateClass c_Cert = null;
 
@@ -405,7 +405,7 @@ namespace Proc.NginX
             }
             else
             {
-                c_Env.LogInfo("SSL is not enabled.  Set 'certbot_email' in config.son");
+                c_Env.LogInfo("SSL is not enabled.  Set 'certbot_email' and 'domain' in config.son");
             }
 
             // 

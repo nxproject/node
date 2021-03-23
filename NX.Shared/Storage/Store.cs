@@ -193,48 +193,51 @@ namespace NX.Shared
             }
             set
             {
-                // Does the key have a delimiter?
-                int iPos = key.IndexOf(Delimiter);
-                if (iPos != -1)
+                if (key.HasValue())
                 {
-                    // Get the first portion of the key as a store
-                    StoreClass c_Store = this.GetAsStore(key.Substring(0, iPos));
-                    // And set the value there
-                    c_Store[key.Substring(iPos + Delimiter.Length)] = value;
-                }
-                else
-                {
-                    // Assure
-                    value = value.IfEmpty();
-
-                    // Is it a remove?
-                    if (value.StartsWith("-"))
+                    // Does the key have a delimiter?
+                    int iPos = key.IndexOf(Delimiter);
+                    if (iPos != -1)
                     {
-                        // Get as array
-                        JArray c_Values = this.GetAsJArray(key);
-                        // Remove
-                        c_Values.Remove(value.Substring(1));
-                        // And put back
-                        this.Set(key, c_Values);
-                    }
-                    else if (value.StartsWith("+"))
-                    {
-                        // Get as array
-                        JArray c_Values = this.GetAsJArray(key);
-                        // Adjust value
-                        string sAdj = value.Substring(1);
-                        // Add if not already there
-                        if (!c_Values.Contains(sAdj))
-                        {
-                            c_Values.Add(sAdj);
-                            // And put back
-                            this.Set(key, c_Values);
-                        }
+                        // Get the first portion of the key as a store
+                        StoreClass c_Store = this.GetAsStore(key.Substring(0, iPos));
+                        // And set the value there
+                        c_Store[key.Substring(iPos + Delimiter.Length)] = value;
                     }
                     else
                     {
-                        // Nothing else to recurse to
-                        this.Set(key, value);
+                        // Assure
+                        value = value.IfEmpty();
+
+                        // Is it a remove?
+                        if (value.StartsWith("-"))
+                        {
+                            // Get as array
+                            JArray c_Values = this.GetAsJArray(key);
+                            // Remove
+                            c_Values.Remove(value.Substring(1));
+                            // And put back
+                            this.Set(key, c_Values);
+                        }
+                        else if (value.StartsWith("+"))
+                        {
+                            // Get as array
+                            JArray c_Values = this.GetAsJArray(key);
+                            // Adjust value
+                            string sAdj = value.Substring(1);
+                            // Add if not already there
+                            if (!c_Values.Contains(sAdj))
+                            {
+                                c_Values.Add(sAdj);
+                                // And put back
+                                this.Set(key, c_Values);
+                            }
+                        }
+                        else
+                        {
+                            // Nothing else to recurse to
+                            this.Set(key, value);
+                        }
                     }
                 }
             }

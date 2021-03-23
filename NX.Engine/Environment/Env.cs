@@ -359,7 +359,7 @@ namespace NX.Engine
                     if (sDomain.HasValue())
                     {
                         sAns = "http";
-                        if (this["certbot_email"].HasValue()) sAns += "s";
+                        if (this.UsesSSL) sAns += "s";
                         sAns += "://{0}".FormatString(sDomain);
 
                         this[KeyLoopbackURL] = sAns;
@@ -369,6 +369,16 @@ namespace NX.Engine
                 return sAns;
             }
             set { this[KeyLoopbackURL] = value; }
+        }
+
+        /// <summary>
+        /// 
+        /// Are we setup for SSL?
+        /// 
+        /// </summary>
+        public bool UsesSSL
+        {
+            get { return this["certbot_email"].HasValue() && !this.Domain.IsIPV4() && !this.Domain.IsIPV6(); }
         }
         #endregion
 
@@ -388,7 +398,7 @@ namespace NX.Engine
                 if (sDomain.HasValue())
                 {
                     sAns = "http";
-                    if (this["certbot_email"].HasValue()) sAns += "s";
+                    if (this.UsesSSL) sAns += "s";
                     sAns += "://{0}".FormatString(sDomain);
                 }
 
@@ -824,7 +834,7 @@ namespace NX.Engine
                 // Virtual
                 c_Ans.Set("siochannel", this.SIOChannels.Join(","));
                 c_Ans.Set("url", this.LoopbackURL);
-                c_Ans.Set("protocol", "http" + (this["certbot_email"].HasValue() ? "s" : "") + "//");
+                c_Ans.Set("protocol", "http" + (this.UsesSSL ? "s" : "") + "//");
 
                 return c_Ans;
             }

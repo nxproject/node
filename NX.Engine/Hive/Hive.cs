@@ -687,7 +687,7 @@ namespace NX.Engine.Hive
                 if (!done)
                 {
                     // Make
-                    this.MakeGenome(field, name.Name);
+                    this.MakeGenome(field, name.Genome);
                 }
                 // Callback
                 if (cb != null) cb();
@@ -804,7 +804,7 @@ namespace NX.Engine.Hive
 
                 // Get the dockerfile from
                 string sFrom = sSourceDir.CombinePath("Dockerfile").ReadFile();
-                MatchCollection c_Matches = Regex.Matches(sFrom, @"FROM\s{repo_project}/(?<basedon>[^\x3A]+)\x3A{hive}");
+                MatchCollection c_Matches = Regex.Matches(sFrom, @"FROM\s{repo_project}/{hive}\x3A(?<basedon>\w+)");
                 foreach (Match c_Match in c_Matches)
                 {
                     // Make the base name

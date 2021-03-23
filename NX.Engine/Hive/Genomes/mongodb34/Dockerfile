@@ -1,6 +1,6 @@
 # NXProject MongoDB 3.4.10 Image
 
-FROM {repo_project}/base:{hive}
+FROM {repo_project}/{hive}:base
 LABEL {proj_label}
 
 ENV GOSU_VERSION="1.7" \

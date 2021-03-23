@@ -175,7 +175,7 @@ namespace NX.Engine.Hive
 
                 // Get the name
                 string sKey1 = this.Parent.Parent.LabelGenome;
-                string sValue1 = name.Name;
+                string sValue1 = name.Genome;
                 string sKey2 = this.Parent.Parent.LabelHive;
                 string sValue2 = this.Parent.Parent.Parent.HiveName;
 
@@ -299,7 +299,7 @@ namespace NX.Engine.Hive
                     {
                         FromImage = name.RepoNameNoTag,
                         Repo = name.LocalNameNoTag,
-                        Tag = name.Tag
+                        Tag = name.Genome
                     }, c_Auth, new Progress<JSONMessage>(delegate (JSONMessage msg)
                     {
                         switch (msg.Status)
@@ -360,7 +360,7 @@ namespace NX.Engine.Hive
                     }
                 }
 
-                this.Parent.Parent.Parent.LogInfo("Built genome {0}".FormatString(name.Name));
+                this.Parent.Parent.Parent.LogInfo("Built genome {0}".FormatString(name.Genome));
             }
             catch (Exception e)
             {
@@ -436,7 +436,7 @@ namespace NX.Engine.Hive
                         Force = true
                     });
 
-                    this.Parent.Parent.Parent.LogInfo("Removed genome {0}".FormatString(name.Name));
+                    this.Parent.Parent.Parent.LogInfo("Removed genome {0}".FormatString(name.Genome));
                 }
             }
             catch (Exception e)
@@ -513,7 +513,7 @@ namespace NX.Engine.Hive
             // Assume nothing to copy
             List<DockerIFEntryClass> c_Files = new List<DockerIFEntryClass>();
             // Append dockerfile
-            this.AddEntries(c_Files, this.Parent.Parent.GenomeDirectory(name.Name), true);
+            this.AddEntries(c_Files, this.Parent.Parent.GenomeDirectory(name.Genome), true);
             // Assure
             directory = directory.IfEmpty();
             // Do we have a directory?
@@ -551,7 +551,7 @@ namespace NX.Engine.Hive
                     string sDF = c_In.Path.ReadFile();
 
                     // Labels
-                    string sLabels = @"""{0}""=""{1}""".FormatString(this.Parent.Parent.LabelGenome, name.Name);
+                    string sLabels = @"""{0}""=""{1}""".FormatString(this.Parent.Parent.LabelGenome, name.Genome);
                     sLabels += @" ""{0}""=""{1}""".FormatString(this.Parent.Parent.LabelHive, this.Parent.Parent.Parent.HiveName);
                     // Format
                     sDF = this.Parent.Parent.Parent.Format(sDF, true, "proj_label", sLabels);
@@ -783,7 +783,7 @@ namespace NX.Engine.Hive
 
                 // Get the name
                 string sKey1 = this.Parent.Parent.LabelGenome;
-                string sValue1 = name.Name;
+                string sValue1 = name.Genome;
                 string sKey2 = this.Parent.Parent.LabelHive;
                 string sValue2 = this.Parent.Parent.Parent.HiveName;
 
@@ -1305,35 +1305,34 @@ namespace NX.Engine.Hive
     /// Handy dandy image name tool
     /// 
     /// </summary>
-    public class DockerIFNameClass : IDisposable
+    public class DockerIFNameClass : ChildOfClass<EnvironmentClass>
     {
         #region Constructor
-        private DockerIFNameClass(string qname)
+        private DockerIFNameClass(EnvironmentClass env, string qname)
+            : base(env)
         {
             //
             this.Parse(qname);
         }
 
-        private DockerIFNameClass(DockerIFNameClass name, string newname = null)
+        private DockerIFNameClass(EnvironmentClass env, DockerIFNameClass name, string newname = null)
+            : base(env)
         {
             //
             this.Repo = name.Repo;
             this.Project = name.Project;
-            this.Name = newname.IfEmpty(name.Name);
-            this.Tag = name.Tag;
-        }
-        #endregion
+            this.Name = name.Name;
+            this.Genome = newname.IfEmpty(name.Genome);
 
-        #region IDisposable
-        public void Dispose()
-        { }
+            this.Initialize();
+        }
         #endregion
 
         #region Properties
         public string Repo { get; internal set; }
-        public string Project { get; internal set; }
-        public string Name { get; internal set; }
-        public string Tag { get; internal set; }
+        private string Project { get; set; }
+        private string Name { get; set; }
+        public string Genome { get; internal set; }
 
         public string LocalNameNoTag
         {
@@ -1342,7 +1341,7 @@ namespace NX.Engine.Hive
 
         public string LocalNameWithTag
         {
-            get { return this.LocalNameNoTag + ":" + this.Tag; }
+            get { return this.LocalNameNoTag + ":" + this.Genome; }
         }
 
         public string RepoNameNoTag
@@ -1352,7 +1351,7 @@ namespace NX.Engine.Hive
 
         public string RepoNameWithTag
         {
-            get { return this.RepoNameNoTag + ":" + this.Tag; }
+            get { return this.RepoNameNoTag + ":" + this.Genome; }
         }
         #endregion
 
@@ -1370,9 +1369,14 @@ namespace NX.Engine.Hive
             if (iPos != -1)
             {
                 // Save
-                this.Tag = qname.Substring(iPos + 1);
+                this.Genome = qname.Substring(iPos + 1);
                 // Remove
                 qname = qname.Substring(0, iPos);
+            }
+            else
+            {
+                this.Genome = qname;
+                qname = "";
             }
 
             // Split
@@ -1398,6 +1402,16 @@ namespace NX.Engine.Hive
                     this.Name = asPieces[2];
                     break;
             }
+
+            this.Initialize();
+        }
+
+        private void Initialize()
+        {
+            //
+            this.Project = this.Project.IfEmpty(this.Parent[EnvironmentClass.KeyRepoProject]);
+            this.Name = this.Name.IfEmpty(this.Parent[EnvironmentClass.KeyHive]);
+            this.Genome = this.Genome.IfEmpty(HiveClass.ProcessorDNAName);
         }
         #endregion
 
@@ -1414,10 +1428,10 @@ namespace NX.Engine.Hive
         /// <returns>The parsed name object</returns>
         public static DockerIFNameClass Make(EnvironmentClass env, string qname)
         {
-            DockerIFNameClass c_Ans = new DockerIFNameClass(qname);
+            DockerIFNameClass c_Ans = new DockerIFNameClass(env, qname);
 
-            if (!c_Ans.Project.HasValue()) c_Ans.Project = env[EnvironmentClass.KeyRepoProject];
-            c_Ans.Tag = env.HiveName;
+            //if (!c_Ans.Project.HasValue()) c_Ans.Project = env[EnvironmentClass.KeyRepoProject];
+            //c_Ans.Tag = env.HiveName;
 
             return c_Ans;
         }
@@ -1433,7 +1447,7 @@ namespace NX.Engine.Hive
         /// <returns>The parsed name object</returns>
         public static DockerIFNameClass Make(DockerIFNameClass name, string newname = null)
         {
-            return new DockerIFNameClass(name, newname);
+            return new DockerIFNameClass(name.Parent, name, newname);
         }
         #endregion
     }
