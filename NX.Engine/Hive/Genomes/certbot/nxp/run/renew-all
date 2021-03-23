@@ -38,7 +38,7 @@ certbot_run () {
         --email $ACCOUNT_EMAIL --non-interactive --agree-tos \
         --expand \
         --config-dir /certs \
-        --deploy-hook '/run/renew-all certdone' \
+        --deploy-hook '/etc/nxp/run/renew-all certdone' \
         --standalone -d "$DOMAIN"
 }
 
