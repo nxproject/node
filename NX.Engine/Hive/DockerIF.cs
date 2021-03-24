@@ -160,7 +160,7 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="name">The handy dandy name</param>
         /// <returns>True if it exists</returns>
-        public string GetImageCreatedDate(DockerIFNameClass name)
+        public string GetImageCreatedDate(DockerIFNameClass name, bool userepo = false)
         {
             // Assume image not found
             string sAns = null;
@@ -174,7 +174,7 @@ namespace NX.Engine.Hive
                 }).Result;
 
                 // Get the name
-                string sName = name.LocalNameWithTag;
+                string sName = (userepo ? name.RepoNameWithTag : name.LocalNameWithTag);
 
                 foreach (var c_Entry in c_List)
                 {
@@ -1379,7 +1379,7 @@ namespace NX.Engine.Hive
         #endregion
 
         #region Properties
-        public string Repo { get; internal set; }
+        public string Repo { get; set; }
         private string Project { get; set; }
         private string Name { get; set; }
         public string Genome { get; internal set; }
