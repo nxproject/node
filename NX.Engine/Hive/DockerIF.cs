@@ -160,10 +160,10 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="name">The handy dandy name</param>
         /// <returns>True if it exists</returns>
-        public string GetImageCreatedDate(DockerIFNameClass name, bool userepo = false)
+        public long GetImageCreatedDate(DockerIFNameClass name, bool userepo = false)
         {
             // Assume image not found
-            string sAns = null;
+            long lAns = 0;
 
             // Protect
             try
@@ -188,7 +188,7 @@ namespace NX.Engine.Hive
                     if (sName.IsSameValue(sTagName))
                     {
                         // Get the info
-                        sAns = c_Entry.Created.ToString();
+                        lAns = c_Entry.Created.Ticks;
 
                         // Only one
                         break;
@@ -200,7 +200,7 @@ namespace NX.Engine.Hive
                 this.HandleException("GetImageCreatedDate", e);
             }
 
-            return sAns;
+            return lAns;
         }
 
         /// <summary>
