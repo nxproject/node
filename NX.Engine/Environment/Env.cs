@@ -834,6 +834,7 @@ namespace NX.Engine
                 // Virtual
                 c_Ans.Set("siochannel", this.SIOChannels.Join(","));
                 c_Ans.Set("url", this.LoopbackURL);
+                c_Ans.Set("publicurl", this.ReachableURL);
                 c_Ans.Set("protocol", "http" + (this.UsesSSL ? "s" : "") + "//");
 
                 return c_Ans;
