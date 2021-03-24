@@ -155,6 +155,56 @@ namespace NX.Engine.Hive
 
         /// <summary>
         /// 
+        /// Gets the image checksum
+        /// 
+        /// </summary>
+        /// <param name="name">The handy dandy name</param>
+        /// <returns>True if it exists</returns>
+        public string GetImageCreatedDate(DockerIFNameClass name)
+        {
+            // Assume image not found
+            string sAns = null;
+
+            // Protect
+            try
+            {
+                // Do we have it?
+                var c_List = this.Client.Images.ListImagesAsync(new ImagesListParameters()
+                {
+                }).Result;
+
+                // Get the name
+                string sName = name.LocalNameWithTag;
+
+                foreach (var c_Entry in c_List)
+                {
+                    string sTagName = "";
+
+                    if (c_Entry.RepoTags != null && c_Entry.RepoTags.Count > 0)
+                    {
+                        sTagName = c_Entry.RepoTags[0];
+                    }
+                    // Does the repo tag match?
+                    if (sName.IsSameValue(sTagName))
+                    {
+                        // Get the info
+                        sAns = c_Entry.Created.ToString();
+
+                        // Only one
+                        break;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                this.HandleException("GetImageCreatedDate", e);
+            }
+
+            return sAns;
+        }
+
+        /// <summary>
+        /// 
         /// Checks to see if image is in local repo
         /// 
         /// </summary>
