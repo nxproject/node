@@ -136,6 +136,7 @@ namespace NX.Engine
 
                                         // Add
                                         this.Cache[sName] = c_Type;
+                                        this.Cache[c_Plug.Name] = c_Type;
 
                                         //
                                         try

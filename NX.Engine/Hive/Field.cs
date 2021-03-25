@@ -659,8 +659,10 @@ namespace NX.Engine.Hive
                 int iCount = 0;
 
                 // What is left over are zombies
-                foreach (string sZombie in this.RefreshList)
+                for (int i = this.RefreshList.Count - 1; i >= 0; i--)
                 {
+                    string sZombie = this.RefreshList[i];
+
                     // Get the bee
                     BeeClass c_Zombie = this.GetBee(sZombie);
                     // Any?

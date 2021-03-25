@@ -54,7 +54,7 @@ namespace NX.Engine
                     this.SignalQueenChange();
 
                     // Assure DNA
-                    if (this.Parent.Hive.Roster.IsQueen)
+                    if (this.Parent != null && this.Parent.Hive.Roster.IsQueen)
                     {
                         this.Parent.Hive.AssureDNACount(this.Genome, 1);
                     }
@@ -64,31 +64,31 @@ namespace NX.Engine
                 this.Tracker = new Hive.TrackerClass(this.Parent.Hive, TrackerClass.TrackType.DNA,
                     delegate (string value, List<string> url)
                     {
-                    // Reset
-                    this.Location = null;
+                        // Reset
+                        this.Location = null;
                         this.Field = null;
                         this.Bee = null;
 
-                    // Did we get someone to talk to?
-                    if (url.Count > 0)
+                        // Did we get someone to talk to?
+                        if (url.Count > 0)
                         {
-                        // Set the location
-                        this.Location = url[0];
-                        // And now the field from the location
-                        this.Field = this.Parent.Hive.FieldFromLocation(this.Location);
-                        // Do we have one?
-                        if (this.Field != null)
+                            // Set the location
+                            this.Location = url[0];
+                            // And now the field from the location
+                            this.Field = this.Parent.Hive.FieldFromLocation(this.Location);
+                            // Do we have one?
+                            if (this.Field != null)
                             {
-                            // And the bee
-                            this.Bee = this.Field.BeeFromLocation(this.Location);
+                                // And the bee
+                                this.Bee = this.Field.BeeFromLocation(this.Location);
                             }
                         }
 
-                    //
-                    this.Parent.LogInfo("{0} genome bumble bee is {1}available".FormatString(this.Genome, this.Location.HasValue() ? "" : "not "));
+                        //
+                        this.Parent.LogInfo("{0} genome bumble bee is {1}available".FormatString(this.Genome, this.Location.HasValue() ? "" : "not "));
 
-                    // Tell the world
-                    this.AvailabilityChanged?.Invoke(this.IsAvailable);
+                        // Tell the world
+                        this.AvailabilityChanged?.Invoke(this.IsAvailable);
 
                     }, this.Genome);
 
@@ -96,7 +96,7 @@ namespace NX.Engine
                 this.Parent.Hive.QueenChanged += delegate ()
                 {
                     // Are we the queen?
-                    if(this.Parent.Hive.Roster.IsQueen)
+                    if (this.Parent != null && this.Parent.Hive.Roster.IsQueen)
                     {
                         this.Parent.Hive.AssureDNACount(this.Genome, 1);
                     }
@@ -211,7 +211,7 @@ namespace NX.Engine
             try
             {
                 // Tracking?
-                if (this.Tracker!= null)
+                if (this.Tracker != null)
                 {
                     // Check current
                     this.Tracker.Trigger(this.Genome, this.Parent.Hive.Roster.GetLocationsForDNA(this.Genome));
