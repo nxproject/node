@@ -568,10 +568,11 @@ namespace NX.Shared
                         // Add it to the array
                         c_Ans.Add(sValue);
                     }
+                    // Remove
+                    this.SynchObject.Remove(key);
+                    // Save
+                    this.SynchObject.Set(key, c_Ans);
                 }
-
-                // Save
-                this.SynchObject.Set(key, c_Ans);
             }
 
             return c_Ans;

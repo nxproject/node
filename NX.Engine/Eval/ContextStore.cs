@@ -37,8 +37,11 @@ namespace NX.Engine
     public class ContextStoreClass<T>
     {
         #region Constructor
-        public ContextStoreClass()
-        { }
+        public ContextStoreClass(Func<T> creator = null)
+        {
+            //
+            this.Creator = creator;
+        }
         #endregion
 
         #region Indexer
@@ -46,20 +49,26 @@ namespace NX.Engine
         {
             get
             {
-                T c_Ans = default(T);
-
                 key = this.SanitizeName(key).IfEmpty(this.Default).IfEmpty("passed");
 
                 if (this.Values.ContainsKey(key))
                 {
-                    c_Ans = this.Values[key];
+                    return this.Values[key];
                 }
                 else
                 {
-                    this.Values[key] = c_Ans;
-                }
+                    T c_Ans = default(T);
 
-                return c_Ans;
+                    // Call the default creator if any
+                    if(this.Creator != null)
+                    {
+                        c_Ans = this.Creator();
+                    }
+
+                    if(c_Ans != null) this.Values[key] = c_Ans;
+
+                    return c_Ans;
+                };
             }
             set
             {
@@ -91,6 +100,13 @@ namespace NX.Engine
         /// 
         /// </summary>
         public string Default { get; set; }
+
+        /// <summary>
+        /// 
+        /// The creator
+        /// 
+        /// </summary>
+        private Func<T> Creator { get; set; }
         #endregion
 
         #region Methods

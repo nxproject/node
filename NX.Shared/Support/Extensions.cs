@@ -1532,7 +1532,7 @@ namespace NX.Shared
 
         public static List<string> Keys(this JObject obj)
         {
-            return obj.Properties().Select(p => p.Name).ToList();
+            return obj.Properties().Select(p => (p != null ? p.Name : "")).ToList();
         }
 
         public static JObject Minimize(this JObject obj)
@@ -1564,7 +1564,7 @@ namespace NX.Shared
 
         public static string ToSimpleString(this JObject obj)
         {
-            return obj.ToString(Newtonsoft.Json.Formatting.None, new Newtonsoft.Json.JsonConverter[0]);
+            return obj.ToString(Newtonsoft.Json.Formatting.None); //, new Newtonsoft.Json.JsonConverter[0]);
         }
 
         public static string ToTFString(this JObject obj)

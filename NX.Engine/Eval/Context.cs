@@ -72,7 +72,10 @@ namespace NX.Engine
         /// The stores
         /// 
         /// </summary>
-        public virtual ContextStoreClass<StoreClass> Stores { get; set; } = new ContextStoreClass<StoreClass>();
+        public virtual ContextStoreClass<StoreClass> Stores { get; set; } = new ContextStoreClass<StoreClass>(delegate()
+        {
+            return new StoreClass();
+        });
 
        /// <summary>
         /// 

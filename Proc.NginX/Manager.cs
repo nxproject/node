@@ -365,7 +365,7 @@ namespace Proc.NginX
             sBody += "Mask errors".NginxComment(1);
             sBody += "".NginxErrors();
 
-            // Defualt to the me field
+            // Default to the me field
             FieldClass c_Field = this.Parent.Hive.MeField;
             // Get the field to use
             string sField = this.Parent["field_nginx"];

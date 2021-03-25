@@ -414,7 +414,10 @@ namespace NX.Engine.Hive
             }
             catch (Exception e)
             {
-                this.HandleException("BuildImage", e);
+                if (!e.Message.Contains("An existing connection was forcibly closed by the remote host"))
+                {
+                    this.HandleException("BuildImage", e);
+                }
             }
             finally
             {
