@@ -144,6 +144,13 @@ namespace Proc.NginX
         /// 
         /// </summary>
         private BumbleBeeClass Certbot { get; set; }
+
+        /// <summary>
+        /// 
+        /// Need to copy files once
+        /// 
+        /// </summary>
+        private bool NginXFilesCopied { get; set; }
         #endregion
 
         #region Methods
@@ -270,17 +277,23 @@ namespace Proc.NginX
             if (cando || !sFile.FileExists() || force)
             {
                 //
-                this.Parent.LogInfo("Creating nginx.conf");
+                this.Parent.LogVerbose("Creating nginx.conf");
 
                 // Make the new config
                 string sConf = this.MakeNginxConfig();
                 // Changed?
                 if (!sConf.IsExactSameValue(sFile.ReadFile()))
                 {
-                    // Copy from sources
-                    this.Parent.LogInfo("{0} files copied {1} => {2}".FormatString(sSource.CopyDirectoryTree(sPath),
-                                            sSource,
-                                            sPath));
+                    //
+                    if (!this.NginXFilesCopied)
+                    {
+                        // Copy from sources
+                        this.Parent.LogInfo("{0} files copied {1} => {2}".FormatString(sSource.CopyDirectoryTree(sPath),
+                                                sSource,
+                                                sPath));
+
+                        this.NginXFilesCopied = true;
+                    }
 
                     // Write out
                     sFile.WriteFile(sConf);
@@ -402,10 +415,6 @@ namespace Proc.NginX
                 {
                     c_Env.LogInfo("Using SSL certificate at {0}".FormatString(c_Cert.Path));
                 }
-            }
-            else
-            {
-                c_Env.LogInfo("SSL is not enabled.  Set 'certbot_email' and 'domain' in config.son");
             }
 
             // 
