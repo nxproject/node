@@ -43,7 +43,6 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml;
 using System.Runtime.Loader;
 
-
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using TimeZoneConverter;
@@ -4875,8 +4874,60 @@ namespace NX.Shared
                         options.Inverse(output, context);
                     }
                 });
+
+                // Eval
+                // Is Not
+                HandlebarsDotNet.Handlebars.RegisterHelper("eval", (output, options, context, arguments) =>
+                {
+                    // Params
+                    var field = arguments.At<string>(0);
+                    var value = arguments.At<string>(1);
+
+                    // Get the field value
+                    var fieldvalue = context.GetValue<string>(field);
+
+                    // Check
+                    bool bCmp = !value.IsSameValue(fieldvalue);
+
+                    // Do
+                    if (Eval != null)
+                    {
+                        // Start with no delimiter
+                        string sDelim = "";
+
+                        // Loop thru
+                        foreach(var sArg in arguments)
+                        {
+                            // Evaluate
+                            string sValue = Eval(sArg.ToStringSafe());
+                            // A result?
+                            if (sValue.HasValue())
+                            {
+                                // Write it
+                                output.WriteSafeString(sDelim + sValue);
+                                // Change the delimiter
+                                sDelim = " ";
+                            }
+                        }
+
+                        // Output
+                        options.Template(output, context);
+                    }
+                    else
+                    {
+                        options.Inverse(output, context);
+                    }
+                });
+
             }
         }
+
+        /// <summary>
+        /// 
+        /// The eval callback
+        /// 
+        /// </summary>
+        public static Func<string,string> Eval { get; set; }
 
         /// <summary>
         /// 
@@ -4886,10 +4937,12 @@ namespace NX.Shared
         /// <param name="text"></param>
         /// <param name="values"></param>
         /// <returns></returns>
-        public static string Handlebars(this string text, StoreClass values)
+        public static string Handlebars(this string text, StoreClass values, Func<string, string> eval = null)
         {
             // Init
             HandlebarsInit();
+            // Set the evaluator
+            Eval = eval;
 
             // Change the markers
             text = text.IfEmpty().Replace("[[", "{{").Replace("]]", "}}");
