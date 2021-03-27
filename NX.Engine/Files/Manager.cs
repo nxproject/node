@@ -176,6 +176,7 @@ namespace NX.Engine.Files
             }
             catch (Exception e)
             {
+                call.Env.LogException("In upload: {0}".FormatString(doc.Path), e);
                 call.RespondWithError(e.Message);
             }
             finally
@@ -183,7 +184,7 @@ namespace NX.Engine.Files
                 if (doc != null)
                 {
                     // Do we have a special handler?
-                    if(ManagerClass.Conversion != null)
+                    if (ManagerClass.Conversion != null)
                     {
                         doc = ManagerClass.Conversion(doc);
                     }
@@ -219,26 +220,22 @@ namespace NX.Engine.Files
             {
                 doc.Location.GetDirectoryFromPath().AssurePath();
 
+                // Get the stream
                 var input = call.Request.InputStream;
-                using (FileStream output = new FileStream(doc.Location, FileMode.Create, FileAccess.Write))
+                // Make temp
+                using (MemoryStream c_In = new MemoryStream())
                 {
-                    Byte[] buffer = new Byte[1024];
-                    Int32 len = input.Read(buffer, 0, 1024);
-
-                    // Loop thru
-                    while (len > 0)
-                    {
-                        // Write
-                        output.Write(buffer, 0, len);
-                        // Again
-                        len = input.Read(buffer, 0, 1024);
-                    }
-
-                    output.Flush();
+                    // Copy it
+                    input.CopyTo(c_In);
+                    // Into string
+                    string sWkg = c_In.ToArray().FromBytes();
+                    // Convert and save
+                    doc.ValueAsBytes = sWkg.FromBase64Bytes();
                 }
             }
             catch (Exception e)
             {
+                call.Env.LogException("In uploadtext", e);
                 call.RespondWithError(e.Message);
             }
             finally

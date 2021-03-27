@@ -36,9 +36,9 @@ namespace Route.File
     /// Uploads a file
     /// 
     /// </summary>
-    public class Put : RouteClass
+    public class PutRaw : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Support.Route, "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Support.Route + "raw", "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Get the full path
@@ -51,7 +51,7 @@ namespace Route.File
             using (DocumentClass c_Doc = new DocumentClass(c_Mgr, sPath))
             {
                 // Save
-                c_Mgr.Upload(call, c_Doc);
+                c_Mgr.UploadText(call, c_Doc);
             }
         }
     }

@@ -4927,7 +4927,7 @@ namespace NX.Shared
         /// The eval callback
         /// 
         /// </summary>
-        public static Func<string,string> Eval { get; set; }
+        private static Func<string, string> Eval { get; set; }
 
         /// <summary>
         /// 
