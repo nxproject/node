@@ -73,6 +73,16 @@ namespace NX.Engine.Files
         { }
         #endregion
 
+        #region IDisposable
+        public override void Dispose()
+        {
+            // If temp, delete
+            if (this.Folder.IsTemp) this.Delete();
+
+            base.Dispose();
+        }
+        #endregion
+
         #region Properties
         /// <summary>
         /// 
@@ -579,6 +589,19 @@ namespace NX.Engine.Files
         #endregion
 
         #region Statics
+        /// <summary>
+        /// 
+        /// Makes a temporary file with a given extension
+        /// 
+        /// </summary>
+        /// <param name="mgr"></param>
+        /// <param name="ext"></param>
+        /// <returns></returns>
+        public static DocumentClass MakeTemp(ManagerClass mgr, string ext)
+        {
+            return new DocumentClass(mgr, FolderClass.TempFolder.CombinePath("".GUID() + "." + ext));
+        }
+
         /// <summary>
         /// 
         /// Returns the folder that holds the metadata

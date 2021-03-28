@@ -43,8 +43,12 @@ namespace NX.Engine.Files
     /// </summary>
     public class FolderClass : ChildOfClass<ManagerClass>
     {
+        #region Constants
+        public const string TempFolder = "_temp";
+        #endregion
+
         #region Constructor
-        public FolderClass(ManagerClass mgr, string path)
+        public FolderClass(ManagerClass mgr, string path = TempFolder)
             : base(mgr)
         {
             // Save
@@ -198,6 +202,13 @@ namespace NX.Engine.Files
                 return c_Ans;
             }
         }
+
+        /// <summary>
+        /// 
+        /// Returns true if the folder is a temp folder
+        /// 
+        /// </summary>
+        public bool IsTemp {  get { return this.Path.StartsWith(TempFolder); } }
         #endregion
 
         #region Methods
