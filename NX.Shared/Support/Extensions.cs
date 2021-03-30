@@ -3027,23 +3027,32 @@ namespace NX.Shared
         /// <param name="path1">The filed path</param>
         /// <param name="path2">The new entry</param>
         /// <returns></returns>
-        public static string CombinePath(this string path1, string path2)
+        public static string CombinePath(this string path1, params string[] paths)
         {
             path1 = path1.IfEmpty();
-            path2 = path2.IfEmpty();
-            if (path1.HasValue())
+
+            // Loop thru
+            foreach (string sPath in paths)
             {
-                if (path2.StartsWith(PathSeparator))
+                if (sPath.HasValue())
                 {
-                    while (path1.EndsWith(PathSeparator)) path1 = path1.Substring(0, path1.Length - 1);
-                }
-                else
-                {
-                    if (!path1.EndsWith(PathSeparator)) path1 += PathSeparator;
+                    if (path1.HasValue())
+                    {
+                        if (sPath.StartsWith(PathSeparator))
+                        {
+                            while (path1.EndsWith(PathSeparator)) path1 = path1.Substring(0, path1.Length - 1);
+                        }
+                        else
+                        {
+                            if (!path1.EndsWith(PathSeparator)) path1 += PathSeparator;
+                        }
+
+                        path1 += sPath;
+                    }
                 }
             }
 
-            return path1 + path2;
+            return path1;
         }
 
         public static string AdjustPathToOS(this string path, bool adddrive = false)

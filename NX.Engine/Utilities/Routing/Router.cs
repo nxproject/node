@@ -92,6 +92,9 @@ namespace NX.Engine
         public void Add(RouteClass route)
         {
             this.Add(route, route.RouteTree);
+
+            // Run callback
+            route.AtAdd(this);
         }
 
         /// <summary>

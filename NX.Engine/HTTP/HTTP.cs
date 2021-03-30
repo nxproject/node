@@ -255,7 +255,11 @@ namespace NX.Engine
                             // We got one
                             if (c_Route != null)
                             {
-                                // Just in case the programmer missed something
+                                // Save the route
+                                c_Call.HttpMethod = c_Ctx.Request.HttpMethod;
+                                c_Call.RouteTree = c_Nodes;
+                            
+                                    // Just in case the programmer missed something
                                 try
                                 {
                                     // Is the user kosher?

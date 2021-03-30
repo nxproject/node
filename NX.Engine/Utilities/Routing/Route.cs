@@ -122,6 +122,15 @@ namespace NX.Engine
         /// <param name="store">The store where the URL params are stored</param>
         public virtual void Call(HTTPCallClass call, StoreClass store)
         { }
+
+        /// <summary>
+        /// 
+        /// Gets called when the route is added
+        /// 
+        /// </summary>
+        /// <param name="router"></param>
+        public virtual void AtAdd(RouterClass router)
+        { }
         #endregion
 
         #region Methods

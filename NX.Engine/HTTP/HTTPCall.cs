@@ -31,6 +31,7 @@ using System;
 using System.Net;
 using System.IO;
 using System.Security.Principal;
+using System.Collections.Generic;
 
 using Newtonsoft.Json.Linq;
 
@@ -187,6 +188,20 @@ namespace NX.Engine
         /// 
         /// </summary>
         public string JSONRpcID { get; set; }
+
+        /// <summary>
+        /// 
+        /// The HTTP method used
+        /// 
+        /// </summary>
+        public string HttpMethod { get; set; }
+
+        /// <summary>
+        /// 
+        /// The route that was called
+        /// 
+        /// </summary>
+        public List<string> RouteTree { get; set; }
         #endregion
 
         /// <summary>
