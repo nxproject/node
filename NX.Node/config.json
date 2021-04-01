@@ -3,7 +3,7 @@
 
   // Production
 
-  //"field": [ "10.192.150.155:2375" ], // The list of fields
+  "field": [ "10.192.150.155:2375" ], // The list of fields
 
   // The following should be set in NX.Office unless you are running NX.Node only
   ////"domain": "nx9.us", // The domain   
@@ -11,7 +11,7 @@
 
   // Testing
 
-  "field": [ "10.192.150.151:2375" ], // Playground
+  //"field": [ "10.192.150.151:2375" ], // Playground
 
   //"field": [ "10.192.180.160:2375" ], // Development
 
