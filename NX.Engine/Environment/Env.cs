@@ -94,14 +94,11 @@ namespace NX.Engine
         /// <param name="args">The command line arguments</param>
         public EnvironmentClass(string[] args)
         {
-            // Check to see if secured
-            string sCurrentCode = this.Router.SecureCode;
-
             // Load the arguments
             this.Parse(args, true);
 
             // Initialize
-            this.Initialize(sCurrentCode);
+            this.Initialize();
         }
 
         /// <summary>
@@ -113,14 +110,11 @@ namespace NX.Engine
         public EnvironmentClass(JObject args)
             : base(null, "_env")
         {
-            // Check to see if secured
-            string sCurrentCode = this.Router.SecureCode;
-
             // Load the arguments
             this.LoadFrom(args);
 
             // Initialize
-            this.Initialize(sCurrentCode);
+            this.Initialize();
         }
 
         /// <summary>
@@ -133,56 +127,9 @@ namespace NX.Engine
             : this(env.SynchObject.Clone())
         { }
 
-        private void Initialize(string currcode)
+        private void Initialize()
         {
-            // Did we get a secure code?
-            string sSecureCode = this[EnvironmentClass.KeySecureCode];
-            // Do we have to gen?
-            if (sSecureCode.IsSameValue("random"))
-            {
-                sSecureCode = "".GUID();
-            }
-            if (sSecureCode.HasValue())
-            {
-                // Parse
-                ItemClass c_SC = new ItemClass(sSecureCode);
-
-                // Was the original secured?
-                if (!currcode.IsSameValue(RouterClass.UnsecureCode))
-                {
-                    // Does it match the new one?
-                    if (!c_SC.Key.IsSameValue(currcode))
-                    {
-                        // Bad
-                        sSecureCode = null;
-                    }
-                }
-
-                // Do we still have a value?
-                if (sSecureCode.HasValue())
-                {
-                    // Parse
-                    c_SC = new ItemClass(sSecureCode);
-
-                    // Does it have a new one?
-                    if (c_SC.Value.HasValue())
-                    {
-                        sSecureCode = c_SC.Value;
-                    }
-                }
-
-                // Save
-                if (sSecureCode.HasValue())
-                {
-                    this[EnvironmentClass.KeySecureCode] = sSecureCode;
-                }
-                else
-                {
-                    this.Remove(EnvironmentClass.KeySecureCode);
-                }
-            }
-
-            // Do we have a config?
+           // Do we have a config?
             if (this.Config.HasValue())
             {
                 // Read it
@@ -199,6 +146,31 @@ namespace NX.Engine
                         this.SynchObject.Set(sKey, c_Config.GetObject(sKey));
                     }
                 }
+            }
+
+            // Did we get a secure code?
+            string sSecureCode = this[EnvironmentClass.KeySecureCode];
+            // Do we have to gen?
+            if (sSecureCode.IsSameValue("random"))
+            {
+                sSecureCode = "".GUID();
+            }
+
+            // Set usecured?
+            if (sSecureCode.IsSameValue(RouterClass.UnsecureCode))
+            {
+                sSecureCode = null;
+            }
+
+            // Save
+            if (sSecureCode.HasValue())
+            {
+                this[EnvironmentClass.KeySecureCode] = sSecureCode;
+                this.LogInfo("Secure code is {0}".FormatString(sSecureCode));
+            }
+            else
+            {
+                this.Remove(EnvironmentClass.KeySecureCode);
             }
 
             // Welcome

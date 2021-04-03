@@ -47,7 +47,7 @@ namespace NX.Engine
             {
                 object c_Ans = null;
 
-                switch(name.ToLower())
+                switch (name.ToLower())
                 {
                     case "e":
                         c_Ans = Math.E;
@@ -66,26 +66,40 @@ namespace NX.Engine
                         break;
 
                     default:
-                        using(DatumClass c_Datum = new DatumClass(this.Parent, name))
+                        if (Parent.HandlebarData != null)
                         {
-                            c_Ans = c_Datum.Value;
+                            c_Ans = this.Parent.HandlebarData[name];
+                        }
+                        else
+                        {
+                            using (DatumClass c_Datum = new DatumClass(this.Parent, name))
+                            {
+                                c_Ans = c_Datum.Value;
+                            }
                         }
                         break;
                 }
                 return c_Ans;
             }
-            set 
+            set
             {
-                using (DatumClass c_Datum = new DatumClass(this.Parent, name))
+                if (Parent.HandlebarData != null)
                 {
-                    c_Datum.Value = value.ToStringSafe();
+                    this.Parent.HandlebarData[name] = XCVT.ToString(value);
+                }
+                else
+                {
+                    using (DatumClass c_Datum = new DatumClass(this.Parent, name))
+                    {
+                        c_Datum.Value = value.ToStringSafe();
+                    }
                 }
             }
         }
         #endregion
 
         #region Properties
-        public Context Context {  get { return this.Root as Context; } }
+        public Context Context { get { return this.Root as Context; } }
         #endregion
     }
 }

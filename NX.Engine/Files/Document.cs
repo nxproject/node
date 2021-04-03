@@ -296,18 +296,11 @@ namespace NX.Engine.Files
             get
             {
                 // Make the ID
-                string sAns = this.Path.SHA1HashString();
-
-                // Save a pointer back to itself
-                using (DocumentClass c_Doc = new DocumentClass(this.Parent, this.MetadataFolder, ReversePointerFile))
-                {
-                    // Write
-                    c_Doc.Value = this.Path;
-                }
+                string sAns = this.Path.ToBase64URL();
 
                 // Make it.
                 // NB:  Must use the route defined in Routes.Files.Support
-                return this.Parent.Parent.SiteInfo.URL.CombineURL("f", sAns);
+                return this.Parent.Parent.ReachableURL.CombineURL("fenc", sAns);
             }
         }
         #endregion

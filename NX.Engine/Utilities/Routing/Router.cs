@@ -285,7 +285,42 @@ namespace NX.Engine
         /// <returns>True if it is defined</returns>
         public bool IsDefined(string route)
         {
-            return this.Routes.Contains(route);
+            // Assume not
+            bool bAns = false;
+
+            // Split
+            string[] asPieces = route.IfEmpty().Split("/");
+            // Start at top
+            RouteLayerClass c_Layer = this.Routes;
+            // Loop thru
+            for (int i = 0; i < asPieces.Length; i++)
+            {
+                // Get
+                string sPiece = asPieces[i];
+
+                // If not, exit
+                if (!c_Layer.Contains(sPiece))
+                {
+                    break;
+                }
+
+                // If last piece, we found it
+                if (i == (asPieces.Length - 1))
+                {
+                    bAns = true;
+                    break;
+                }
+                else
+                {
+                    // Move on
+                    c_Layer = c_Layer.Routes[sPiece];
+                    // If none, exit
+                    if (c_Layer == null) break;
+                }
+            }
+
+            //
+            return bAns;
         }
         #endregion
     }

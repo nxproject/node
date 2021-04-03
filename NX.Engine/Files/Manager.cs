@@ -283,6 +283,9 @@ namespace NX.Engine.Files
         /// <returns>The collapsed path</returns>
         public string Collapse(string path)
         {
+            // Assure
+            path = path.IfEmpty();
+
             // Does it start with the base?
             if (path.StartsWith(MappedFolder))
             {

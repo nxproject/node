@@ -41,7 +41,7 @@ namespace NX.Engine
     public class Context : ChildOfClass<EnvironmentClass>
     {
         #region Constructor
-        public Context(EnvironmentClass call, StoreClass store, Func<ExprCBParams, string> cb = null)
+        public Context(EnvironmentClass call, StoreClass store = null, Func<ExprCBParams, string> cb = null, HandlebarDataClass vars = null)
            : base(call)
         {
             // Start anew
@@ -56,6 +56,9 @@ namespace NX.Engine
                 this.Stores.Use("passed");
                 this.Stores[this.Stores.Default] = store;
             }
+
+            // Save the variables
+            this.HandlebarData = vars;
         }
         #endregion
 
@@ -72,12 +75,12 @@ namespace NX.Engine
         /// The stores
         /// 
         /// </summary>
-        public virtual ContextStoreClass<StoreClass> Stores { get; set; } = new ContextStoreClass<StoreClass>(delegate()
+        public virtual ContextStoreClass<StoreClass> Stores { get; set; } = new ContextStoreClass<StoreClass>(delegate ()
         {
             return new StoreClass();
         });
 
-       /// <summary>
+        /// <summary>
         /// 
         /// The documents
         /// 
@@ -117,7 +120,14 @@ namespace NX.Engine
         /// The functions
         /// 
         /// </summary>
-        public FunctionsDefinitions Functions {  get { return FunctionsTable; } }
+        public FunctionsDefinitions Functions { get { return FunctionsTable; } }
+
+        /// <summary>
+        /// 
+        /// Data for vars
+        /// 
+        /// </summary>
+        internal HandlebarDataClass HandlebarData { get; private set; }
         #endregion
 
         #region Methods
@@ -132,11 +142,11 @@ namespace NX.Engine
 
         #region Statics
         private static FunctionsDefinitions IFunctionsTable { get; set; }
-        public static FunctionsDefinitions FunctionsTable 
-        { 
+        public static FunctionsDefinitions FunctionsTable
+        {
             get
             {
-                if(IFunctionsTable == null)
+                if (IFunctionsTable == null)
                 {
                     IFunctionsTable = new FunctionsDefinitions();
                 }
