@@ -36,11 +36,13 @@ namespace Route.File
     /// Uploads a file
     /// 
     /// </summary>
-    public class PutRaw : RouteClass
+    public class PutAt : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Support.Route + "raw", "?path?" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.POST(), Support.Route + "at", "?path?" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
+            call.Env.Debug();
+
             // Get the full path
             string sPath = store.PathFromEntry(NX.Engine.Files.ManagerClass.MappedFolder, "path").URLDecode();
 
@@ -48,11 +50,8 @@ namespace Route.File
             NX.Engine.Files.ManagerClass c_Mgr = call.Env.Globals.Get<NX.Engine.Files.ManagerClass>();
 
             // And upload
-            using (DocumentClass c_Doc = new DocumentClass(c_Mgr, sPath))
-            {
-                // Save
-                c_Mgr.UploadRaw(call, c_Doc);
-            }
+            c_Mgr.Upload(call, null, c_Mgr, sPath);
         }
+        
     }
 }

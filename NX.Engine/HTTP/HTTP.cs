@@ -258,8 +258,8 @@ namespace NX.Engine
                                 // Save the route
                                 c_Call.HttpMethod = c_Ctx.Request.HttpMethod;
                                 c_Call.RouteTree = c_Nodes;
-                            
-                                    // Just in case the programmer missed something
+
+                                // Just in case the programmer missed something
                                 try
                                 {
                                     // Is the user kosher?
