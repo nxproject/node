@@ -43,8 +43,6 @@ namespace Route.File
             // Get the full path
             string sPath = store["code"].FromBase64URL();
 
-            call.Env.LogInfo(sPath);
-
             // Get the manager
             ManagerClass c_Mgr = call.Env.Globals.Get<ManagerClass>();
 

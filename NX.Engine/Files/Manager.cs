@@ -104,9 +104,7 @@ namespace NX.Engine.Files
 
                     using (FileStream output = new FileStream(doc.Location, FileMode.Create, FileAccess.Write))
                     {
-                        doc.Location.GetDirectoryFromPath().AssurePath();
-
-                        // Find start boundary
+                       // Find start boundary
                         while (true)
                         {
                             if (len == 0)
@@ -177,7 +175,7 @@ namespace NX.Engine.Files
             catch (Exception e)
             {
                 call.Env.LogException("In upload: {0}".FormatString(doc.Path), e);
-                call.RespondWithError(e.Message);
+                call.RespondWithError(e.GetAllExceptions());
             }
             finally
             {
@@ -201,8 +199,14 @@ namespace NX.Engine.Files
                         // Delete so not to call cloud
                         doc.Location.DeleteFile();
                     }
+
+                    call.RespondWithOK("path", doc.Path, "url", this.Parent.ReachableURL.CombinePath("f", doc.Path));
+
                 }
-                call.RespondWithOK();
+                else
+                {
+                    call.RespondWithFail();
+                }
             }
 
             return doc;
@@ -218,7 +222,7 @@ namespace NX.Engine.Files
         {
             try
             {
-                doc.Location.GetDirectoryFromPath().AssurePath();
+                doc.Folder.AssurePath();
 
                 // Get the stream
                 var input = call.Request.InputStream;
@@ -236,7 +240,7 @@ namespace NX.Engine.Files
             catch (Exception e)
             {
                 call.Env.LogException("In uploadtext", e);
-                call.RespondWithError(e.Message);
+                call.RespondWithError(e.GetAllExceptions());
             }
             finally
             {
@@ -257,8 +261,14 @@ namespace NX.Engine.Files
                 {
                     // Delete so not to call cloud
                     doc.Location.DeleteFile();
+
+                    call.RespondWithOK("path", doc.Path, "url", this.Parent.ReachableURL.CombinePath("f", doc.Path));
+
                 }
-                call.RespondWithOK();
+                else
+                {
+                    call.RespondWithFail();
+                }
             }
         }
 

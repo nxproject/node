@@ -570,9 +570,19 @@ namespace NX.Engine
         /// Responds with {"ok": "1"}
         /// 
         /// </summary>
-        public void RespondWithOK()
+        public void RespondWithOK(params string[] values)
         {
-            this.RespondWithJSON("ok".AsJObject("1"));
+            // Make base
+            JObject c_Ans = "ok".AsJObject("1");
+
+            // Loop thru
+            for (int i = 0; i < values.Length; i += 2)
+            {
+                c_Ans.Set(values[i], values[i + 1]);
+            }
+
+            //
+            this.RespondWithJSON(c_Ans);
         }
 
         /// <summary>
