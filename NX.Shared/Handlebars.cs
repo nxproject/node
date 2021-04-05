@@ -236,8 +236,6 @@ namespace NX.Shared
             // Set the evaluator
             Eval = eval;
 
-            // Change the markers
-            text = text.IfEmpty().Replace("[[", "{{").Replace("]]", "}}");
             // Compile
             var c_Template = HandlebarsDotNet.Handlebars.Compile(text);
             // Process
