@@ -574,6 +574,7 @@ namespace NX.Engine
         {
             // Make base
             JObject c_Ans = "ok".AsJObject("1");
+            c_Ans.Set("success", "1");
 
             // Loop thru
             for (int i = 0; i < values.Length; i += 2)
@@ -590,9 +591,20 @@ namespace NX.Engine
         /// Responds with {"ok": "0"}
         /// 
         /// </summary>
-        public void RespondWithFail()
+        public void RespondWithFail(params string[] values)
         {
-            this.RespondWithJSON("ok".AsJObject("0"));
+            // Make base
+            JObject c_Ans = "ok".AsJObject("0");
+            c_Ans.Set("success", "0");
+
+            // Loop thru
+            for (int i = 0; i < values.Length; i += 2)
+            {
+                c_Ans.Set(values[i], values[i + 1]);
+            }
+
+            //
+            this.RespondWithJSON(c_Ans);
         }
 
         /// <summary>
