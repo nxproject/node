@@ -133,6 +133,15 @@ namespace NX.Engine
         { }
         #endregion
 
+        #region Telemetry
+        /// <summary>
+        /// 
+        /// The type of telemetry that the call generates
+        /// 
+        /// </summary>
+        public virtual string Telemetry { get { return null; } }
+        #endregion
+
         #region Methods
         private static string Make(string method, Types type = Types.Normal)
         {

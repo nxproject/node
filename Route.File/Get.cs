@@ -53,5 +53,6 @@ namespace Route.File
                 call.RespondWithFile(c_Doc.Location);
             }
         }
+        public override string Telemetry => "File Download";
     }
 }
