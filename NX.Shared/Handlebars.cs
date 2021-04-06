@@ -276,6 +276,11 @@ namespace NX.Shared
         #endregion
 
         #region Methods
+        public override string ToString()
+        {
+            return this.ConvertDictionary(this.SynchObject).ToSimpleString();
+        }
+
         /// <summary>
         /// 
         /// Gets a value
@@ -498,6 +503,60 @@ namespace NX.Shared
                         // Add
                         c_Ans.Add(value.Get(i));
                     }
+                }
+            }
+
+            return c_Ans;
+        }
+
+        private JObject ConvertDictionary(Dictionary<string, object> dict)
+        {
+            //
+            JObject c_Ans = new JObject();
+
+            // Loop thru
+            foreach (string sKey in dict.Keys)
+            {
+                // Get the object
+                object c_Entry = dict[sKey];
+                if (c_Entry is List<object>)
+                {
+                    c_Ans.Set(sKey, this.ConvertList((List<object>)c_Entry));
+                }
+                else if (c_Entry is Dictionary<string, object>)
+                {
+                    c_Ans.Set(sKey, this.ConvertDictionary((Dictionary<string, object>)c_Entry));
+                }
+                else
+                {
+                    c_Ans.Set(sKey, c_Entry.ToString());
+                }
+            }
+
+            return c_Ans;
+        }
+
+        private JArray ConvertList(List<object> dict)
+        {
+            //
+            JArray c_Ans = new JArray();
+
+            // Loop thru
+            for(int i=0; i < dict.Count;i++)
+            {
+                // Get the object
+                object c_Entry = dict[i];
+                if (c_Entry is List<object>)
+                {
+                    c_Ans.Add(this.ConvertList((List<object>)c_Entry));
+                }
+                else if (c_Entry is Dictionary<string, object>)
+                {
+                    c_Ans.Add(this.ConvertDictionary((Dictionary<string, object>)c_Entry));
+                }
+                else
+                {
+                    c_Ans.Add(c_Entry.ToString());
                 }
             }
 
