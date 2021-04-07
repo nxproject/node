@@ -95,28 +95,16 @@ namespace NX.Engine
 
         public static string MD5HashString(this string value)
         {
-            StringBuilder c_Wkg = new StringBuilder();
-
             byte[] baWkg = MD5Hash(value.ToBytes());
-            for (int iLoop = 0; iLoop < baWkg.Length; iLoop++)
-            {
-                c_Wkg.Append(string.Format("{0:X}", baWkg[iLoop]));
-            }
 
-            return c_Wkg.ToString();
+            return BitConverter.ToString(baWkg).Replace("-", "");
         }
 
         public static string SHA1HashString(this string value, string addition = "")
         {
-            StringBuilder c_Wkg = new StringBuilder();
+            byte[] baWkg = SHA1Hash((value + addition).ToBytes()); ;
 
-            byte[] baWkg = SHA1Hash((value + addition).ToBytes());
-            for (int iLoop = 0; iLoop < baWkg.Length; iLoop++)
-            {
-                c_Wkg.Append(string.Format("{0:X}", baWkg[iLoop]));
-            }
-
-            return c_Wkg.ToString();
+            return BitConverter.ToString(baWkg).Replace("-", "");
         }
 
         public static bool IsMD5Hash(this string value)
@@ -428,7 +416,7 @@ namespace NX.Engine
 
         public static string ByteToHex(this byte value)
         {
-            string sWkg = string.Format("{0:X}", value);
+            string sWkg = string.Format("{0:X2}", value);
 
             while (sWkg.Length < 2) sWkg = "0" + sWkg;
 

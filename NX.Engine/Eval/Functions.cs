@@ -687,7 +687,7 @@ namespace NX.Engine
             }, 1, 1,
             "Returns the value encrypted as a password",
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
-            this.AddFn(new StaticFunction("hex", delegate (Context ctx, object[] ps) { return String.Format("0x{0:X}", XCVT.ToInt32(ps[0])); }, 1, 1,
+            this.AddFn(new StaticFunction("hex", delegate (Context ctx, object[] ps) { return String.Format("0x{0:X2}", XCVT.ToInt32(ps[0])); }, 1, 1,
                 "Returns the hex representation of a numeric value",
                 new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value")));
             this.AddFn(new StaticFunction("format", delegate (Context ctx, object[] ps) { return string.Format("{0:" + XCVT.ToString(ps[0]) + "}", ps[1]); }, 2, 2,
