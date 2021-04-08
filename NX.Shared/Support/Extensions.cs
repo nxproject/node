@@ -881,7 +881,7 @@ namespace NX.Shared
 
             for(int i=0;i< value.Length;i++)
             {
-                sAns += cs2[cs1.IndexOf(value.Substring(i, 1));
+                sAns += cs2[cs1.IndexOf(value.Substring(i, 1))];
             }
             return sAns;
         }
