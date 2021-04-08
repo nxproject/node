@@ -864,6 +864,30 @@ namespace NX.Shared
         {
             return value.IfEmpty().Replace("-", "+").Replace("_", "/").Replace("~", "=").FromBase64();
         }
+
+        public static string Base64Encode(this string value)
+        {
+            return value.Translate(B64, B64Enc);
+        }
+
+        public static string Base64Decode(this string value)
+        {
+            return value.Translate(B64Enc, B64);
+        }
+
+        public static string Translate(this string value, string cs1, string cs2)
+        {
+            string sAns = "";
+
+            for(int i=0;i< value.Length;i++)
+            {
+                sAns += cs2[cs1.IndexOf(value.Substring(i, 1));
+            }
+            return sAns;
+        }
+
+        private static string B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=-_~";
+        private static string B64Enc = "Cf_069ilz2y17ucDMvQgtYZBeEhTGU-qsJVoIOWnPHbLwaprRN5jd8kXKA4SmF~x3";
         #endregion
 
         #region URL
