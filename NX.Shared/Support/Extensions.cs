@@ -857,7 +857,7 @@ namespace NX.Shared
 
         public static string ToBase64URL(this string value)
         {
-            return value.IfEmpty().ToBase64().Replace("+", "-").Replace("/", "_").Replace("=", "~");
+            return value.IfEmpty().ToBase64().Base64Secure();
         }
 
         public static string FromBase64URL(this string value)
@@ -875,6 +875,16 @@ namespace NX.Shared
             return value.Translate(B64Enc, B64);
         }
 
+        public static string Base64Secure(this string value)
+        {
+            return value.Replace("+", "-").Replace("/", "_").Replace("=", "~").Translate(B64, B64Enc);
+        }
+
+        public static string Base64Unsecure(this string value)
+        {
+            return value.Translate(B64Enc, B64).Replace("-", "+").Replace("_", "/").Replace("~", "=");
+        }
+
         public static string Translate(this string value, string cs1, string cs2)
         {
             string sAns = "";
@@ -887,7 +897,7 @@ namespace NX.Shared
         }
 
         private static string B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=-_~";
-        private static string B64Enc = "Cf_069ilz2y17ucDMvQgtYZBeEhTGU-qsJVoIOWnPHbLwaprRN5jd8kXKA4SmF~x3";
+        private static string B64Enc = "jbZdCAaOeB02KxoQ56mfvYr-qUt7s=MVD9yXg_RSJnI~ik4Tw31cpFu/EzlWhHGN8PL+";
         #endregion
 
         #region URL
