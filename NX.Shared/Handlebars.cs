@@ -276,6 +276,12 @@ namespace NX.Shared
         #endregion
 
         #region Methods
+        /// <summary>
+        /// 
+        /// As JSON
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return this.ConvertDictionary(this.SynchObject).ToSimpleString();
@@ -402,7 +408,6 @@ namespace NX.Shared
             //
             this.Merge(this.ConvertJObject(value.SynchObject));
         }
-
 
         /// <summary>
         /// 

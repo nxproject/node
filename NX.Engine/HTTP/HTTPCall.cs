@@ -821,6 +821,18 @@ namespace NX.Engine
                 this.Response.AddHeader("Etag", this.ResponseETag);
             }
         }
+
+        /// <summary>
+        /// 
+        /// Redirects to an external URL
+        /// 
+        /// </summary>
+        /// <param name="url"></param>
+        public void Redirect(string url)
+        {
+            //
+            this.Response.Redirect(url);
+        }
         #endregion
 
         #region User properties

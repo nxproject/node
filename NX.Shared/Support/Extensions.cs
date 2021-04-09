@@ -862,7 +862,7 @@ namespace NX.Shared
 
         public static string FromBase64URL(this string value)
         {
-            return value.IfEmpty().Replace("-", "+").Replace("_", "/").Replace("~", "=").FromBase64();
+            return value.IfEmpty().Base64Unsecure().FromBase64();
         }
 
         public static string Base64Encode(this string value)
