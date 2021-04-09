@@ -500,12 +500,12 @@ namespace NX.Engine
 
         public static string Compress(this string value)
         {
-            return Convert.ToBase64String(CompressArray(value.ToBytes())).Base64Secure();
+            return CompressArray(value.ToBytes()).ToBase64().Base64Secure();
         }
 
         public static string Decompress(this string value)
         {
-            return DecompressArray(Convert.FromBase64String(value.Base64Unsecure())).FromBytes();
+            return DecompressArray(value.Base64Unsecure().FromBase64Bytes()).FromBytes();
         }
         #endregion
 

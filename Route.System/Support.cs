@@ -26,6 +26,6 @@ namespace Route.System
 {
     public static class Support
     {
-        public const string Route = "route";
+        public const string Route = "__route";
     }
 }

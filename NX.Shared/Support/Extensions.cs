@@ -885,19 +885,19 @@ namespace NX.Shared
             return value.Translate(B64Enc, B64).Replace("-", "+").Replace("_", "/").Replace("~", "=");
         }
 
-        public static string Translate(this string value, string cs1, string cs2)
+        private static string Translate(this string value, string cs1, string cs2)
         {
             string sAns = "";
 
-            for(int i=0;i< value.Length;i++)
+            for (int i = 0; i < value.Length; i++)
             {
                 sAns += cs2[cs1.IndexOf(value.Substring(i, 1))];
             }
             return sAns;
         }
 
-        private static string B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=-_~";
-        private static string B64Enc = "jbZdCAaOeB02KxoQ56mfvYr-qUt7s=MVD9yXg_RSJnI~ik4Tw31cpFu/EzlWhHGN8PL+";
+        private static string B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_~";
+        private static string B64Enc = "Lzhd-tAXgk~UmeJliBw0yT2OFbqICujW64H5nSQY1RDvPK_rcZGxE8ofV7pNa9s3M";
         #endregion
 
         #region URL
@@ -1931,7 +1931,12 @@ namespace NX.Shared
 
         public static JObject Set(this JObject obj, string key, object value)
         {
-            obj[key] = JToken.FromObject(value);
+            try
+            {
+                if (obj.Contains(key)) obj.Remove(key);
+                obj[key] = JToken.FromObject(value);
+            }
+            catch { }
 
             return obj;
         }
