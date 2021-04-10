@@ -36,7 +36,7 @@ namespace NXNode
         static void Main(string[] args)
         {
             // Make into list
-            List<string> c_Args = new List<string>(args);
+              List<string> c_Args = new List<string>(args);
 
             // Bootstarp condiction
             if (c_Args.Count == 0)

@@ -229,73 +229,8 @@ namespace NX.Engine
                     // Any?
                     if (c_Ctx != null)
                     {
-                        // Make the wrapper
-                        using (HTTPCallClass c_Call = new HTTPCallClass(this.Parent, c_Ctx))
-                        {
-                            // The parameters
-                            StoreClass c_Params = new StoreClass();
-
-                            // First from URL after ?
-                            string sURL = c_Ctx.Request.RawUrl;
-                            // Find the ?
-                            int iPos = sURL.IndexOf("?");
-                            if (iPos != -1)
-                            {
-                                // Parse the URL parameters
-                                c_Params.Parse(sURL.Substring(iPos + 1), StoreClass.ParseTypes.URL);
-                                // And remove from the URL
-                                sURL = sURL.Substring(0, iPos);
-                            }
-
-                            // Split the URL
-                            List<string> c_Nodes = new List<string>(sURL.Substring(1).Split('/'));
-
-                            // Find the route
-                            RouteClass c_Route = this.Parent.Router.Get(c_Params, c_Ctx.Request.HttpMethod, c_Nodes);
-                            // We got one
-                            if (c_Route != null)
-                            {
-                                // Save the route
-                                c_Call.HttpMethod = c_Ctx.Request.HttpMethod;
-                                c_Call.RouteTree = c_Nodes;
-
-                                // Just in case the programmer missed something
-                                try
-                                {
-                                    // Is the user kosher?
-                                    if (!c_Call.UserInfo.Valid)
-                                    {
-                                        // Validate
-                                        if (this.Parent.ValidatonCallback != null)
-                                        {
-                                            c_Call.UserInfo.Valid = this.Parent.ValidatonCallback();
-                                        }
-                                    }
-
-                                    // Ok?
-                                    if (c_Call.UserInfo.Valid)
-                                    {
-                                        // Call the route
-                                        c_Route.Call(c_Call, c_Params);
-                                    }
-                                    else
-                                    {
-                                        this.Parent.LogError("HTTP: Invalid user");
-                                    }
-                                }
-                                catch (Exception e)
-                                {
-                                    this.Parent.LogException("HTTP: ProcessRequest", e);
-                                }
-                            }
-
-                            // Was the call competed?
-                            if (!c_Call.ResponseCompleted)
-                            {
-                                // No, answer with an HTTP 500 error
-                                c_Call.RespondWithError();
-                            }
-                        }
+                        // Process
+                        this.Process(c_Ctx, c_Ctx.Request.RawUrl);
                     }
                 }
                 catch { }
@@ -366,6 +301,86 @@ namespace NX.Engine
                 }
             }
             catch { }
+        }
+
+        /// <summary>
+        /// 
+        /// Processes a call
+        /// 
+        /// </summary>
+        /// <param name="ctx"></param>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public HTTPCallClass Process(HttpListenerContext ctx, string url)
+        {
+            // Make the wrapper
+            HTTPCallClass c_Call = new HTTPCallClass(this.Parent, ctx);
+
+                // The parameters
+                StoreClass c_Params = new StoreClass();
+
+                // First from URL after ?
+                string sURL = url;
+                // Find the ?
+                int iPos = sURL.IndexOf("?");
+                if (iPos != -1)
+                {
+                    // Parse the URL parameters
+                    c_Params.Parse(sURL.Substring(iPos + 1), StoreClass.ParseTypes.URL);
+                    // And remove from the URL
+                    sURL = sURL.Substring(0, iPos);
+                }
+
+                // Split the URL
+                List<string> c_Nodes = new List<string>(sURL.Substring(1).Split('/'));
+
+                // Find the route
+                RouteClass c_Route = this.Parent.Router.Get(c_Params, ctx.Request.HttpMethod, c_Nodes);
+                // We got one
+                if (c_Route != null)
+                {
+                    // Save the route
+                    c_Call.HttpMethod = ctx.Request.HttpMethod;
+                    c_Call.RouteTree = c_Nodes;
+
+                    // Just in case the programmer missed something
+                    try
+                    {
+                        // Is the user kosher?
+                        if (!c_Call.UserInfo.Valid)
+                        {
+                            // Validate
+                            if (this.Parent.ValidatonCallback != null)
+                            {
+                                c_Call.UserInfo.Valid = this.Parent.ValidatonCallback();
+                            }
+                        }
+
+                        // Ok?
+                        if (c_Call.UserInfo.Valid)
+                        {
+                            // Call the route
+                            c_Route.Call(c_Call, c_Params);
+                        }
+                        else
+                        {
+                            this.Parent.LogError("HTTP: Invalid user");
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        this.Parent.LogException("HTTP: ProcessRequest", e);
+                    }
+                }
+
+                // Was the call competed?
+                if (!c_Call.ResponseCompleted)
+                {
+                    // No, answer with an HTTP 500 error
+                    c_Call.RespondWithError();
+                }
+
+            return c_Call;
         }
         #endregion
     }
