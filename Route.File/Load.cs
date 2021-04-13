@@ -54,9 +54,16 @@ namespace Route.File
             {
                 // Get
                 StoreClass c_Store = call.BodyAsStore;
+                // And the contents
+                string sContent = c_Store["content"];
+                // Baase64?
+                if(store["base64"].FromDBBoolean())
+                {
+                    sContent = sContent.FromBase64();
+                }
 
                 // Save
-                c_Doc.Value = c_Store["content"];
+                c_Doc.Value = sContent;
 
                 c_Ans["done"] = "y";
 

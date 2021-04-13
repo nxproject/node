@@ -114,9 +114,9 @@ namespace NX.Engine.Files
                 if (doc != null)
                 {
                     // Do we have a special handler?
-                    if (ManagerClass.Conversion != null)
+                    if (ManagerClass.Converter != null)
                     {
-                        doc = ManagerClass.Conversion(doc);
+                        doc = ManagerClass.Converter(doc);
                     }
 
                     // Make the parameter
@@ -177,9 +177,9 @@ namespace NX.Engine.Files
             finally
             {
                 // Do we have a special handler?
-                if (ManagerClass.Conversion != null)
+                if (ManagerClass.Converter != null)
                 {
-                    doc = ManagerClass.Conversion(doc);
+                    doc = ManagerClass.Converter(doc);
                 }
 
                 // Make the parameter
@@ -318,7 +318,7 @@ namespace NX.Engine.Files
         /// Handler to handle conversions at upload
         /// 
         /// </summary>
-        public static Func<DocumentClass, DocumentClass> Conversion { get; set; }
+        public static Func<DocumentClass, DocumentClass> Converter { get; set; }
         #endregion
     }
 
