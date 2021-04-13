@@ -95,6 +95,9 @@ namespace NX.Engine.Files
                     // Must have document
                     if (doc != null)
                     {
+                        // Assure folder
+                        doc.Folder.AssurePath();
+
                         // SOpen
                         using (FileStream c_Out = new FileStream(doc.Location, FileMode.Create, FileAccess.Write))
                         {
