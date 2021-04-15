@@ -195,32 +195,42 @@ namespace NXNode
         /// <param name="target"></param>
         private static void CopyFolder(string source, string target)
         {
-            // Assure target
-            target.AssurePath();
-
-            // Console.WriteLine("Loading " + source);
-
-            // The list
-            List<string> c_Files = source.GetFilesInPath();
-            // Do each file
-            foreach (string sFile in c_Files)
+            // Skip
+            string sFolder = source.GetDirectoryNameFromPath().ToLower();
+            switch (sFolder)
             {
-                // Copy
-                sFile.CopyFile(target.CombinePath(sFile.GetFileNameFromPath().AdjustPathToOS()));
-            }
+                case "readmes":
+                    break;
 
-            // And now each directory
-            foreach (string sDir in source.GetDirectoriesInPath())
-            {
-                // Get the name
-                string sName = sDir.GetDirectoryNameFromPath();
-                // Skip system
-                if (!sName.StartsWith("."))
-                {
-                    // Copy
-                    CopyFolder(source.CombinePath(sName).AdjustPathToOS(),
-                                target.CombinePath(sName).AdjustPathToOS());
-                }
+                default:
+                    // Assure target
+                    target.AssurePath();
+
+                    // Console.WriteLine("Loading " + source);
+
+                    // The list
+                    List<string> c_Files = source.GetFilesInPath();
+                    // Do each file
+                    foreach (string sFile in c_Files)
+                    {
+                        // Copy
+                        sFile.CopyFile(target.CombinePath(sFile.GetFileNameFromPath().AdjustPathToOS()));
+                    }
+
+                    // And now each directory
+                    foreach (string sDir in source.GetDirectoriesInPath())
+                    {
+                        // Get the name
+                        string sName = sDir.GetDirectoryNameFromPath();
+                        // Skip system
+                        if (!sName.StartsWith("."))
+                        {
+                            // Copy
+                            CopyFolder(source.CombinePath(sName).AdjustPathToOS(),
+                                        target.CombinePath(sName).AdjustPathToOS());
+                        }
+                    }
+                    break;
             }
         }
         #endregion

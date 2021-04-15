@@ -16,11 +16,11 @@ code, open it with Visual Studio (use **Visual Studio Community 2019** or later,
 it's free) and get ready to view the code.  using MS Windows 10 or later, you can
 easily install [Docker Desktop on Windows](https://docs.docker.com/docker-for-windows/install/).
 
-* [Routes](docs/README_ROUTES.md)
-* [Functions](docs/README_FNS.md)
-* [Processes](docs/README_PROCS.md)
-* [Loading processes, routes and functions](docs/README_USE.md)
-* [Environment](docs/README_ENV.md)
+* [Routes](readmes/README_ROUTES.md)
+* [Functions](readmes/README_FNS.md)
+* [Processes](readmes/README_PROCS.md)
+* [Loading processes, routes and functions](readmes/README_USE.md)
+* [Environment](readmes/README_ENV.md)
 
 ## Containers are bees
 
@@ -48,26 +48,26 @@ but a shorthand definition is available.
 
 And best explained in this sequence:
 
-* [Genome](docs/README_B_GENOME.md)
-* [DNA](docs/README_B_DNA.md)
-* [Hive](docs/README_B_HIVE.md)
-* [Fields](docs/README_B_FIELD.md)
-* [Roster](docs/README_B_ROSTER.md)
+* [Genome](readmes/README_B_GENOME.md)
+* [DNA](readmes/README_B_DNA.md)
+* [Hive](readmes/README_B_HIVE.md)
+* [Fields](readmes/README_B_FIELD.md)
+* [Roster](readmes/README_B_ROSTER.md)
 * Bees
-	* [Worker Bee](docs/README_B_BEE.md)
-	* [Queen Bee](docs/README_B_QUEEN.md)
-	* [Bumble bee](docs/README_B_BUMBLE.md)
+	* [Worker Bee](readmes/README_B_BEE.md)
+	* [Queen Bee](readmes/README_B_QUEEN.md)
+	* [Bumble bee](readmes/README_B_BUMBLE.md)
 
 ## Other subjects
-* [DotNet](docs/README_DOTNET.md)
-* [Git](docs/README_GIT.md)
-* [A static (maybe) web site](docs/README_STATIC.md)
-* [HTTP](docs/README_HTTP.md)
-* [XML](docs/README_XML.md)
-* [Kubernetes](docs/README_KUBE.md)
-* [Where do I put my files](docs/README_FOLDERS.md)
-* [How do I debug my code?](docs/README_DEBUG.md)
-* [Bootstrap](docs/README_BOOTSTRAP.md)
+* [DotNet](readmes/README_DOTNET.md)
+* [Git](readmes/README_GIT.md)
+* [A static (maybe) web site](readmes/README_STATIC.md)
+* [HTTP](readmes/README_HTTP.md)
+* [XML](readmes/README_XML.md)
+* [Kubernetes](readmes/README_KUBE.md)
+* [Where do I put my files](readmes/README_FOLDERS.md)
+* [How do I debug my code?](readmes/README_DEBUG.md)
+* [Bootstrap](readmes/README_BOOTSTRAP.md)
 
 ## Prerequisites
 
