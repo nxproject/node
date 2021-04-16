@@ -796,6 +796,15 @@ namespace NX.Engine
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The value"),
             new ParameterDefinitionClass(ParameterDefinitionClass.Types.Required, "The default value")));
 
+            this.AddFn(new StaticFunction("guid", delegate (Context ctx, object[] ps)
+            {
+                string sPrefix = "";
+                if (ps.Length > 0) sPrefix = XCVT.ToString(ps[0]);
+
+                return sPrefix.GUID();
+            }, 0, 1,
+           "Returns a global unique identifier",
+           new ParameterDefinitionClass(ParameterDefinitionClass.Types.Optional, "Prefix")));
             this.AddFn(new StaticFunction("randomstring", delegate (Context ctx, object[] ps)
             {
                 int iLen = XCVT.ToInt32(ps[0]);
