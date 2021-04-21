@@ -44,7 +44,7 @@ namespace NX.Engine
         #region Handlebars
         public static void Register(string fn, HandlebarsBlockHelper helper)
         {
-            HandlebarsExtensionsClass.Register(fn, helper);
+            HandlebarsDotNet.Handlebars.RegisterHelper(fn, helper);
         }
 
         /// <summary>
