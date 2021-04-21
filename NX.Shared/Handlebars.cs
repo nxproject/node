@@ -40,6 +40,11 @@ namespace NX.Shared
     public static class HandlebarsExtensionsClass
     {
         #region Handlebars
+        public static void Register(string fn, HandlebarsBlockHelper helper)
+        {
+            HandlebarsExtensionsClass.Register(fn, helper);
+        }
+
         /// <summary>
         /// 
         /// Has the handlebars extension been initioalized?
@@ -60,8 +65,11 @@ namespace NX.Shared
                 // Flag
                 IsHandlebarsInit = true;
 
+                //
+                HandlebarsDotNet.Handlebars.Configuration.Compatibility.RelaxedHelperNaming = true;
+
                 // If
-                HandlebarsDotNet.Handlebars.RegisterHelper("iff", (output, options, context, arguments) =>
+                HandlebarsExtensionsClass.Register("iff", (output, options, context, arguments) =>
                 {
                     if (arguments.Length != 3)
                     {
@@ -127,7 +135,7 @@ namespace NX.Shared
                 });
 
                 // Is
-                HandlebarsDotNet.Handlebars.RegisterHelper("is", (output, options, context, arguments) =>
+                HandlebarsExtensionsClass.Register("is", (output, options, context, arguments) =>
                 {
                     if (arguments.Length != 2)
                     {
@@ -156,7 +164,7 @@ namespace NX.Shared
                 });
 
                 // Is Not
-                HandlebarsDotNet.Handlebars.RegisterHelper("isnt", (output, options, context, arguments) =>
+                HandlebarsExtensionsClass.Register("isnt", (output, options, context, arguments) =>
                 {
                     if (arguments.Length != 2)
                     {
@@ -185,8 +193,7 @@ namespace NX.Shared
                 });
 
                 // Eval
-                // Is Not
-                HandlebarsDotNet.Handlebars.RegisterHelper("eval", (output, options, context, arguments) =>
+                HandlebarsExtensionsClass.Register("eval", (output, options, context, arguments) =>
                 {
                     // Params
                     string sExpr = arguments.At<string>(0);
