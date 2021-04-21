@@ -264,11 +264,15 @@ namespace NX.Engine
         #endregion
     }
 
-    public class HandlebarDataClass : IDisposable
+    public class HandlebarDataClass : ChildOfClass<EnvironmentClass>
     {
         #region Constructor
-        public HandlebarDataClass()
-        { }
+        public HandlebarDataClass(EnvironmentClass env)
+            : base(env)
+        {
+            // Into store
+            this.SynchObject.Add("_env", env);
+        }
         #endregion
 
         #region IDisposable
