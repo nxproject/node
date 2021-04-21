@@ -33,9 +33,11 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json.Linq;
 
+using NX.Shared;
+
 using HandlebarsDotNet;
 
-namespace NX.Shared
+namespace NX.Engine
 {
     public static class HandlebarsExtensionsClass
     {
@@ -195,38 +197,49 @@ namespace NX.Shared
                 // Eval
                 HandlebarsExtensionsClass.Register("eval", (output, options, context, arguments) =>
                 {
-                    // Params
-                    string sExpr = arguments.At<string>(0);
-
-                    // Get the field value
-                    object c_This = context["this"];
-
-                    // Do
-                    if (Eval != null)
+                    // Make a eval context
+                    NX.Engine.Context c_Ctx = new Context(cb: delegate(ExprCBParams cbp)
                     {
+                        //
+                        string sAns = null;
+
+                        // According to call
+                        switch(cbp.Mode)
+                        {
+                            case ExprCBParams.Modes.Get:
+                                sAns = context[cbp.Field].ToStringSafe();
+                                break;
+
+                            //case ExprCBParams.Modes.Set:
+                            //    context[cbp.Field] = cbp.Value;
+                            //    break;
+                        }
+
+                        return sAns;
+                    });
+
+                    // Set the delimiter
+                    string sDelim = "";
+
+                    // Loop thru
+                    foreach (var c_Arg in arguments)
+                    {
+                        // Delimiter
+                        output.WriteSafeString(sDelim);
                         // Evaluate
-                        string sValue = Eval(sExpr, c_This);
+                        string sValue = c_Ctx.Eval(c_Arg.ToStringSafe()).Value;
                         // Write it
                         output.WriteSafeString(sValue.IfEmpty());
 
-                        // Output
-                        options.Template(output, context);
+                        // Rset
+                        sDelim = " ";
                     }
-                    else
-                    {
-                        options.Inverse(output, context);
-                    }
-                });
 
+                    // Output
+                    options.Template(output, context);
+                });
             }
         }
-
-        /// <summary>
-        /// 
-        /// The eval callback
-        /// 
-        /// </summary>
-        private static Func<string, object, string> Eval { get; set; }
 
         /// <summary>
         /// 
@@ -236,12 +249,10 @@ namespace NX.Shared
         /// <param name="text"></param>
         /// <param name="values"></param>
         /// <returns></returns>
-        public static string Handlebars(this string text, HandlebarDataClass values, Func<string, object, string> eval = null)
+        public static string Handlebars(this string text, HandlebarDataClass values)
         {
             // Init
             HandlebarsInit();
-            // Set the evaluator
-            Eval = eval;
 
             // Compile
             var c_Template = HandlebarsDotNet.Handlebars.Compile(text);

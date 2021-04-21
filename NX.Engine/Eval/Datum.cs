@@ -402,17 +402,9 @@ namespace NX.Engine
             {
                 var c_Ret = Expression.Eval(this.Parent, this.Field);
 
-                if (!DatumClass.HideErrors && c_Ret.Error.HasValue())
-                {
-                    this.Parent.Parent.LogVerbose("ERROR IN EVAL: {0}".FormatString(c_Ret.Error));
-                }
-
                 sAns = c_Ret.Value.IfEmpty();
             }
-            catch (Exception e)
-            {
-                this.Parent.Parent.LogException("EVAL: {0}".FormatString(this.Field), e);
-            }
+            catch { }
 
             return sAns;
         }

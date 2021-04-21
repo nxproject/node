@@ -38,11 +38,10 @@ namespace NX.Engine
     /// The context where the expression is evaluated
     /// 
     /// </summary>
-    public class Context : ChildOfClass<EnvironmentClass>
+    public class Context : IDisposable
     {
         #region Constructor
-        public Context(EnvironmentClass call, StoreClass store = null, Func<ExprCBParams, string> cb = null, HandlebarDataClass vars = null)
-           : base(call)
+        public Context(StoreClass store = null, Func<ExprCBParams, string> cb = null, HandlebarDataClass vars = null)
         {
             // Start anew
             this.Reset();
@@ -60,6 +59,11 @@ namespace NX.Engine
             // Save the variables
             this.HandlebarData = vars;
         }
+        #endregion
+
+        #region v
+        public void Dispose()
+        { }
         #endregion
 
         #region Properties        

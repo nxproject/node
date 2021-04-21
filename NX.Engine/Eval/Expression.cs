@@ -49,7 +49,7 @@ namespace NX.Engine
         {
             ExpressionReturn c_Ans = new ExpressionReturn();
 
-            using (Context c_Ctx = new Context(call, store, cb))
+            using (Context c_Ctx = new Context(store, cb))
             {
                 //
                 c_Ans = c_Ctx.Evaluate(expr);
