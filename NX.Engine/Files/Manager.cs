@@ -209,6 +209,101 @@ namespace NX.Engine.Files
 
         /// <summary>
         /// 
+        /// Uploads a file
+        /// 
+        /// The following code modified from https://stackoverflow.com/questions/8466703/httplistener-and-file-upload
+        /// </summary>
+        public void UploadImage(HTTPCallClass call, DocumentClass doc)
+        {
+            try
+            {
+                doc.Folder.AssurePath();
+
+                // Get the stream
+                var input = call.Request.InputStream;
+                // Make temp
+                using (MemoryStream c_In = new MemoryStream())
+                {
+                    // Copy it
+                    input.CopyTo(c_In);
+                    // Into string
+                    string sWkg = c_In.ToArray().FromBytes();
+                    // Exract image
+                    sWkg = sWkg.Substring(1 + sWkg.IndexOf(","));
+                    // Convert and save
+                    doc.ValueAsBytes = sWkg.FromBase64Bytes();
+                }
+            }
+            catch (Exception e)
+            {
+                call.Env.LogException("In uploadtext", e);
+                call.RespondWithError(e.GetAllExceptions());
+            }
+            finally
+            {
+                // Do we have a special handler?
+                if (ManagerClass.Converter != null)
+                {
+                    doc = ManagerClass.Converter(doc);
+                }
+
+                // Make the parameter
+                FileSystemParamClass c_P = new FileSystemParamClass(FileSystemParamClass.Actions.Write, doc);
+
+                // Write to cloud
+                this.SignalChange(c_P);
+
+                // Was it handled?
+                if (c_P.Handled)
+                {
+                    // Delete so not to call cloud
+                    doc.Location.DeleteFile();
+
+                    call.RespondWithOK("path", doc.Path, "url", this.Parent.ReachableURL.CombinePath("f", doc.Path));
+
+                }
+                else
+                {
+                    call.RespondWithFail();
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// 
+        /// Uploads a file
+        /// 
+        /// The following code modified from https://stackoverflow.com/questions/8466703/httplistener-and-file-upload
+        /// </summary>
+        public string GetRaw(HTTPCallClass call)
+        {
+            string sAns = null;
+
+            try
+            {
+               // Get the stream
+                var input = call.Request.InputStream;
+                // Make temp
+                using (MemoryStream c_In = new MemoryStream())
+                {
+                    // Copy it
+                    input.CopyTo(c_In);
+                    // Into string
+                    sAns = c_In.ToArray().FromBytes();
+                }
+            }
+            catch (Exception e)
+            {
+                call.Env.LogException("In getraw", e);
+                call.RespondWithError(e.GetAllExceptions());
+            }
+
+            return sAns;
+        }
+
+        /// <summary>
+        /// 
         /// Returns the file boundary string for a MIM upload
         /// 
         /// </summary>
