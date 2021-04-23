@@ -95,9 +95,14 @@ namespace NX.Engine
 
         public static string MD5HashString(this string value)
         {
-            byte[] baWkg = MD5Hash(value.ToBytes());
+            return value.ToBytes().MD5HashString();
+        }
 
-            return BitConverter.ToString(baWkg).Replace("-", "");
+        public static string MD5HashString(this byte[] value)
+        {
+            byte[] baWkg = MD5Hash(value);
+
+            return BitConverter.ToString(baWkg).Replace("-", "").Replace(":", "");
         }
 
         public static string SHA1HashString(this string value, string addition = "")
