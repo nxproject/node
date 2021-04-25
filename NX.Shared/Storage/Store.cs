@@ -526,6 +526,26 @@ namespace NX.Shared
         }
         #endregion
 
+        /// <summary>
+        /// 
+        /// areturns the vaue of if a system key, the normal
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public string PossiblySys(string key)
+        {
+            // Get normal
+            string sAns = this[key];
+            // Any?
+            if(!sAns.HasValue() && key.StartsWith("_"))
+            {
+                sAns = this[key.Substring(1)];
+            }
+
+            return sAns;
+        }
+
         #region Access
         /// <summary>
         /// 

@@ -521,10 +521,14 @@ namespace NX.Engine.Hive
             // Loop thru
             foreach(TickleAreaClass c_EP in this.TickleAreas)
             {
-                // Same?
-                bFound = c_EP.ToString().IsSameValue(ep.ToString());
-                // Only one
-                if (bFound) break;
+                //
+                if (c_EP != null)
+                {
+                    // Same?
+                    bFound = c_EP.ToString().IsSameValue(ep.ToString());
+                    // Only one
+                    if (bFound) break;
+                }
             }
 
             // Only if new
