@@ -1368,6 +1368,31 @@ namespace NX.Shared
         }
 
         /// <summary>
+        /// 
+        /// Makes an URL query
+        /// 
+        /// </summary>
+        /// <param name="url">The URL</param>
+        /// <param name="values">Parameter values</param>
+        /// <returns>A formatted URL</returns>
+        public static string URLQuery(this string url, JObject values)
+        {
+            // Delimiter
+            string sDel = url.Contains("?") ? "&" : "?";
+
+            // Loop thru
+            foreach(string sKey in values.Keys())
+            {
+                // Append
+                url += sDel + sKey + "=" + values.Get(sKey).URLEncode();
+                // Change the delimiter
+                sDel = "&";
+            }
+
+            return url;
+        }
+
+        /// <summary>
         ///
         /// Check to see if ip is an IPV6
         /// 
