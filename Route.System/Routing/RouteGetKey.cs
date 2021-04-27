@@ -46,7 +46,7 @@ namespace Route.System
     /// </summary>
     public class RouteGetKey : RouteClass
     {
-        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "isavailable" };
+        public override List<string> RouteTree => new List<string>() { RouteClass.GET(), Support.Route, "isroutable" };
         public override void Call(HTTPCallClass call, StoreClass store)
         {
             // Does it exist?
