@@ -156,6 +156,11 @@ namespace NX.Engine
                 sSecureCode = "".GUID();
             }
 
+            if (sSecureCode.IsSameValue("site"))
+            {
+                sSecureCode = this.ReachableURL.MD5HashString();
+            }
+
             // Set usecured?
             if (sSecureCode.IsSameValue(RouterClass.UnsecureCode))
             {

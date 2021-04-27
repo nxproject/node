@@ -41,7 +41,7 @@
   //"qd_bumble": [ "nginx" ],
   //"qd_worker": [ "1" ],
 
-  "secure_code": "random", // The security code
+  "secure_code": "site", // The security code
 
   // Minio
   "minio_access": "myaccesskey",
