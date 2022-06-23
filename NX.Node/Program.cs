@@ -78,6 +78,19 @@ namespace NXNode
                     // Add parent
                     //c_CodeFolders.Add(sBaseFolder.Substring(0, sBaseFolder.LastIndexOf(@"\")));
 
+                    // Elsa
+                    //iPos = sBaseFolder.IndexOf(@"\Node\");
+                    //if(iPos != -1)
+                    //{
+                    //    string sNXFolder = sBaseFolder.Substring(0, iPos);
+                    //    string sElsaSource = sNXFolder + @"\Others\Elsa\dist";
+                    //    string sElsaTarget = sNXFolder + @"\Workspace\UI.QX\viewers\elsa\dist";
+                    //    // Assure
+                    //    sElsaTarget.AssurePath();
+                    //    // Copy
+                    //    CopyFolder(sElsaSource, sElsaTarget);
+                    //}
+
                     // Loop thru
                     foreach (string sStartFolder in c_CodeFolders)
                     {

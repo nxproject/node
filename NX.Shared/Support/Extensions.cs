@@ -42,6 +42,7 @@ using System.Diagnostics;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Xml;
 using System.Runtime.Loader;
+using System.Security.Cryptography;
 
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
@@ -4800,6 +4801,50 @@ namespace NX.Shared
             }
 
             return c_Assm;
+        }
+        #endregion
+
+        #region Encryption
+        public static string Encrypt(this string value, string key)
+        {
+            byte[] result;
+            using (var aes = Aes.Create())
+            {
+                using (var encryptor = aes.CreateEncryptor(System.Text.Encoding.UTF8.GetBytes(key), aes.IV))
+                using (var resultStream = new MemoryStream())
+                {
+                    using (var aesStream = new CryptoStream(resultStream, encryptor, CryptoStreamMode.Write))
+                    using (var plainStream = new MemoryStream(value.ToBytes()))
+                    {
+                        plainStream.CopyTo(aesStream);
+                    }
+
+                    result = resultStream.ToArray();
+                }
+            }
+
+            return result.ToBase64();
+        }
+
+        public static string Decrypt(this string value, string key)
+        {
+            byte[] result;
+            using (var aes = Aes.Create())
+            {
+                using (var encryptor = aes.CreateDecryptor(System.Text.Encoding.UTF8.GetBytes(key), aes.IV))
+                using (var resultStream = new MemoryStream())
+                {
+                    using (var aesStream = new CryptoStream(resultStream, encryptor, CryptoStreamMode.Write))
+                    using (var plainStream = new MemoryStream(value.FromBase64Bytes()))
+                    {
+                        plainStream.CopyTo(aesStream);
+                    }
+
+                    result = resultStream.ToArray();
+                }
+            }
+
+            return result.FromBytes();
         }
         #endregion
     }
