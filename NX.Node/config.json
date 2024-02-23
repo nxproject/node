@@ -7,13 +7,15 @@
 
   // The following should be set in NX.Office unless you are running NX.Node only
   ////"domain": "nx9.us", // The domain   
-  ////"certbot_email": "nxoffice2021@gmail.com", // Turns on certbot support
+  ////"certbot_email": "nx.jegbhe@gmail.com", // Turns on certbot support
 
   // Testing
 
   //"field": [ "10.192.150.151:2375" ], // Playground
 
-  "field": [ "10.192.180.160:2375" ], // Development
+  //"field": [ "10.192.180.160:2375" ], // D
+  //"field": [ "10.192.188.131:2375" ],
+  "field": [ "127.0.0.1:2375" ],
 
   // Field IP will be set to 172.17.0.1
   // Only use if single field and image kept in container registry

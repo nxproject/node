@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2024 Jose E. Gonzalez (nx.jegbhe@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -36,9 +36,9 @@ namespace NXNode
         static void Main(string[] args)
         {
             // Make into list
-              List<string> c_Args = new List<string>(args);
+            List<string> c_Args = new List<string>(args);
 
-            // Bootstarp condiction
+            // Bootstrap condition
             if (c_Args.Count == 0)
             {
                 // Add default
@@ -67,7 +67,8 @@ namespace NXNode
                     // The working code folders
                     List<string> c_CodeFolders = c_Env.GetAsJArray("code_folder").ToList(); ;
                     // Get the root folder
-                    string sBaseFolder = "".WorkingDirectory();
+                    string sRootFolder = "".WorkingDirectory();
+                    string sBaseFolder = sRootFolder;
                     // Do we have a bin?
                     int iPos = sBaseFolder.IndexOf(@"\bin\");
                     if (iPos != -1)
@@ -75,21 +76,6 @@ namespace NXNode
                         // Remove tail
                         sBaseFolder = sBaseFolder.Substring(0, iPos);
                     }
-                    // Add parent
-                    //c_CodeFolders.Add(sBaseFolder.Substring(0, sBaseFolder.LastIndexOf(@"\")));
-
-                    // Elsa
-                    //iPos = sBaseFolder.IndexOf(@"\Node\");
-                    //if(iPos != -1)
-                    //{
-                    //    string sNXFolder = sBaseFolder.Substring(0, iPos);
-                    //    string sElsaSource = sNXFolder + @"\Others\Elsa\dist";
-                    //    string sElsaTarget = sNXFolder + @"\Workspace\UI.QX\viewers\elsa\dist";
-                    //    // Assure
-                    //    sElsaTarget.AssurePath();
-                    //    // Copy
-                    //    CopyFolder(sElsaSource, sElsaTarget);
-                    //}
 
                     // Loop thru
                     foreach (string sStartFolder in c_CodeFolders)
@@ -106,22 +92,20 @@ namespace NXNode
                                 if (sFolder.StartsWith("UI.", StringComparison.InvariantCultureIgnoreCase))
                                 {
                                     // Set target
-                                    string sTargetDir = "".WorkingDirectory().CombinePath(sFolder.ToLower()).AdjustPathToOS();
+                                    string sTargetDir = sRootFolder.CombinePath(sFolder.ToLower()).AdjustPathToOS();
                                     // Assure
                                     sTargetDir.AssurePath();
 
                                     // UI
-                                    CopyFolder(sAtDir, sTargetDir);
+                                    CopyFolder(c_Env, sAtDir, sTargetDir, true);
                                 }
                                 else
                                 {
-                                    // Move to bin
-                                    string sBinFolder = sAtDir.CombinePath("bin").CombinePath("".InDebug() ? "Debug" : "Release").AdjustPathToOS();
                                     // Loop thru code
-                                    foreach (string sCodeFolder in sBinFolder.GetDirectoriesInPath())
+                                    foreach (string sCodeFolder in sAtDir.GetDirectoriesInPath())
                                     {
                                         // Do the folder
-                                        CopyFolder(sCodeFolder, "".WorkingDirectory());
+                                        CopyFolder(c_Env, sCodeFolder, sRootFolder, false);
                                     }
                                 }
                             }
@@ -139,7 +123,7 @@ namespace NXNode
                     if (c_Env.MakeGenome)
                     {
                         // Make
-                        c_Env.Hive.MakeSelfIntoGenome("".WorkingDirectory());
+                        c_Env.Hive.MakeSelfIntoGenome(sRootFolder);
 
                         // Kill processors
                         c_Env.Hive.KillProcessorBees();
@@ -206,46 +190,95 @@ namespace NXNode
         /// </summary>
         /// <param name="source"></param>
         /// <param name="target"></param>
-        private static void CopyFolder(string source, string target)
+        private static void CopyFolder(EnvironmentClass env, string source, string target, bool inbin)
         {
-            // Skip
+            // Tell user
+            //env.LogInfo("At {0} - {1}".FormatString(source, inbin ? "Active" : "Looking"));
+
+            // Get name
             string sFolder = source.GetDirectoryNameFromPath().ToLower();
-            switch (sFolder)
+
+            // Are we allowed?
+            if (inbin || sFolder.IsSameValue("bin"))
             {
-                case "readmes":
-                    break;
+                // Flag
+                inbin = true;
 
-                default:
-                    // Assure target
-                    target.AssurePath();
+                // According to name
+                switch (sFolder)
+                {
+                    case "readmes":
+                        break;
 
-                    // Console.WriteLine("Loading " + source);
+                    default:
+                        // Assure target
+                        target.AssurePath();
 
-                    // The list
-                    List<string> c_Files = source.GetFilesInPath();
-                    // Do each file
-                    foreach (string sFile in c_Files)
-                    {
-                        // Copy
-                        sFile.CopyFile(target.CombinePath(sFile.GetFileNameFromPath().AdjustPathToOS()));
-                    }
+                        // The list
+                        List<string> c_Files = source.GetFilesInPath();
+                        int iCount = 0;
 
-                    // And now each directory
-                    foreach (string sDir in source.GetDirectoriesInPath())
-                    {
-                        // Get the name
-                        string sName = sDir.GetDirectoryNameFromPath();
-                        // Skip system
-                        if (!sName.StartsWith("."))
+                        // Do each file
+                        foreach (string sFile in c_Files)
                         {
-                            // Copy
-                            CopyFolder(source.CombinePath(sName).AdjustPathToOS(),
-                                        target.CombinePath(sName).AdjustPathToOS());
+                            // Skip
+                            switch (sFile.GetExtensionFromPath().ToLower())
+                            {
+                                case "pdb":
+                                    break;
+
+                                default:
+                                    // Copy
+                                    string sError = sFile.CopyLatestFileWithError(target.CombinePath(sFile.GetFileNameFromPath().AdjustPathToOS()));
+
+                                    //
+                                    if (sError.HasValue())
+                                    {
+                                        if (sError.Contains("being used"))
+                                        {
+                                            sError = null;
+                                        }
+                                    }
+
+                                    //
+                                    if (!sError.HasValue())
+                                    {
+                                        //env.LogInfo("Copied {0}".FormatString(sFile));
+                                        iCount++;
+                                    }
+                                    else
+                                    {
+                                        env.LogError("Failed {0} - {1}".FormatString(sFile, sError));
+                                    }
+                                    break;
+                            }
+
                         }
-                    }
-                    break;
+
+                        //
+                        if (iCount > 0)
+                        {
+                            env.LogInfo("{0} files copied from {1}".FormatString(iCount, source));
+                        }
+                        break;
+                }
+            }
+
+            // And now each directory
+            foreach (string sDir in source.GetDirectoriesInPath())
+            {
+                // Get the name
+                string sName = sDir.GetDirectoryNameFromPath();
+                // Skip system
+                if (!sName.StartsWith("."))
+                {
+                    // Copy
+                    CopyFolder(env, source.CombinePath(sName).AdjustPathToOS(),
+                                target.CombinePath(sName).AdjustPathToOS(),
+                                inbin);
+                }
             }
         }
-        #endregion
     }
+    #endregion
 }

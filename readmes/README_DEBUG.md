@@ -13,7 +13,7 @@ all the code that you will be using should be compiled in Debug mode, as it crea
 First, setup your **config.json** to have these entries:
 ```
 	"uses": [ "Proc.Office" ],
-	"code_folder": [ "C:\\Candid Concepts\\NX\\Office\\Proc.Office\\bin\\Debug\\netcoreapp3.1" ],
+	"code_folder": [ "C:\\Candid Concepts\\NX\\Office\\Proc.Office" ],
 
 	"make_genome": "n",
 	"make_bee": "n"

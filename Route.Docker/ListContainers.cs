@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2024 Jose E. Gonzalez (nx.jegbhe@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -64,7 +64,7 @@ namespace Route.Docker
                 DockerIFClass c_Client = c_Field.DockerIF;
                 if (c_Client != null)
                 {
-                    foreach (ContainerListResponse c_Ctx in c_Client.ListContainersInfo())
+                    foreach (DockerIFContainerDetails c_Ctx in c_Client.ListContainersDetails())
                     {
                         // 
                         JObject c_Entry = new JObject();

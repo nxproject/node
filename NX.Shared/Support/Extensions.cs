@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2024 Jose E. Gonzalez (nx.jegbhe@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ using System.Runtime.InteropServices;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
-using System.Runtime.Serialization.Formatters.Binary;
+using H.Formatters;
 using System.Xml;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
@@ -47,6 +47,7 @@ using System.Security.Cryptography;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using TimeZoneConverter;
+using System.Text;
 
 namespace NX.Shared
 {
@@ -1382,7 +1383,7 @@ namespace NX.Shared
             string sDel = url.Contains("?") ? "&" : "?";
 
             // Loop thru
-            foreach(string sKey in values.Keys())
+            foreach (string sKey in values.Keys())
             {
                 // Append
                 url += sDel + sKey + "=" + values.Get(sKey).URLEncode();
@@ -3457,6 +3458,18 @@ namespace NX.Shared
             }
         }
 
+        public static DateTime LastWriteFromPath(this string path)
+        {
+            DateTime c_Ans = DateTime.MinValue;
+
+            if (path.FileExists())
+            {
+                c_Ans = File.GetLastWriteTime(path);
+            }
+
+            return c_Ans;
+        }
+
         public static int CopyDirectoryTree(this string source, string target)
         {
             // The count
@@ -3534,6 +3547,49 @@ namespace NX.Shared
             catch { }
 
             return bAns;
+        }
+
+        public static string CopyFileWithError(this string from, string to)
+        {
+            string sAns = null;
+
+            try
+            {
+                System.IO.File.Copy(from, to, true);
+            }
+            catch (Exception e)
+            {
+                sAns = e.GetAllExceptions();
+            }
+
+            return sAns;
+        }
+
+        public static string CopyLatestFileWithError(this string from, string to)
+        {
+            string sAns = null;
+
+            try
+            {
+                // Do if there is a source
+                bool bDo = from.FileExists();
+
+                // Does the target exist?
+                if (bDo && to.FileExists())
+                {
+                    // Check dates
+                    bDo = from.LastWriteFromPath() > to.LastWriteFromPath();
+                }
+
+                // Do?
+                if (bDo) System.IO.File.Copy(from, to, true);
+            }
+            catch (Exception e)
+            {
+                sAns = e.GetAllExceptions();
+            }
+
+            return sAns;
         }
 
         public static bool MoveFile(this string from, string to)
@@ -4593,7 +4649,7 @@ namespace NX.Shared
                 using (MemoryStream c_Stream = new MemoryStream())
                 {
                     // Do
-                    c_Cvt.Serialize(c_Stream, value);
+                    c_Cvt.InternalFormatter.Serialize(c_Stream, value);
                     // And rewind
                     c_Stream.Seek(0, SeekOrigin.Begin);
                     // And out
@@ -4626,7 +4682,7 @@ namespace NX.Shared
                 using (MemoryStream c_Stream = new MemoryStream(value.FromBase64Bytes()))
                 {
                     // Do
-                    c_Ans = c_Cvt.Deserialize(c_Stream);
+                    c_Ans = c_Cvt.InternalFormatter.Deserialize(c_Stream);
                 }
             }
             catch { }

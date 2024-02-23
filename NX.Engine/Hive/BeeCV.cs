@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2024 Jose E. Gonzalez (nx.jegbhe@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +60,7 @@ namespace NX.Engine.Hive
             this.IsVirtual = type == BeeClass.Types.Virtual;
 
             // Make a phony values
-            this.Values = new ContainerListResponse();
+            this.Values = new DockerIFContainerDetails();
             // Set the Id
             this.Values.ID = id;
 
@@ -82,7 +82,7 @@ namespace NX.Engine.Hive
             this.Refresh();
         }
 
-        public BeeCVClass(FieldClass field, ContainerListResponse cv)
+        public BeeCVClass(FieldClass field, DockerIFContainerDetails cv)
             : base(field)
         {
             // Make the UUID
@@ -99,7 +99,7 @@ namespace NX.Engine.Hive
         /// Obtained from Docker
         /// 
         /// </summary>
-        private ContainerListResponse Values { get; set; }
+        private DockerIFContainerDetails Values { get; set; }
 
         /// <summary>
         /// 
@@ -419,7 +419,7 @@ namespace NX.Engine.Hive
                     try
                     {
                         // Get
-                        IList<ContainerListResponse> c_CVs = c_Client.ListContainersByID(this.Id);
+                        IList<DockerIFContainerDetails> c_CVs = c_Client.ListContainersByID(this.Id);
                         // Any?
                         if (c_CVs.Count > 0)
                         {

@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2024 Jose E. Gonzalez (nx.jegbhe@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -55,46 +55,38 @@ namespace NX.Engine.SocketIO
             // Connect
             this.Parent.Client.On(this.Name, response =>
             {
-                //this.Parent.Parent.LogInfo("SocketIO Event: Reeceived '{0}': {1} count".FormatString(this.Name, response.Count));
+                //this.Parent.Parent.LogInfo("SocketIO Event: Received '{0}': {1} count".FormatString(this.Name, response.Count));
 
                 // Loop thru
-                for (int i=0;i < response.Count;i++)
+                int iIndex = 0;
+
+                try
                 {
-                    //
-                    var c_Raw = response.GetValue(i);
+                    // Message
                     string sMsg = null;
-                    switch(c_Raw.GetType().Name)
-                    {
-                        case "JObject":
-                            sMsg = (c_Raw as JObject).ToSimpleString();
-                            break;
-                        default:
-                            try
-                            {
-                                sMsg = c_Raw.ToString();
-                            }
-                            catch (Exception e)
-                            { 
-                                this.Parent.Parent.LogException(e);
-                            }
-                            break;
-                    }
 
-                    if (sMsg.HasValue())
+                    // Loop
+                    do
                     {
-                        //this.Parent.Parent.LogInfo("SocketIO Event: Reeceived '{0}': RAW-{1}".FormatString(this.Name, sMsg));
-
-                        // Make the message
-                        using (MessageClass c_Msg = new MessageClass(this, sMsg))
+                        // 
+                        sMsg = response.GetValue<string>(iIndex);
+                        if (sMsg.HasValue())
                         {
-                            //
-                           // this.Parent.Parent.LogInfo("SocketIO Event: Reeceived '{0}': {1}".FormatString(this.Name, c_Msg.ToString()));
+                            // Make the message
+                            using (MessageClass c_Msg = new MessageClass(this, sMsg))
+                            {
+                                //
+                                // this.Parent.Parent.LogInfo("SocketIO Event: Received '{0}': {1}".FormatString(this.Name, c_Msg.ToString()));
 
-                            // Tell world
-                            this.MessageReceived?.Invoke(c_Msg);
+                                // Tell world
+                                this.MessageReceived?.Invoke(c_Msg);
+                            }
+
                         }
-                    }
+
+                    } while (sMsg.HasValue());
                 }
+                catch { }
             });
 
             this.Parent.Parent.LogInfo("SocketIO Event: Listening for '{0}'".FormatString(this.Name));

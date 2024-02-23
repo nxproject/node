@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30225.117
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34607.119
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NX.Engine", "NX.Engine\NX.Engine.csproj", "{814B3290-ABBA-423F-A09F-65E356D12090}"
 EndProject
@@ -50,6 +50,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		UI.Bootstrap\index.html = UI.Bootstrap\index.html
 		LICENSE = LICENSE
 		README.md = README.md
+		readmes\README_BB_NGINX.md = readmes\README_BB_NGINX.md
+		readmes\README_BB_REDIS.md = readmes\README_BB_REDIS.md
+		readmes\README_BOOTSTRAP.md = readmes\README_BOOTSTRAP.md
 		readmes\README_B_BEE.md = readmes\README_B_BEE.md
 		readmes\README_B_BUMBLE.md = readmes\README_B_BUMBLE.md
 		readmes\README_B_DNA.md = readmes\README_B_DNA.md
@@ -59,9 +62,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		docs\README_B_MASON.md = docs\README_B_MASON.md
 		readmes\README_B_QUEEN.md = readmes\README_B_QUEEN.md
 		readmes\README_B_ROSTER.md = readmes\README_B_ROSTER.md
-		readmes\README_BB_NGINX.md = readmes\README_BB_NGINX.md
-		readmes\README_BB_REDIS.md = readmes\README_BB_REDIS.md
-		readmes\README_BOOTSTRAP.md = readmes\README_BOOTSTRAP.md
 		readmes\README_DEBUG.md = readmes\README_DEBUG.md
 		readmes\README_DOTNET.md = readmes\README_DOTNET.md
 		readmes\README_EMPTY.md = readmes\README_EMPTY.md
@@ -116,8 +116,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{230CAAAF-5346-4098-A8F5-C9F606061AE1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Route.Docker", "Route.Docker\Route.Docker.csproj", "{722375C3-C9B0-4EFC-A1C4-056FF65DA84E}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proc.Minio", "Proc.Minio\Proc.Minio.csproj", "{B40760C2-1B0C-464B-8C1D-1AC8665331CE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proc.Redis", "Proc.Redis\Proc.Redis.csproj", "{1747C842-EFDA-48E8-82AE-012D5C8793B1}"
 EndProject
@@ -222,10 +220,6 @@ Global
 		{722375C3-C9B0-4EFC-A1C4-056FF65DA84E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{722375C3-C9B0-4EFC-A1C4-056FF65DA84E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{722375C3-C9B0-4EFC-A1C4-056FF65DA84E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B40760C2-1B0C-464B-8C1D-1AC8665331CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B40760C2-1B0C-464B-8C1D-1AC8665331CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B40760C2-1B0C-464B-8C1D-1AC8665331CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B40760C2-1B0C-464B-8C1D-1AC8665331CE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1747C842-EFDA-48E8-82AE-012D5C8793B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1747C842-EFDA-48E8-82AE-012D5C8793B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1747C842-EFDA-48E8-82AE-012D5C8793B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -266,7 +260,6 @@ Global
 		{E158A413-81F3-4B90-BE02-049C7B7A5084} = {F8E88495-137B-4C44-A0CF-F9D0C06E2B9E}
 		{230CAAAF-5346-4098-A8F5-C9F606061AE1} = {058AF47E-8CC7-49EC-8C9B-CFB48CD80A93}
 		{722375C3-C9B0-4EFC-A1C4-056FF65DA84E} = {230CAAAF-5346-4098-A8F5-C9F606061AE1}
-		{B40760C2-1B0C-464B-8C1D-1AC8665331CE} = {058AF47E-8CC7-49EC-8C9B-CFB48CD80A93}
 		{1747C842-EFDA-48E8-82AE-012D5C8793B1} = {AFE145B7-C9F7-4DB7-902F-22EE52E6010A}
 		{AFE145B7-C9F7-4DB7-902F-22EE52E6010A} = {058AF47E-8CC7-49EC-8C9B-CFB48CD80A93}
 	EndGlobalSection

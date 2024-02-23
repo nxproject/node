@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2024 Jose E. Gonzalez (nx.jegbhe@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -31,13 +31,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Text;
 
 using Docker.DotNet;
 using Docker.DotNet.Models;
 
 using ICSharpCode.SharpZipLib.Tar;
-
+using Newtonsoft.Json.Linq;
 using NX.Shared;
 
 namespace NX.Engine.Hive
@@ -764,10 +765,10 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="name">The handy dandy name</param>
         /// <returns>True if it exists</returns>
-        public List<ContainerListResponse> ListContainersInfo()
+        public List<DockerIFContainerDetails> ListContainersDetails()
         {
             // Assume none
-            List<ContainerListResponse> c_Ans = new List<ContainerListResponse>();
+            List<DockerIFContainerDetails> c_Ans = new List<DockerIFContainerDetails>();
 
             // Protect
             try
@@ -803,12 +804,12 @@ namespace NX.Engine.Hive
                         }
                     }
 
-                    if (iMatched <= 0) c_Ans.Add(c_Entry);
+                    if (iMatched <= 0) c_Ans.Add(new DockerIFContainerDetails(c_Entry));
                 }
             }
             catch (Exception e)
             {
-                this.HandleException("ListContainersInfo", e);
+                this.HandleException("ListContainersDetails", e);
             }
 
             return c_Ans;
@@ -882,7 +883,7 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="filter">The filter</param>
         /// <returns></returns>
-        public IList<ContainerListResponse> ListContainersByID(string id)
+        public IList<DockerIFContainerDetails> ListContainersByID(string id)
         {
             // Make the filter
             DockerIFFilterClass c_Filter = new DockerIFFilterClass("id", id);
@@ -898,19 +899,24 @@ namespace NX.Engine.Hive
         /// </summary>
         /// <param name="filter">The filter</param>
         /// <returns></returns>
-        public IList<ContainerListResponse> ListContainersByFilter(DockerIFFilterClass filter)
+        public IList<DockerIFContainerDetails> ListContainersByFilter(DockerIFFilterClass filter)
         {
             // Assume none
-            IList<ContainerListResponse> c_Ans = new List<ContainerListResponse>();
+            IList<DockerIFContainerDetails> c_Ans = new List<DockerIFContainerDetails>();
 
             // Protect
             try
             {
-                c_Ans = this.Client.Containers.ListContainersAsync(new ContainersListParameters()
+                IList<ContainerListResponse> c_Wkg = this.Client.Containers.ListContainersAsync(new ContainersListParameters()
                 {
                     All = true,
                     Filters = filter.Values as IDictionary<string, IDictionary<string, bool>>
                 }).Result;
+
+                foreach (ContainerListResponse c_Entry in c_Wkg)
+                {
+                    c_Ans.Add(new DockerIFContainerDetails(c_Entry));
+                }
             }
             catch (Exception e)
             {
@@ -1502,6 +1508,68 @@ namespace NX.Engine.Hive
         {
             return new DockerIFNameClass(name.Parent, name, newname);
         }
+        #endregion
+    }
+
+    /// <summary>
+    /// 
+    /// To isolate Docker.DotNet.Models
+    /// 
+    /// </summary>
+    public class DockerIFContainerDetails : IDisposable
+    {
+        #region Constructor
+        internal DockerIFContainerDetails(ContainerListResponse response) 
+            :this()
+        {
+            // 
+            this.Status = response.Status;
+            this.State = response.State;
+            this.SizeRw = response.SizeRw;
+            this.SizeRootFs = response.SizeRootFs;
+            this.NetworkSettings = response.NetworkSettings;
+            this.Names = response.Names;
+            this.Mounts = response.Mounts;
+            this.Labels = response.Labels;
+            this.ImageID = response.ImageID;
+            this.Image = response.Image;
+            this.ID = response.ID;
+            this.Created = response.Created;
+            this.Command = response.Command; 
+
+            foreach(Port c_Port in response.Ports)
+            {
+                //
+                this.Ports.Add(c_Port);
+            }
+        }
+
+        internal DockerIFContainerDetails()
+        {
+            this.Ports = new List<Port>();
+        }
+        #endregion
+
+        #region IDisposable
+        public void Dispose()
+        { }
+        #endregion
+
+        #region Properties
+        public string Status { get; set; }
+        public string State { get; set; }
+        public long SizeRw { get; set; }
+        public long SizeRootFs { get; set; }
+        public List<Port> Ports { get; set; }
+        public SummaryNetworkSettings NetworkSettings { get; set; }
+        public IList<string> Names { get; set; }
+        public IList<MountPoint> Mounts { get; set; }
+        public IDictionary<string, string> Labels { get; set; }
+        public string ImageID { get; set; }
+        public string Image { get; set; }
+        public string ID { get; set; }
+        public DateTime Created { get; set; }
+        public string Command { get; set; }
         #endregion
     }
 }

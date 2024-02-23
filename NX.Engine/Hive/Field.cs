@@ -1,6 +1,6 @@
 ﻿///--------------------------------------------------------------------------------
 /// 
-/// Copyright (C) 2020-2021 Jose E. Gonzalez (nxoffice2021@gmail.com) - All Rights Reserved
+/// Copyright (C) 2020-2024 Jose E. Gonzalez (nx.jegbhe@gmail.com) - All Rights Reserved
 /// 
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -392,7 +392,7 @@ namespace NX.Engine.Hive
                     this.Parent.Parent.LogVerbose("{0} bees seen...".FormatString(c_List.Count));
 
                     // Loop thru
-                    foreach (ContainerListResponse c_Raw in c_List)
+                    foreach (DockerIFContainerDetails c_Raw in c_List)
                     {
                         // Make into usable
                         BeeCVClass c_CV = new BeeCVClass(this, c_Raw);
